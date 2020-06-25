@@ -40,7 +40,7 @@ func setup() {
 	rsFields, _ = gcontext.GetRequestScopedFields(ctx)
 
 	os.Setenv("PRODUCT", "engagement")
-	os.Setenv("APP", "murmur")
+	os.Setenv("APP_ENV", "murmur")
 	os.Setenv("APP_VERSION", "87.23.11")
 	os.Setenv("AWS_REGION", "us-west-02")
 	os.Setenv("AWS_ACCOUNT_ID", "aws-account-123")
@@ -48,7 +48,7 @@ func setup() {
 
 func shutdown() {
 	os.Unsetenv("PRODUCT")
-	os.Unsetenv("APP")
+	os.Unsetenv("APP_ENV")
 	os.Unsetenv("APP_VERSION")
 	os.Unsetenv("AWS_REGION")
 	os.Unsetenv("AWS_ACCOUNT_ID")
