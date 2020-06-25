@@ -45,7 +45,7 @@ const (
 	// ENVIRONMENT VARIABLES
 	// List of  Environment Variables keys
 	ProductEnv     = "PRODUCT"
-	AppEnv         = "APP"
+	AppEnv         = "APP_ENV"
 	AppVerEnv      = "APP_VERSION"
 	AwsRegionEnv   = "AWS_REGION"
 	AwsAcountIDEnv = "AWS_ACCOUNT_ID"
