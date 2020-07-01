@@ -1,6 +1,7 @@
 package log
 
 import (
+	"github.com/cultureamp/glamplify/helper"
 	"io"
 	"os"
 	"sync"
@@ -31,7 +32,7 @@ func NewWriter(configure ...func(*WriterConfig)) *FieldWriter { // https://dave.
 	writer := &FieldWriter{}
 	conf := WriterConfig{
 		Output: os.Stdout,
-		OmitEmpty: false,
+		OmitEmpty: helper.GetEnvBool(OmitEmpty, false),
 	}
 	for _, config := range configure {
 		config(&conf)
