@@ -17,7 +17,7 @@ func newSystemLogLevel() *systemLogLevel {
 		FatalSev: 4,
 	}
 
-	level, ok := os.LookupEnv("LOG_LEVEL")
+	level, ok := os.LookupEnv(Level)
 	if !ok {
 		level = DebugSev
 	}

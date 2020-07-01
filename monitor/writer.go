@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/cultureamp/glamplify/helper"
 	"github.com/cultureamp/glamplify/log"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -27,6 +27,8 @@ type writerConfig struct {
 
 	// timeout
 	timeout time.Duration
+
+	omitempty bool
 }
 
 // FieldWriter sends logging output to NR as per https://docs.newrelic.com/docs/logs/new-relic-logs/log-api/introduction-log-api
@@ -41,8 +43,9 @@ type FieldWriter struct {
 func newWriter(configure ...func(*writerConfig)) *FieldWriter { // https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
 	conf := writerConfig{
 		license:  os.Getenv("NEW_RELIC_LICENSE_KEY"),
-		endpoint: getEnvOrDefaultString("NEW_RELIC_LOG_ENDPOINT", "https://log-api.newrelic.com/log/v1"),
-		timeout:  time.Second * time.Duration(getEnvOrDefaultInt("NEW_RELIC_TIMEOUT", 5)),
+		endpoint: helper.GetEnvString("NEW_RELIC_LOG_ENDPOINT", "https://log-api.newrelic.com/log/v1"),
+		timeout:  time.Second * time.Duration(helper.GetEnvInt("NEW_RELIC_TIMEOUT", 5)),
+		omitempty: helper.GetEnvBool(log.OmitEmpty, false),
 	}
 
 	for _, config := range configure {
@@ -63,7 +66,7 @@ func (writer *FieldWriter) WriteFields(system log.Fields, fields ...log.Fields) 
 		system[log.Properties] = properties
 	}
 
-	json := system.ToSnakeCase().ToJson()
+	json := system.ToSnakeCase().ToJson(writer.config.omitempty)
 
 	go post(writer.config, json)
 }
@@ -94,28 +97,4 @@ func post(config writerConfig, jsonStr string) error {
 	body, err := ioutil.ReadAll(resp.Body)
 	str := string(body)
 	return errors.New(fmt.Sprintf("bad server response: %d. body: %v", resp.StatusCode, str))
-}
-
-func getEnvOrDefaultString(key string, defaultValue string) string {
-
-	val, found := os.LookupEnv(key)
-	if !found {
-		return defaultValue
-	}
-	return val
-}
-
-func getEnvOrDefaultInt(key string, defaultValue int) int {
-
-	val, found := os.LookupEnv(key)
-	if !found {
-		return defaultValue
-	}
-
-	i, err := strconv.Atoi(val)
-	if err != nil {
-		return defaultValue
-	}
-
-	return i
 }

@@ -90,7 +90,7 @@ func TestEntries_InvalidValues_ToJSON(t*testing.T) {
 		"key_chan": make(chan string),
 	}
 
-	str := fields.ToJson()
+	str := fields.ToJson(false)
 	assert.Assert(t, str=="{\"key_string\":\"abc\"}", str)
 }
 
@@ -105,6 +105,6 @@ func Benchmark_FieldsToJSON(b *testing.B) {
 	}
 
 	for n := 0; n < b.N; n++ {
-		fields.ToSnakeCase().ToJson()
+		fields.ToSnakeCase().ToJson(false)
 	}
 }

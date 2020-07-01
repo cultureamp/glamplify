@@ -11,7 +11,7 @@ const (
 	// List of standard keys used for logging as per https://cultureamp.atlassian.net/wiki/spaces/TV/pages/959939199/Logging
 	TraceID             = "trace_id"
 	RequestID           = "request_id"
-	CorrelationID		= "correlation_id"
+	CorrelationID       = "correlation_id"
 	Time                = "time"
 	Event               = "event"
 	Product             = "product"
@@ -43,10 +43,11 @@ const (
 	FatalSev = "FATAL"
 
 	// ENVIRONMENT VARIABLES
-	// List of  Environment Variables keys
-	ProductEnv     = "PRODUCT"
-	AppEnv         = "APP_ENV"
-	AppVerEnv      = "APP_VERSION"
-	AwsRegionEnv   = "AWS_REGION"
-	AwsAcountIDEnv = "AWS_ACCOUNT_ID"
+	Level           = "LOG_LEVEL"
+	OmitEmpty       = "LOG_OMITEMPTY"
+	ProductEnv      = "PRODUCT"
+	AppEnv          = "APP_ENV"
+	AppVerEnv       = "APP_VERSION"
+	AwsRegionEnv    = "AWS_REGION"
+	AwsAccountIDEnv = "AWS_ACCOUNT_ID"
 )

@@ -29,13 +29,13 @@ const (
 )
 
 var (
-	internal, _ = NewNotifier(helper.GetEnvOrDefault("APP_NAME", "default"), func(conf *Config) { conf.Enabled = true })
+	internal, _ = NewNotifier(helper.GetEnvString("APP_NAME", "default"), func(conf *Config) { conf.Enabled = true })
 )
 
 func NewNotifier(name string, configure ...func(*Config)) (*Notifier, error) {
 
 	if len(name) == 0 {
-		name = helper.GetEnvOrDefault("APP_NAME", "default")
+		name = helper.GetEnvString("APP_NAME", "default")
 	}
 
 	conf := Config{
@@ -43,8 +43,8 @@ func NewNotifier(name string, configure ...func(*Config)) (*Notifier, error) {
 		Logging:         false,
 		License:         os.Getenv("BUGSNAG_LICENSE_KEY"),
 		AppName:         name,
-		AppVersion:      helper.GetEnvOrDefault("APP_VERSION", "1.0.0"),
-		ReleaseStage:    helper.GetEnvOrDefault("APP_ENV", "production"),
+		AppVersion:      helper.GetEnvString("APP_VERSION", "1.0.0"),
+		ReleaseStage:    helper.GetEnvString("APP_ENV", "production"),
 		ProjectPackages: []string{"github.com/cultureamp"},
 	}
 

@@ -8,16 +8,18 @@ import (
 
 // WriterConfig for setting initial values for Logger
 type WriterConfig struct {
-	Output io.Writer
+	Output    io.Writer
+	OmitEmpty bool
 }
 
 // FieldWriter wraps the standard library writer and add structured types as quoted key value pairs
 type FieldWriter struct {
-	mutex      sync.Mutex
-	output     io.Writer
+	mutex     sync.Mutex
+	output    io.Writer
+	omitempty bool
 }
 
-type Writer interface  {
+type Writer interface {
 	WriteFields(system Fields, fields ...Fields)
 }
 
@@ -29,6 +31,7 @@ func NewWriter(configure ...func(*WriterConfig)) *FieldWriter { // https://dave.
 	writer := &FieldWriter{}
 	conf := WriterConfig{
 		Output: os.Stdout,
+		OmitEmpty: false,
 	}
 	for _, config := range configure {
 		config(&conf)
@@ -38,6 +41,7 @@ func NewWriter(configure ...func(*WriterConfig)) *FieldWriter { // https://dave.
 	defer writer.mutex.Unlock()
 
 	writer.output = conf.Output
+	writer.omitempty = conf.OmitEmpty
 
 	return writer
 }
@@ -48,7 +52,7 @@ func (writer *FieldWriter) WriteFields(system Fields, fields ...Fields) {
 	if len(properties) > 0 {
 		system[Properties] = properties
 	}
-	str := system.ToSnakeCase().ToJson()
+	str := system.ToSnakeCase().ToJson(writer.omitempty)
 	writer.write(str)
 }
 

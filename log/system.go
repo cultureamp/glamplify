@@ -69,7 +69,7 @@ func (df SystemValues) getEnvFields(fields Fields) Fields {
 	fields = df.addEnvFieldIfMissing(App, AppEnv, fields)
 	fields = df.addEnvFieldIfMissing(AppVer, AppVerEnv, fields)
 	fields = df.addEnvFieldIfMissing(AwsRegion, AwsRegionEnv, fields)
-	fields = df.addEnvFieldIfMissing(AwsAccountID, AwsAcountIDEnv, fields)
+	fields = df.addEnvFieldIfMissing(AwsAccountID, AwsAccountIDEnv, fields)
 
 	return fields
 }

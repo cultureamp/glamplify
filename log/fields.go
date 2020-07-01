@@ -3,11 +3,11 @@ package log
 import (
 	"encoding/json"
 	"fmt"
-	"runtime/debug"
+	"github.com/cultureamp/glamplify/helper"
 	systemLog "log"
 	"reflect"
+	"runtime/debug"
 	"time"
-	"github.com/cultureamp/glamplify/helper"
 )
 
 // Fields type, used to pass to Debug, Print and Error.
@@ -53,9 +53,8 @@ func (fields Fields) ToSnakeCase() Fields {
 	return snaked
 }
 
-func (fields Fields) ToJson() string {
-
-	filtered := fields.filterNonSerializableValues()
+func (fields Fields) ToJson(omitempty bool) string {
+	filtered := fields.filterNonSerializableValues().omitEmpty(omitempty)
 	bytes, err := json.Marshal(filtered)
 	if err != nil {
 		buf := debug.Stack()
@@ -65,6 +64,48 @@ func (fields Fields) ToJson() string {
 
 	return string(bytes)
 }
+
+
+
+func (fields Fields) filterNonSerializableValues() Fields {
+	filtered := Fields{}
+	for k, v := range fields {
+		vt := reflect.TypeOf(v).Kind()
+
+		switch vt {
+		case reflect.Func, reflect.Chan : // add other types we don't want to log here
+			continue
+		default:
+			filtered[k] = v
+		}
+	}
+
+	return filtered
+}
+
+func (fields Fields) omitEmpty(omitEmpty bool) Fields {
+	if !omitEmpty {
+		return fields
+	}
+
+	filtered := Fields{}
+	for k, v := range fields {
+		switch vt := v.(type) {
+		case Fields:
+			v = vt.omitEmpty(omitEmpty)
+			filtered[k] = v
+		case string:
+			if vt != "" {
+				filtered[k] = v
+			}
+		default:
+			filtered[k] = v
+		}
+	}
+
+	return filtered
+}
+
 
 // ValidateNewRelic checks that Entries are valid according to NewRelic requirements before processing
 // https://docs.newrelic.com/docs/insights/insights-data-sources/custom-data/insights-custom-data-requirements-limits
@@ -88,19 +129,3 @@ func (fields Fields) ValidateNewRelic() (bool, error) {
 
 	return true, nil
 }
-
-func (fields Fields) filterNonSerializableValues() Fields {
-	filtered := Fields{}
-
-	for k, v := range fields {
-		vt := reflect.TypeOf(v).Kind()
-		switch vt {
-		case reflect.Func, reflect.Chan : // add other types we don't want to log here
-			continue
-		default:
-			filtered[k] = v
-		}
-	}
-	return filtered
-}
-
