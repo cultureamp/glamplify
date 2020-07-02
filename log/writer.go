@@ -3,6 +3,7 @@ package log
 import (
 	"io"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/cultureamp/glamplify/helper"
@@ -64,40 +65,46 @@ func (writer *FieldWriter) WriteFields(sev int, system Fields, fields ...Fields)
 }
 
 func (writer *FieldWriter) write(sev int, str string) {
+	// This can return an error, but we just swallow it here as what can we or a client really do? Try and log it? :)
 
-	// Note: Making this faster is a good thing (while we are a sync writer - async writer is a different story)
-	// So we don't use the stdlib writer.Print(), but rather have our own optimized version
-	// Which does less, but is 3-10x faster
-
-	// alloc a slice to contain the string and possible '\n'
-	length := len(str)
-	buffer := make([]byte, length+1)
-	copy(buffer[:], str)
-	if len(str) == 0 || str[length-1] != '\n' {
-		copy(buffer[length:], "\n")
-	}
+	str = writer.addNewLineIfMissing(str)
 
 	writer.mutex.Lock()
 	defer writer.mutex.Unlock()
 
-	// This can return an error, but we just swallow it here as what can we or a client really do? Try and log it? :)
 	if writer.useColors {
+		// Helpful for humans, but SLOWS down the output writing, so don't recommend this for production
+
 		color.SetOutput(writer.output)
 		switch sev {
 		case DebugLevel:
-			color.Debug.Print(buffer)
+			color.Debug.Println(str)
 		case InfoLevel:
-			color.Info.Print(buffer)
+			color.Info.Print(str)
 		case WarnLevel:
-			color.Warn.Print(buffer)
+			color.Warn.Print(str)
 		case ErrorLevel:
-			color.Error.Print(buffer)
+			color.Error.Print(str)
 		case FatalLevel:
-			color.Danger.Print(buffer)
+			color.Danger.Print(str)
 		default:
-			color.Print(buffer)
+			color.Print(str)
 		}
 	} else {
-		writer.output.Write(buffer)
+		// Note: Making this faster is a good thing (while we are a sync writer - async writer is a different story)
+		// So we don't use the stdlib writer.Print(), but rather have our own optimized version
+		// Which does less, but is 3-10x faster
+		writer.output.Write([]byte(str))
 	}
+}
+
+func (writer *FieldWriter) addNewLineIfMissing(str string) string {
+	var b strings.Builder
+	b.WriteString(str)
+	l := len(str)
+	if str[l-1] != '\n' {
+		b.WriteString("\n")
+	}
+
+	return b.String()
 }
