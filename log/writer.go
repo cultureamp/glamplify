@@ -74,19 +74,20 @@ func (writer *FieldWriter) write(sev int, str string) {
 
 	if writer.useColors {
 		// Helpful for humans, but SLOWS down the output writing, so don't recommend this for production
-
+		// Also we purposely print with double NewLines (1 in the string and an extra one when printing)
+		// to make it easy to separate different log lines...
 		color.SetOutput(writer.output)
 		switch sev {
 		case DebugLevel:
 			color.Debug.Println(str)
 		case InfoLevel:
-			color.Info.Print(str)
+			color.Info.Println(str)
 		case WarnLevel:
-			color.Warn.Print(str)
+			color.Warn.Println(str)
 		case ErrorLevel:
-			color.Error.Print(str)
+			color.Error.Println(str)
 		case FatalLevel:
-			color.Danger.Print(str)
+			color.Danger.Println(str)
 		default:
 			color.Print(str)
 		}
