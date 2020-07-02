@@ -1,16 +1,19 @@
 package log
 
 import (
-	"github.com/cultureamp/glamplify/helper"
 	"io"
 	"os"
 	"sync"
+
+	"github.com/cultureamp/glamplify/helper"
+	"github.com/gookit/color"
 )
 
 // WriterConfig for setting initial values for Logger
 type WriterConfig struct {
-	Output    io.Writer
-	OmitEmpty bool
+	Output     io.Writer
+	OmitEmpty  bool
+	UseColours bool
 }
 
 // FieldWriter wraps the standard library writer and add structured types as quoted key value pairs
@@ -18,10 +21,11 @@ type FieldWriter struct {
 	mutex     sync.Mutex
 	output    io.Writer
 	omitempty bool
+	useColors bool
 }
 
 type Writer interface {
-	WriteFields(system Fields, fields ...Fields)
+	WriteFields(sev int, system Fields, fields ...Fields)
 }
 
 // NewWriter creates a new FieldWriter. The optional configure func lets you set values on the underlying standard writer.
@@ -31,8 +35,9 @@ func NewWriter(configure ...func(*WriterConfig)) *FieldWriter { // https://dave.
 
 	writer := &FieldWriter{}
 	conf := WriterConfig{
-		Output: os.Stdout,
+		Output:    os.Stdout,
 		OmitEmpty: helper.GetEnvBool(OmitEmpty, false),
+		UseColours: helper.GetEnvBool(UseColours, false),
 	}
 	for _, config := range configure {
 		config(&conf)
@@ -43,21 +48,22 @@ func NewWriter(configure ...func(*WriterConfig)) *FieldWriter { // https://dave.
 
 	writer.output = conf.Output
 	writer.omitempty = conf.OmitEmpty
+	writer.useColors = conf.UseColours
 
 	return writer
 }
 
-func (writer *FieldWriter) WriteFields(system Fields, fields ...Fields) {
+func (writer *FieldWriter) WriteFields(sev int, system Fields, fields ...Fields) {
 	merged := Fields{}
 	properties := merged.Merge(fields...)
 	if len(properties) > 0 {
 		system[Properties] = properties
 	}
 	str := system.ToSnakeCase().ToJson(writer.omitempty)
-	writer.write(str)
+	writer.write(sev, str)
 }
 
-func (writer *FieldWriter) write(str string) {
+func (writer *FieldWriter) write(sev int, str string) {
 
 	// Note: Making this faster is a good thing (while we are a sync writer - async writer is a different story)
 	// So we don't use the stdlib writer.Print(), but rather have our own optimized version
@@ -75,5 +81,23 @@ func (writer *FieldWriter) write(str string) {
 	defer writer.mutex.Unlock()
 
 	// This can return an error, but we just swallow it here as what can we or a client really do? Try and log it? :)
-	writer.output.Write(buffer)
+	if writer.useColors {
+		color.SetOutput(writer.output)
+		switch sev {
+		case DebugLevel:
+			color.Debug.Print(buffer)
+		case InfoLevel:
+			color.Info.Print(buffer)
+		case WarnLevel:
+			color.Warn.Print(buffer)
+		case ErrorLevel:
+			color.Error.Print(buffer)
+		case FatalLevel:
+			color.Danger.Print(buffer)
+		default:
+			color.Print(buffer)
+		}
+	} else {
+		writer.output.Write(buffer)
+	}
 }

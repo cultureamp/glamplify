@@ -25,13 +25,13 @@ func newSystemValues() *SystemValues {
 	return &SystemValues{}
 }
 
-func (df SystemValues) getSystemValues(rsFields gcontext.RequestScopedFields, event string, sev string) Fields {
+func (df SystemValues) getSystemValues(rsFields gcontext.RequestScopedFields, event string, severity string) Fields {
 	fields := Fields{
 		Time:     df.timeNow(RFC3339Milli),
 		Event:    event,
 		Resource: df.hostName(),
 		Os:       df.targetOS(),
-		Severity: sev,
+		Severity: severity,
 	}
 
 	fields = df.getMandatoryFields(rsFields, fields)

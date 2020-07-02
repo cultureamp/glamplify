@@ -163,17 +163,18 @@ func (logger Logger) Event(event string) *Segment {
 	}
 }
 
-func (logger Logger) write(rsFields gcontext.RequestScopedFields, event string, err error, sev string, fields ...Fields) string {
+func (logger Logger) write(rsFields gcontext.RequestScopedFields, event string, err error, severity string, fields ...Fields) string {
 	event = helper.ToSnakeCase(event)
 
+	sev := sevLevel.stringToLevel(severity)
 	if sevLevel.shouldLog(sev) {
-		system := logger.sysValues.getSystemValues(rsFields, event, sev)
+		system := logger.sysValues.getSystemValues(rsFields, event, severity)
 		if err != nil {
 			system = logger.sysValues.getErrorValues(err, system)
 		}
 
 		properties := logger.fields.Merge(fields...)
-		logger.writer.WriteFields(system, properties)
+		logger.writer.WriteFields(sev, system, properties)
 	}
 
 	return event

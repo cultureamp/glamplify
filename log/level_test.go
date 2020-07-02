@@ -10,15 +10,15 @@ func Test_Sev_Log(t *testing.T) {
 
 	sev := newSystemLogLevel()
 
-	ok := sev.shouldLog(DebugSev)
+	ok := sev.shouldLog(DebugLevel)
 	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(InfoSev)
+	ok = sev.shouldLog(InfoLevel)
 	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(WarnSev)
+	ok = sev.shouldLog(WarnLevel)
 	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(ErrorSev)
+	ok = sev.shouldLog(ErrorLevel)
 	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(FatalSev)
+	ok = sev.shouldLog(FatalLevel)
 	assert.Assert(t, ok, ok)
 }
 
@@ -29,15 +29,15 @@ func Test_Sev_Log_Env(t *testing.T) {
 
 	sev := newSystemLogLevel()
 
-	ok := sev.shouldLog(DebugSev)
+	ok := sev.shouldLog(DebugLevel)
 	assert.Assert(t, !ok, ok)
-	ok = sev.shouldLog(InfoSev)
+	ok = sev.shouldLog(InfoLevel)
 	assert.Assert(t, !ok, ok)
-	ok = sev.shouldLog(WarnSev)
+	ok = sev.shouldLog(WarnLevel)
 	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(ErrorSev)
+	ok = sev.shouldLog(ErrorLevel)
 	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(FatalSev)
+	ok = sev.shouldLog(FatalLevel)
 	assert.Assert(t, ok, ok)
 }
 
@@ -45,7 +45,7 @@ func Test_Sev_Log_Unknown(t *testing.T) {
 
 	sev := newSystemLogLevel()
 
-	ok := sev.shouldLog("unknown")
+	ok := sev.shouldLog(-1)
 	assert.Assert(t, !ok, ok)
 }
 
@@ -56,14 +56,14 @@ func Test_Sev_Log_Env_Unknown(t *testing.T) {
 
 	sev := newSystemLogLevel()
 
-	ok := sev.shouldLog(DebugSev)
+	ok := sev.shouldLog(DebugLevel)
 	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(InfoSev)
+	ok = sev.shouldLog(InfoLevel)
 	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(WarnSev)
+	ok = sev.shouldLog(WarnLevel)
 	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(ErrorSev)
+	ok = sev.shouldLog(ErrorLevel)
 	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(FatalSev)
+	ok = sev.shouldLog(FatalLevel)
 	assert.Assert(t, ok, ok)
 }

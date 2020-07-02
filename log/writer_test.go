@@ -15,11 +15,12 @@ func Test_WriteFields(t *testing.T) {
 		conf.Output = memBuffer
 	})
 
-	writer.WriteFields(Fields{
-		"system": "system_value",
+	writer.WriteFields(DebugLevel,
+		Fields{
+		"system":       "system_value",
 		"system_empty": "",
 	}, Fields{
-		"properties": "properties_value",
+		"properties":       "properties_value",
 		"properties_empty": "",
 	})
 
@@ -38,11 +39,12 @@ func Test_WriteFields_Filtered(t *testing.T) {
 		conf.OmitEmpty = true
 	})
 
-	writer.WriteFields(Fields{
-		"system": "system_value",
+	writer.WriteFields(DebugLevel,
+		Fields{
+		"system":       "system_value",
 		"system_empty": "",
 	}, Fields{
-		"properties": "properties_value",
+		"properties":       "properties_value",
 		"properties_empty": "",
 	})
 

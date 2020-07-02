@@ -45,6 +45,7 @@ const (
 	// ENVIRONMENT VARIABLES
 	Level           = "LOG_LEVEL"
 	OmitEmpty       = "LOG_OMITEMPTY"
+	UseColours      = "LOG_COLOURS"
 	ProductEnv      = "PRODUCT"
 	AppEnv          = "APP_ENV"
 	AppVerEnv       = "APP_VERSION"

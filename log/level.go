@@ -1,20 +1,31 @@
 package log
 
-import "os"
+import (
+	"os"
+)
 
 type systemLogLevel struct {
 	sysLogLevel int
-	lookup      map[string]int
+	stol        map[string]int
 }
+
+const (
+	DebugLevel = iota
+	InfoLevel
+	WarnLevel
+	ErrorLevel
+	FatalLevel
+)
+
 
 func newSystemLogLevel() *systemLogLevel {
 
-	table := map[string]int {
-		DebugSev: 0,
-		InfoSev: 1,
-		WarnSev: 2,
-		ErrorSev: 3,
-		FatalSev: 4,
+	table := map[string]int{
+		DebugSev: DebugLevel,
+		InfoSev:  InfoLevel,
+		WarnSev:  WarnLevel,
+		ErrorSev: ErrorLevel,
+		FatalSev: FatalLevel,
 	}
 
 	level, ok := os.LookupEnv(Level)
@@ -23,25 +34,30 @@ func newSystemLogLevel() *systemLogLevel {
 	}
 	logLevel, found := table[level]
 	if !found {
-		logLevel = 0
+		logLevel = DebugLevel
 	}
 
 	return &systemLogLevel{
 		sysLogLevel: logLevel,
-		lookup: table,
+		stol:        table,
 	}
 }
 
-func (sev systemLogLevel) shouldLog(severity string) bool {
-
-	level, ok := sev.lookup[severity]
-	if !ok {
-		return false
+func (sev systemLogLevel) stringToLevel(severity string) int {
+	level, ok := sev.stol[severity]
+	if ok {
+		return level
 	}
 
-	if level >= sev.sysLogLevel {
+	return DebugLevel
+}
+
+func (sev systemLogLevel) shouldLog(severity int) bool {
+
+	if severity >= sev.sysLogLevel {
 		return true
 	}
 
 	return false
 }
+

@@ -59,7 +59,7 @@ func newWriter(configure ...func(*writerConfig)) *FieldWriter { // https://dave.
 	return writer
 }
 
-func (writer *FieldWriter) WriteFields(system log.Fields, fields ...log.Fields) {
+func (writer *FieldWriter) WriteFields(sev int, system log.Fields, fields ...log.Fields) {
 	merged := log.Fields{}
 	properties := merged.Merge(fields...)
 	if len(properties) > 0 {

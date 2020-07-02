@@ -12,9 +12,11 @@ require (
 	github.com/bugsnag/panicwrap v1.2.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gofrs/uuid v3.2.0+incompatible // indirect
+	github.com/gookit/color v1.2.5
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/newrelic/go-agent v2.14.1+incompatible
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/spf13/viper v1.4.0
+	golang.org/x/sys v0.0.0-20191026070338-33540a1f6037 // indirect
 	gotest.tools v2.2.0+incompatible
 )
