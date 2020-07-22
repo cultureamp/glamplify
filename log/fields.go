@@ -65,8 +65,6 @@ func (fields Fields) ToJson(omitempty bool) string {
 	return string(bytes)
 }
 
-
-
 func (fields Fields) filterNonSerializableValues() Fields {
 	filtered := Fields{}
 	for k, v := range fields {
@@ -105,7 +103,6 @@ func (fields Fields) omitEmpty(omitEmpty bool) Fields {
 
 	return filtered
 }
-
 
 // ValidateNewRelic checks that Entries are valid according to NewRelic requirements before processing
 // https://docs.newrelic.com/docs/insights/insights-data-sources/custom-data/insights-custom-data-requirements-limits
