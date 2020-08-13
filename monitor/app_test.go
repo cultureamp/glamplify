@@ -37,7 +37,7 @@ func TestApplication_RecordEvent_Server_Fail(t *testing.T) {
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, app != nil, "application was nil")
 
-	err = app.RecordEvent("glamplify_unittest_customevent",log.Fields{
+	err = app.RecordEvent("glamplify_unittest_customevent", log.Fields{
 		"test":  "big_long_string_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890",
 		"anull": nil,
 	})
@@ -46,3 +46,14 @@ func TestApplication_RecordEvent_Server_Fail(t *testing.T) {
 	app.Shutdown()
 }
 
+func TestApplication_Fail_License(t *testing.T) {
+	app, err := monitor.NewApplication("Glamplify-Unit-Tests", func(conf *monitor.Config) {
+		conf.Enabled = true
+		conf.Logging = false
+		conf.ServerlessMode = false
+		conf.License = "bad"
+	})
+
+	assert.Assert(t, err != nil, err)
+	assert.Assert(t, app == nil, "application was not nil")
+}
