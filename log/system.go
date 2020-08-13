@@ -66,7 +66,8 @@ func (df SystemValues) getErrorValues(err error, fields Fields) Fields {
 func (df SystemValues) getEnvFields(fields Fields) Fields {
 
 	fields = df.addEnvFieldIfMissing(Product, ProductEnv, fields)
-	fields = df.addEnvFieldIfMissing(App, AppEnv, fields)
+	fields = df.addEnvFieldIfMissing(App, AppNameEnv, fields)
+	fields = df.addEnvFieldIfMissing(AppEnv, AppEnvEnv, fields)
 	fields = df.addEnvFieldIfMissing(AppVer, AppVerEnv, fields)
 	fields = df.addEnvFieldIfMissing(AwsRegion, AwsRegionEnv, fields)
 	fields = df.addEnvFieldIfMissing(AwsAccountID, AwsAccountIDEnv, fields)
