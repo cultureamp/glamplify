@@ -84,6 +84,22 @@ func Test_NewWithRequest(t *testing.T) {
 	assert.Assert(t, rsFields.TraceID == "1-2-3", rsFields)
 }
 
+func Test_Log_IsEnabled(t *testing.T) {
+	logger := NewFromCtx(ctx)
+	assert.Assert(t, logger != nil, logger)
+
+	assert.Assert(t, logger.IsEnabled(DebugSev), logger.IsEnabled(DebugSev))
+
+	os.Setenv("LOG_LEVEL", InfoSev)
+	defer os.Unsetenv("LOG_LEVEL")
+	sevLevel := newSystemLogLevel()
+
+	level := sevLevel.stringToLevel(DebugSev)
+	assert.Assert(t, !sevLevel.shouldLog(level), sevLevel.shouldLog(level))
+	level = sevLevel.stringToLevel(InfoSev)
+	assert.Assert(t, sevLevel.shouldLog(level), sevLevel.shouldLog(level))
+}
+
 func Test_Log_Debug(t *testing.T) {
 
 	memBuffer := &bytes.Buffer{}

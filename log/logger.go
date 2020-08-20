@@ -163,6 +163,12 @@ func (logger Logger) Event(event string) *Segment {
 	}
 }
 
+// IsEnabled returns true if the given severity is enabled
+func (logger Logger) IsEnabled(severity string) bool {
+	sev := sevLevel.stringToLevel(severity)
+	return sevLevel.shouldLog(sev)
+}
+
 func (logger Logger) write(rsFields gcontext.RequestScopedFields, event string, err error, severity string, fields ...Fields) string {
 	event = helper.ToSnakeCase(event)
 
