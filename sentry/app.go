@@ -1,6 +1,7 @@
-package bugsnag
+package sentry
 
 import (
+	"context"
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"net/http"
 	"os"
@@ -13,7 +14,8 @@ import (
 type Config struct {
 	Enabled      bool
 	Logging      bool
-	License      string
+	DSN          string
+	ServerName   string
 	AppName      string
 	AppVersion   string
 	ReleaseStage string
@@ -23,15 +25,7 @@ type Application struct {
 	conf Config
 }
 
-const (
-	waitFORBugsnag = 2 * time.Second
-)
-
-var (
-	internal, _ = NewApplication(helper.GetEnvString("APP_NAME", "default"), func(conf *Config) { conf.Enabled = true })
-)
-
-func NewApplication(name string, configure ...func(*Config)) (*Application, error) {
+func NewApplication(ctx context.Context, name string, configure ...func(*Config)) (*Application, error) {
 
 	if len(name) == 0 {
 		name = helper.GetEnvString("APP_NAME", "default")
@@ -40,30 +34,34 @@ func NewApplication(name string, configure ...func(*Config)) (*Application, erro
 	conf := Config{
 		Enabled:      false,
 		Logging:      false,
-		License:      os.Getenv("SENTRY_LICENSE_KEY"),
+		DSN:          os.Getenv("SENTRY_DSN"),
 		AppName:      name,
 		AppVersion:   helper.GetEnvString("APP_VERSION", "1.0.0"),
 		ReleaseStage: helper.GetEnvString("APP_ENV", "production"),
+	}
+
+	host, err := os.Hostname()
+	if err != nil {
+		conf.ServerName = host
 	}
 
 	for _, config := range configure {
 		config(&conf)
 	}
 
-	if conf.Enabled {
-		// todo
-		// set DSN
-	}
-
 	cfg := sentry.ClientOptions{
-		// Enable printing of SDK debug messages.
-		// Useful when getting started or trying to figure something out.
-		// Debug: conf.Logging,
-
-		// TODO
+		Dsn:         conf.DSN,
+		Release:     conf.AppName,
+		Environment: conf.ReleaseStage,
+		ServerName:  conf.ServerName,
 	}
 
-	err := sentry.Init(cfg)
+	if conf.Logging {
+		cfg.Debug = true
+		cfg.DebugWriter = newSentryLogger(ctx)
+	}
+
+	err = sentry.Init(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -100,8 +98,16 @@ func (app *Application) Middleware(next http.Handler) http.Handler {
 }
 
 func (app *Application) WrapHTTPHandler(pattern string, handler func(http.ResponseWriter, *http.Request)) (string, func(http.ResponseWriter, *http.Request)) {
+	p, h := app.wrapHTTPHandler(pattern, http.HandlerFunc(handler))
+	return p, func(w http.ResponseWriter, r *http.Request) {
+		r = app.addToHTTPContext(r)
+		h.ServeHTTP(w, r)
+	}
+}
+
+func (app *Application) wrapHTTPHandler(pattern string, handler http.Handler) (string, http.Handler) {
 	sentryHandler := sentryhttp.New(sentryhttp.Options{})
-	return pattern, sentryHandler.HandleFunc(handler)
+	return pattern, sentryHandler.Handle(handler)
 }
 
 func (app Application) Error(err error) *sentry.EventID {
@@ -120,3 +126,11 @@ func (app Application) Message(message string) *sentry.EventID {
 	return sentry.CaptureMessage(message)
 }
 
+func (app *Application) addToHTTPContext(req *http.Request) *http.Request {
+	ctx := app.addToContext(req.Context())
+	return req.WithContext(ctx)
+}
+
+func (app *Application) addToContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, sentryContextKey, app)
+}

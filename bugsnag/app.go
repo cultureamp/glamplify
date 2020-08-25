@@ -29,10 +29,10 @@ const (
 )
 
 var (
-	internal, _ = NewApplication(helper.GetEnvString("APP_NAME", "default"), func(conf *Config) { conf.Enabled = true })
+	internal, _ = NewApplication(context.Background(), helper.GetEnvString("APP_NAME", "default"), func(conf *Config) { conf.Enabled = true })
 )
 
-func NewApplication(name string, configure ...func(*Config)) (*Application, error) {
+func NewApplication(ctx context.Context, name string, configure ...func(*Config)) (*Application, error) {
 
 	if len(name) == 0 {
 		name = helper.GetEnvString("APP_NAME", "default")
@@ -62,7 +62,7 @@ func NewApplication(name string, configure ...func(*Config)) (*Application, erro
 	}
 
 	if conf.Logging {
-		cfg.Logger = newBugsnagLogger(context.Background())
+		cfg.Logger = newBugsnagLogger(ctx)
 	}
 
 	bugsnag.Configure(cfg)
@@ -129,7 +129,7 @@ func (app *Application) addToHTTPContext(req *http.Request) *http.Request {
 }
 
 func (app *Application) addToContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, notifyContextKey, app)
+	return context.WithValue(ctx, bugsnagContextKey, app)
 }
 
 func fieldsAsMetaData(fields log.Fields) bugsnag.MetaData {

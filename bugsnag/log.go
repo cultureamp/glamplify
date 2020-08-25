@@ -19,10 +19,10 @@ func newBugsnagLogger(ctx context.Context) *bugsnagLogger {
 	}
 }
 
-func (logger bugsnagLogger) Printf(format string, v ...interface{}) {
+func (l bugsnagLogger) Printf(format string, v ...interface{}) {
 	msg := fmt.Sprintf(format, v...)
 	fields := log.Fields{
 		log.Message: msg,
 	}
-	logger.logger.Info("bugsnag_log", fields)
+	l.logger.Info("bugsnag_log", fields)
 }

@@ -1,75 +1,64 @@
-package bugsnag_test
+package sentry_test
 
 import (
 	"context"
 	"errors"
-	"github.com/cultureamp/glamplify/log"
-	"github.com/cultureamp/glamplify/bugsnag"
+	"github.com/cultureamp/glamplify/sentry"
 	"gotest.tools/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
-func TestNotify_Error_Success(t *testing.T) {
+func TestSentry_Error_Success(t *testing.T) {
 
-	notifier, err := bugsnag.NewApplication("GlamplifyUnitTests", func (conf *bugsnag.Config) {
+	ctx := context.Background()
+	sentry, err := sentry.NewApplication(ctx, "GlamplifyUnitTests", func (conf *sentry.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.AppVersion = "1.0.0"
 	})
 	assert.Assert(t, err == nil, err)
 
-	err = notifier.Error(errors.New("NPE"), log.Fields{
-		"user": "mike",
-		"pwd": "abc",     // should be filtered out in bugsnag
-		"age": 47,
-	})
-	assert.Assert(t, err == nil, err)
+	id := sentry.Error(errors.New("NPE"))
+	assert.Assert(t, id != nil, id)
 
-	notifier.Shutdown()
+	sentry.Shutdown()
 }
 
+func TestSentry_Context_Success(t *testing.T) {
 
-func TestNotify_Context_Success(t *testing.T) {
-
-	notifier, err := bugsnag.NewApplication("GlamplifyUnitTests", func (conf *bugsnag.Config) {
+	ctx := context.Background()
+	sentry, err := sentry.NewApplication(ctx, "GlamplifyUnitTests", func (conf *sentry.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.AppVersion = "1.0.0"
 	})
 	assert.Assert(t, err == nil, err)
 
-	_, handler := notifier.WrapHTTPHandler("/", rootRequest)
+	_, handler := sentry.WrapHTTPHandler("/", rootRequest)
 	h := http.HandlerFunc(handler)
 
 	rr := httptest.NewRecorder()
 	req, err := http.NewRequest("GET", "/", nil)
 
 	// Add *testing.T to request context
-	ctx := req.Context()
+	ctx = req.Context()
 	ctx = context.WithValue(ctx, "t", t)
 	req = req.WithContext(ctx)
 
 	h.ServeHTTP(rr, req)
 
-	notifier.Shutdown()
+	sentry.Shutdown()
 }
-
 
 func rootRequest(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	t, _ := ctx.Value("t").(*testing.T)
 
-	notifier, err := bugsnag.NotifyFromContext(ctx)
+	sentry, err := sentry.SentryFromContext(ctx)
 	assert.Assert(t, err == nil, err)
-
-	err = notifier.ErrorWithContext(ctx, errors.New("NPE"), log.Fields{
-		"user": "mike",
-		"pwd":  "abc", // should be filtered out in bugsnag
-		"age":  47,
-	})
-	assert.Assert(t, err == nil, err)
+	assert.Assert(t, sentry != nil, sentry)
 }
 
 

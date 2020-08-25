@@ -1,28 +1,26 @@
-package bugsnag
+package sentry
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/cultureamp/glamplify/log"
 )
 
-type notifyLogger struct {
+type sentryLogger struct {
 	logger *log.Logger
 }
 
-func newNotifyLogger(ctx context.Context) *notifyLogger {
+func newSentryLogger(ctx context.Context) *sentryLogger {
 	logger := log.NewFromCtx(ctx)
 
-	return &notifyLogger{
+	return &sentryLogger{
 		logger: logger,
 	}
 }
 
-func (logger notifyLogger) Printf(format string, v ...interface{}) {
-	msg := fmt.Sprintf(format, v...)
-	fields := log.Fields{
-		log.Message: msg,
-	}
-	logger.logger.Info("notified", fields)
+func (l sentryLogger) Write(p []byte) (n int, err error) {
+	msg := string(p)
+	l.logger.Event("sentry_log").Debug(msg)
+
+	return len(p), nil
 }
+
