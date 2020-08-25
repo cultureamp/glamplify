@@ -1,4 +1,4 @@
-package monitor
+package newrelic
 
 import (
 	"context"
@@ -25,26 +25,26 @@ type Config struct {
 	// Enabled controls whether the agent will communicate with the New Relic
 	// servers and spawn goroutines.  Setting this to be false is useful in
 	// testing and staging situations.
-	Enabled bool `yaml:"enabled"`
+	Enabled bool
 
 	// license is your New Relic license key.
 	//
 	// https://docs.newrelic.com/docs/accounts/install-new-relic/account-setup/license-key
-	License string `yaml:"license"`
+	License string
 
 	// Logging controls whether Event logging is sent to StdOut or not
-	Logging bool `yaml:"logging"`
+	Logging bool
 
 	// Labels are key value pairs used to roll up applications into specific categories.
 	//
 	// https://docs.newrelic.com/docs/using-new-relic/user-interface-functions/organize-your-data/labels-categories-organize-apps-monitors
-	Labels Labels `yaml:"labels"`
+	Labels Labels
 
 	// ServerlessMode contains types which control behavior when running in
 	// AWS Lambda.
 	//
 	// https://docs.newrelic.com/docs/serverless-function-monitoring/aws-lambda-monitoring/get-started/introduction-new-relic-monitoring-aws-lambda
-	ServerlessMode bool `yaml:"serverless_mode"`
+	ServerlessMode bool
 
 	// coreLogger logger
 	logger *monitorLogger

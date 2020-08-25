@@ -3,7 +3,6 @@ module github.com/cultureamp/glamplify
 go 1.14
 
 require (
-	github.com/armon/consul-api v0.0.0-20180202201655-eb2c6b5be1b6 // indirect
 	github.com/aws/aws-lambda-go v1.19.0
 	github.com/aws/aws-sdk-go v1.34.4
 	github.com/aws/aws-xray-sdk-go v1.1.0
@@ -13,6 +12,7 @@ require (
 	github.com/bugsnag/panicwrap v1.2.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/getsentry/sentry-go v0.7.0
 	github.com/gofrs/uuid v3.3.0+incompatible // indirect
 	github.com/gookit/color v1.2.7
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
@@ -25,9 +25,6 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.7.1
-	github.com/ugorji/go v1.1.4 // indirect
-	github.com/urfave/cli v1.22.1 // indirect
-	github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77 // indirect
 	golang.org/x/sys v0.0.0-20200812155832-6a926be9bd1d // indirect
 	gopkg.in/ini.v1 v1.58.0 // indirect
 	gotest.tools v2.2.0+incompatible

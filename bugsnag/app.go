@@ -1,4 +1,4 @@
-package notify
+package bugsnag
 
 import (
 	"context"
@@ -11,16 +11,16 @@ import (
 )
 
 type Config struct {
-	Enabled         bool     `yaml:"enabled"`
-	Logging         bool     `yaml:"logging"`
-	License         string   `yaml:"license"`
-	AppName         string   `yaml:"app_name"`
-	AppVersion      string   `yaml:"app_version"`
-	ReleaseStage    string   `yaml:"release_stage"`
-	ProjectPackages []string `yaml:"proejct_packages"`
+	Enabled         bool
+	Logging         bool
+	License         string
+	AppName         string
+	AppVersion      string
+	ReleaseStage    string
+	ProjectPackages []string
 }
 
-type Notifier struct {
+type Application struct {
 	conf Config
 }
 
@@ -29,10 +29,10 @@ const (
 )
 
 var (
-	internal, _ = NewNotifier(helper.GetEnvString("APP_NAME", "default"), func(conf *Config) { conf.Enabled = true })
+	internal, _ = NewApplication(helper.GetEnvString("APP_NAME", "default"), func(conf *Config) { conf.Enabled = true })
 )
 
-func NewNotifier(name string, configure ...func(*Config)) (*Notifier, error) {
+func NewApplication(name string, configure ...func(*Config)) (*Application, error) {
 
 	if len(name) == 0 {
 		name = helper.GetEnvString("APP_NAME", "default")
@@ -62,36 +62,36 @@ func NewNotifier(name string, configure ...func(*Config)) (*Notifier, error) {
 	}
 
 	if conf.Logging {
-		cfg.Logger = newNotifyLogger(context.Background())
+		cfg.Logger = newBugsnagLogger(context.Background())
 	}
 
 	bugsnag.Configure(cfg)
 
-	return &Notifier{conf: conf}, nil
+	return &Application{conf: conf}, nil
 }
 
 // Shutdown flushes any remaining data to the SAAS endpoint
-func (notify Notifier) Shutdown() {
+func (app Application) Shutdown() {
 	time.Sleep(waitFORBugsnag)
 }
 
 // Adds a Bugsnag when used as middleware
-func (notify *Notifier) Middleware(next http.Handler) http.Handler {
+func (app *Application) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r = notify.addToHTTPContext(r)
+		r = app.addToHTTPContext(r)
 		next.ServeHTTP(w, r)
 	})
 }
 
-func (notify *Notifier) WrapHTTPHandler(pattern string, handler func(http.ResponseWriter, *http.Request)) (string, func(http.ResponseWriter, *http.Request)) {
-	p, h := notify.wrapHTTPHandler(pattern, http.HandlerFunc(handler))
+func (app *Application) WrapHTTPHandler(pattern string, handler func(http.ResponseWriter, *http.Request)) (string, func(http.ResponseWriter, *http.Request)) {
+	p, h := app.wrapHTTPHandler(pattern, http.HandlerFunc(handler))
 	return p, func(w http.ResponseWriter, r *http.Request) {
-		r = notify.addToHTTPContext(r)
+		r = app.addToHTTPContext(r)
 		h.ServeHTTP(w, r)
 	}
 }
 
-func (notify *Notifier) wrapHTTPHandler(pattern string, handler http.Handler) (string, http.Handler) {
+func (app *Application) wrapHTTPHandler(pattern string, handler http.Handler) (string, http.Handler) {
 	return pattern, bugsnag.Handler(handler)
 }
 
@@ -99,23 +99,23 @@ func Error(err error, fields log.Fields) error {
 	return internal.Error(err, fields)
 }
 
-func (notify Notifier) Error(err error, fields log.Fields) error {
-	if !notify.conf.Enabled {
+func (app Application) Error(err error, fields log.Fields) error {
+	if !app.conf.Enabled {
 		return nil
 	}
 
 	ctx := bugsnag.StartSession(context.Background())
 	defer bugsnag.AutoNotify(ctx)
 
-	return notify.ErrorWithContext(ctx, err, fields)
+	return app.ErrorWithContext(ctx, err, fields)
 }
 
 func ErrorWithContext(ctx context.Context, err error, fields log.Fields) error {
 	return internal.ErrorWithContext(ctx, err, fields)
 }
 
-func (notify Notifier) ErrorWithContext(ctx context.Context, err error, fields log.Fields) error {
-	if !notify.conf.Enabled {
+func (app Application) ErrorWithContext(ctx context.Context, err error, fields log.Fields) error {
+	if !app.conf.Enabled {
 		return nil
 	}
 
@@ -123,13 +123,13 @@ func (notify Notifier) ErrorWithContext(ctx context.Context, err error, fields l
 	return bugsnag.Notify(err, ctx, meta)
 }
 
-func (notify *Notifier) addToHTTPContext(req *http.Request) *http.Request {
-	ctx := notify.addToContext(req.Context())
+func (app *Application) addToHTTPContext(req *http.Request) *http.Request {
+	ctx := app.addToContext(req.Context())
 	return req.WithContext(ctx)
 }
 
-func (notify *Notifier) addToContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, notifyContextKey, notify)
+func (app *Application) addToContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, notifyContextKey, app)
 }
 
 func fieldsAsMetaData(fields log.Fields) bugsnag.MetaData {

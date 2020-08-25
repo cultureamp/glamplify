@@ -6,17 +6,17 @@ import (
 	"testing"
 
 	"github.com/cultureamp/glamplify/log"
-	"github.com/cultureamp/glamplify/monitor"
-	"github.com/cultureamp/glamplify/notify"
+	"github.com/cultureamp/glamplify/newrelic"
+	"github.com/cultureamp/glamplify/bugsnag"
 )
 
 func Test_Wrap(t *testing.T) {
 
-	app, appErr := monitor.NewApplication("GlamplifyUnitTests", func(conf *monitor.Config) {
+	app, appErr := newrelic.NewApplication("GlamplifyUnitTests", func(conf *newrelic.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.ServerlessMode = false
-		conf.Labels = monitor.Labels{
+		conf.Labels = newrelic.Labels{
 			"asset":          log.Unknown,
 			"classification": "restricted",
 			"workload":       "development",
@@ -25,7 +25,7 @@ func Test_Wrap(t *testing.T) {
 	})
 	assert.Assert(t, appErr == nil, appErr)
 
-	notifier, notifyErr := notify.NewNotifier("GlamplifyUnitTests", func (conf *notify.Config) {
+	notifier, notifyErr := bugsnag.NewApplication("GlamplifyUnitTests", func (conf *bugsnag.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.AppVersion = "1.0.0"

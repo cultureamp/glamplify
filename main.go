@@ -13,8 +13,8 @@ import (
 	ghttp "github.com/cultureamp/glamplify/http"
 	"github.com/cultureamp/glamplify/jwt"
 	"github.com/cultureamp/glamplify/log"
-	"github.com/cultureamp/glamplify/monitor"
-	"github.com/cultureamp/glamplify/notify"
+	"github.com/cultureamp/glamplify/newrelic"
+	"github.com/cultureamp/glamplify/bugsnag"
 )
 
 func main() {
@@ -58,11 +58,11 @@ func main() {
 	logger = log.New(transactionFields, log.Fields{"request_id": 123})
 
 	/* Monitor & Notify */
-	app, appErr := monitor.NewApplication("GlamplifyUnitTests", func(conf *monitor.Config) {
+	app, appErr := newrelic.NewApplication("GlamplifyUnitTests", func(conf *newrelic.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.ServerlessMode = false
-		conf.Labels = monitor.Labels{
+		conf.Labels = newrelic.Labels{
 			"asset":          log.Unknown,
 			"classification": "restricted",
 			"workload":       "development",
@@ -73,7 +73,7 @@ func main() {
 		logger.Fatal("monitoring_failed", appErr)
 	}
 
-	notifier, notifyErr := notify.NewNotifier("GlamplifyUnitTests", func(conf *notify.Config) {
+	notifier, notifyErr := bugsnag.NewApplication("GlamplifyUnitTests", func(conf *bugsnag.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.AppVersion = "1.0.0"
@@ -153,7 +153,7 @@ func rootRequestHandler(w http.ResponseWriter, r *http.Request) {
 	//logger.Fatal("fatal_problem_detected", err)
 
 	/* NEW RELIC TRANSACTION */
-	txn, err := monitor.TxnFromRequest(w, r)
+	txn, err := newrelic.TxnFromRequest(w, r)
 	if err == nil {
 		txn.AddAttributes(log.Fields{
 			"aString": "hello world",

@@ -1,10 +1,10 @@
-package monitor_test
+package newrelic_test
 
 import (
 	"context"
 	"errors"
 	"github.com/cultureamp/glamplify/log"
-	"github.com/cultureamp/glamplify/monitor"
+	"github.com/cultureamp/glamplify/newrelic"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,7 +13,7 @@ import (
 )
 
 func TestTxn_AddAttribute_Server_Success(t *testing.T) {
-	app, err := monitor.NewApplication("Glamplify-Unit-Tests", func(conf *monitor.Config) {
+	app, err := newrelic.NewApplication("Glamplify-Unit-Tests", func(conf *newrelic.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.ServerlessMode = false
@@ -33,7 +33,7 @@ func TestTxn_AddAttribute_Server_Success(t *testing.T) {
 }
 
 func addAttribute(w http.ResponseWriter, r *http.Request) {
-	txn, err := monitor.TxnFromRequest(w, r)
+	txn, err := newrelic.TxnFromRequest(w, r)
 	if err == nil {
 		txn.AddAttributes(log.Fields{
 			"aString": "hello world",
@@ -43,7 +43,7 @@ func addAttribute(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestTxn_NoticeError_Server_Success(t *testing.T) {
-	app, err := monitor.NewApplication("Glamplify-Unit-Tests", func(conf *monitor.Config) {
+	app, err := newrelic.NewApplication("Glamplify-Unit-Tests", func(conf *newrelic.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.ServerlessMode = false
@@ -71,7 +71,7 @@ func reportError(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	t, _ := ctx.Value("t").(*testing.T)
 
-	txn, err := monitor.TxnFromRequest(w, r)
+	txn, err := newrelic.TxnFromRequest(w, r)
 	if err == nil {
 		err = txn.ReportError(errors.New("standard error message"))
 		assert.Assert(t, err == nil, err )

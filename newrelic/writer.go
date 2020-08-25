@@ -1,4 +1,4 @@
-package monitor
+package newrelic
 
 import (
 	"bytes"

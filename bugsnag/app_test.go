@@ -1,10 +1,10 @@
-package notify_test
+package bugsnag_test
 
 import (
 	"context"
 	"errors"
 	"github.com/cultureamp/glamplify/log"
-	"github.com/cultureamp/glamplify/notify"
+	"github.com/cultureamp/glamplify/bugsnag"
 	"gotest.tools/assert"
 	"net/http"
 	"net/http/httptest"
@@ -13,7 +13,7 @@ import (
 
 func TestNotify_Error_Success(t *testing.T) {
 
-	notifier, err := notify.NewNotifier("GlamplifyUnitTests", func (conf *notify.Config) {
+	notifier, err := bugsnag.NewApplication("GlamplifyUnitTests", func (conf *bugsnag.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.AppVersion = "1.0.0"
@@ -33,7 +33,7 @@ func TestNotify_Error_Success(t *testing.T) {
 
 func TestNotify_Context_Success(t *testing.T) {
 
-	notifier, err := notify.NewNotifier("GlamplifyUnitTests", func (conf *notify.Config) {
+	notifier, err := bugsnag.NewApplication("GlamplifyUnitTests", func (conf *bugsnag.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.AppVersion = "1.0.0"
@@ -61,7 +61,7 @@ func rootRequest(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	t, _ := ctx.Value("t").(*testing.T)
 
-	notifier, err := notify.NotifyFromContext(ctx)
+	notifier, err := bugsnag.NotifyFromContext(ctx)
 	assert.Assert(t, err == nil, err)
 
 	err = notifier.ErrorWithContext(ctx, errors.New("NPE"), log.Fields{

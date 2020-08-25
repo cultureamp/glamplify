@@ -1,8 +1,8 @@
-package notify_test
+package bugsnag_test
 
 import (
 	"context"
-	"github.com/cultureamp/glamplify/notify"
+	"github.com/cultureamp/glamplify/bugsnag"
 	"gotest.tools/assert"
 	"testing"
 )
@@ -10,7 +10,7 @@ import (
 func TestContext_Fail(t *testing.T) {
 
 	ctx := context.TODO()
-	txn, err := notify.NotifyFromContext(ctx)
+	txn, err := bugsnag.NotifyFromContext(ctx)
 
 	assert.Assert(t, txn == nil, txn)
 	assert.Assert(t, err != nil, err)

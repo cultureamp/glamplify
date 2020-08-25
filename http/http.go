@@ -1,14 +1,14 @@
 package http
 
 import (
-	"github.com/cultureamp/glamplify/monitor"
-	"github.com/cultureamp/glamplify/notify"
+	"github.com/cultureamp/glamplify/newrelic"
+	"github.com/cultureamp/glamplify/bugsnag"
 	"net/http"
 )
 
 func WrapHTTPHandler(
-	app *monitor.Application,
-	notify *notify.Notifier,
+	app *newrelic.Application,
+	notify *bugsnag.Application,
 	pattern string,
 	handler func(http.ResponseWriter, *http.Request)) (string, func(http.ResponseWriter, *http.Request)) {
 
