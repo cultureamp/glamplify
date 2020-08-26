@@ -9,7 +9,7 @@ import (
 
 func TestContext_Fail(t *testing.T) {
 
-	ctx := context.TODO()
+	ctx := context.Background()
 	txn, err := bugsnag.BugsnagFromContext(ctx)
 
 	assert.Assert(t, txn == nil, txn)
