@@ -2,6 +2,7 @@ package sentry
 
 import (
 	"context"
+	"github.com/cultureamp/glamplify/log"
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"net/http"
 	"os"
@@ -28,7 +29,7 @@ type Application struct {
 func NewApplication(ctx context.Context, name string, configure ...func(*Config)) (*Application, error) {
 
 	if len(name) == 0 {
-		name = helper.GetEnvString("APP_NAME", "default")
+		name = helper.GetEnvString(log.AppNameEnv, "default")
 	}
 
 	conf := Config{
@@ -36,8 +37,8 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 		Logging:      false,
 		DSN:          os.Getenv("SENTRY_DSN"),
 		AppName:      name,
-		AppVersion:   helper.GetEnvString("APP_VERSION", "1.0.0"),
-		ReleaseStage: helper.GetEnvString("APP_ENV", "production"),
+		AppVersion:   helper.GetEnvString(log.AppVerEnv, "1.0.0"),
+		ReleaseStage: helper.GetEnvString(log.AppEnvEnv, "production"),
 	}
 
 	host, err := os.Hostname()
@@ -49,9 +50,14 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 		config(&conf)
 	}
 
+	if !conf.Enabled {
+		// if not enabled, then return early...
+		return &Application{conf: conf}, nil
+	}
+
 	cfg := sentry.ClientOptions{
 		Dsn:         conf.DSN,
-		Release:     conf.AppName,
+		Release:     conf.AppName + "@" + conf.AppVersion,
 		Environment: conf.ReleaseStage,
 		ServerName:  conf.ServerName,
 	}
@@ -71,7 +77,9 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 
 // Shutdown flushes any remaining data to the SAAS endpoint
 func (app Application) Shutdown() {
-	sentry.Flush(2 * time.Second)
+	if app.conf.Enabled {
+		sentry.Flush(2 * time.Second)
+	}
 }
 
 // Flush waits until the underlying Transport sends any buffered events to the
@@ -86,11 +94,16 @@ func (app Application) Shutdown() {
 // the network synchronously, configure it to use the HTTPSyncTransport in the
 // call to Init.
 func (app Application) Flush(timeout time.Duration) {
-	sentry.Flush(timeout)
+	if app.conf.Enabled {
+		sentry.Flush(timeout)
+	}
 }
 
 // Adds a Bugsnag when used as middleware
 func (app *Application) Middleware(next http.Handler) http.Handler {
+	if !app.conf.Enabled {
+		return next
+	}
 
 	// Create an instance of sentryhttp
 	sentryHandler := sentryhttp.New(sentryhttp.Options{})
@@ -98,6 +111,10 @@ func (app *Application) Middleware(next http.Handler) http.Handler {
 }
 
 func (app *Application) WrapHTTPHandler(pattern string, handler func(http.ResponseWriter, *http.Request)) (string, func(http.ResponseWriter, *http.Request)) {
+	if !app.conf.Enabled {
+		return pattern, handler
+	}
+
 	p, h := app.wrapHTTPHandler(pattern, http.HandlerFunc(handler))
 	return p, func(w http.ResponseWriter, r *http.Request) {
 		r = app.addToHTTPContext(r)

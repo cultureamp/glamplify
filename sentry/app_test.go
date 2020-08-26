@@ -20,7 +20,7 @@ func TestSentry_Error_Success(t *testing.T) {
 	})
 	assert.Assert(t, err == nil, err)
 
-	id := sentry.Error(errors.New("NPE"))
+	id := sentry.Error(errors.New("glamplify test NPE"))
 	assert.Assert(t, id != nil, id)
 
 	sentry.Shutdown()
@@ -59,6 +59,9 @@ func rootRequest(w http.ResponseWriter, r *http.Request) {
 	sentry, err := sentry.SentryFromContext(ctx)
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, sentry != nil, sentry)
+
+	id := sentry.Message("glamplify http handler test message")
+	assert.Assert(t, *id != "", id)
 }
 
 
