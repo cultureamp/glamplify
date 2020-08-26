@@ -57,7 +57,7 @@ type Application struct {
 }
 
 // NewApplication creates a new Application - you should only create 1 Application per process
-func NewApplication(name string, configure ...func(*Config)) (*Application, error) {
+func NewApplication(ctx context.Context, name string, configure ...func(*Config)) (*Application, error) {
 
 	conf := Config{
 		Enabled:        false,
@@ -91,8 +91,7 @@ func NewApplication(name string, configure ...func(*Config)) (*Application, erro
 	if conf.Logging {
 		//cfg.Logger = newrelic.NewDebugLogger(os.Stdout) <- this writes JSON to Stdout :(
 		// So we have our own implementation that wraps our standard logger
-		// TODO - the context here is missing traceID, correlationID, etc
-		conf.logger = newMonitorLogger(context.Background())
+		conf.logger = newMonitorLogger(ctx)
 		cfg.Logger = conf.logger
 
 		cfg.Logger.Debug("configuration", log.Fields{

@@ -13,7 +13,8 @@ import (
 )
 
 func TestTxn_AddAttribute_Server_Success(t *testing.T) {
-	app, err := newrelic.NewApplication("Glamplify-Unit-Tests", func(conf *newrelic.Config) {
+	ctx := context.Background()
+	app, err := newrelic.NewApplication(ctx,"Glamplify-Unit-Tests", func(conf *newrelic.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.ServerlessMode = false
@@ -43,7 +44,8 @@ func addAttribute(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestTxn_NoticeError_Server_Success(t *testing.T) {
-	app, err := newrelic.NewApplication("Glamplify-Unit-Tests", func(conf *newrelic.Config) {
+	ctx := context.Background()
+	app, err := newrelic.NewApplication(ctx,"Glamplify-Unit-Tests", func(conf *newrelic.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.ServerlessMode = false
@@ -59,7 +61,7 @@ func TestTxn_NoticeError_Server_Success(t *testing.T) {
 	req, err := http.NewRequest("GET", "/", nil)
 
 	// Add *testing.T to request context
-	ctx := req.Context()
+	ctx = req.Context()
 	ctx = context.WithValue(ctx, "t", t)
 	req = req.WithContext(ctx)
 	h.ServeHTTP(rr, req)

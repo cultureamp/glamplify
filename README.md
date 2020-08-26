@@ -10,33 +10,6 @@ go get github.com/cultureamp/glamplify
 
 ## Usage
 
-### Config
-```Go
-package main
-
-import (
-	"github.com/cultureamp/glamplify/config"
-)
-
-func main() {
-
-    // Settings will contain configuration data as read in from the config file.
-    settings := config.Load()
-
-    // Or if you want to look for a config file from a specific location use
-    // settings = config.LoadFrom([]string{"${HOME}/settings"}, "config")
-
-    // Then you can use
-    if settings.App.Version > 2.0 {
-        // to do
-    }
-}
-```
-If no config.yml or config.json can be found, or if it is corrupted, then a config will be created by checking these ENV variables.
-
-- CONFIG_APPNAME (default: "service-name")
-- CONFIG_VERSION (default: 1.0)
-
 ### TRACER (AWS XRAY)
 
 ```GO
@@ -107,13 +80,14 @@ import (
     "bytes"
     "context"
     "errors"
+    "net/http"
+    "time"
+
     "github.com/cultureamp/glamplify/aws"
     "github.com/cultureamp/glamplify/constants"
     gcontext "github.com/cultureamp/glamplify/context"
     "github.com/cultureamp/glamplify/jwt"
     "github.com/cultureamp/glamplify/log"
-    "net/http"
-    "time"
 )
 
 func main() {
@@ -257,6 +231,8 @@ Alternatively, you can read it from another environment variable and pass it int
 package main
 
 import (
+    "context"
+
     "github.com/aws/aws-xray-sdk-go/xray"
     "github.com/cultureamp/glamplify/aws"
     gcontext "github.com/cultureamp/glamplify/context"
@@ -267,8 +243,8 @@ import (
 )
 
 func main() {
-
-    app, err := monitor.NewApplication("GlamplifyDemo", func(conf *monitor.Config) {
+    ctx := context.Background()
+    app, err := newrelic.NewApplication(ctx, "GlamplifyDemo", func(conf *newrelic.Config) {
         conf.Enabled = true             // default = "false"
         conf.Logging = true             // default = "false"
         conf.ServerlessMode = false     // default = "false"
@@ -290,7 +266,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 
     // Do things
 
-    txn, err := monitor.TxnFromRequest(w, r)
+    txn, err := newrelic.TxnFromRequest(w, r)
     if err != nil {
         logger.Error("monitor_transaction_failed", err)
         txn.AddAttributes(log.Fields{
@@ -316,7 +292,8 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 package main
 
 import (
-     "net/http"
+     "context"
+"net/http"
 
     "github.com/aws/aws-xray-sdk-go/xray"
     "github.com/cultureamp/glamplify/aws"
@@ -327,8 +304,8 @@ import (
 )
 
 func main() {
-
-    app, err := monitor.NewApplication("GlamplifyDemo", func(conf *monitor.Config) {
+    ctx := context.Background()
+    app, err := newrelic.NewApplication(ctx, "GlamplifyDemo", func(conf *newrelic.Config) {
         conf.Enabled = true             // default = "false"
         conf.Logging = true             // default = "false"
         conf.ServerlessMode = false     // default = "false"
@@ -349,7 +326,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
     logger := log.NewFromRequest(r)
  
     // Do things
-    app, err := monitor.AppFromRequest(w, r)
+    app, err := newrelic.AppFromRequest(w, r)
     if err != nil {
         logger.Error("monitor_failed", err)
     }
@@ -381,14 +358,14 @@ import (
 )
 
 func main() {
-
-    app, _ := monitor.NewApplication("GlamplifyDemo", func(conf *monitor.Config) {
+    ctx := context.Background()
+    app, _ := newrelic.NewApplication(ctx, "GlamplifyDemo", func(conf *newrelic.Config) {
         conf.Enabled = true             // default = "false"
         conf.Logging = true             // default = "false"
         conf.ServerlessMode = true      // default = "false"
      })
 
-    monitor.Start(handler, app)
+    newrelic.Start(handler, app)
 }
 
 func handler(ctx context.Context) {
@@ -397,7 +374,7 @@ func handler(ctx context.Context) {
 
     // Do things
 
-    txn, err := monitor.TxnFromContext(ctx)
+    txn, err := newrelic.TxnFromContext(ctx)
     if err != nil {
         logger.Error("monitor_transaction_failed", err)
         txn.AddAttributes(log.Fields{
@@ -434,14 +411,14 @@ import (
 )
 
 func main() {
-
-    app, _ := monitor.NewApplication("GlamplifyDemo", func(conf *monitor.Config) {
+    ctx := context.Background()
+    app, _ := newrelic.NewApplication("GlamplifyDemo", func(conf *newrelic.Config) {
         conf.Enabled = true             // default = "false"
         conf.Logging = true             // default = "false"
         conf.ServerlessMode = true      // default = "false"
     })
 
-    monitor.Start(handler, app)
+    newrelic.Start(handler, app)
 }
 
 func handler(ctx context.Context) {
@@ -450,7 +427,7 @@ func handler(ctx context.Context) {
 
     // Do things
 
-    app, err := monitor.AppFromContext(ctx)
+    app, err := newrelic.AppFromContext(ctx)
     if err != nil {
         logger.Error("monitor_transaction_failed", err)
         err = app.RecordEvent("mycustomEvent", log.Fields{
@@ -462,7 +439,7 @@ func handler(ctx context.Context) {
 }
 ```
 
-## Notify
+## Busnag
 
 Make sure you have the environment variable BUGSNAG_LICENSE_KEY set to the correct license key.
 Alternatively, you can read it from another environment variable and pass it into the notify.Config struct.
@@ -471,17 +448,19 @@ Alternatively, you can read it from another environment variable and pass it int
 package main
 
 import (
-    "errors"
+    "context"
+"errors"
+    "net/http"
+
     gcontext "github.com/cultureamp/glamplify/context"
     "github.com/cultureamp/glamplify/jwt"
     "github.com/cultureamp/glamplify/log"
     "github.com/cultureamp/glamplify/bugsnag"
-    "net/http"
 )
 
 func main() {
-
-    notifier, err := notify.NewNotifier("GlamplifyDemo", func(conf *notify.Config) {
+    ctx := context.Background()
+    notifier, err := bugsnag.NewApplication(ctx, "GlamplifyDemo", func(conf *bugsnag.Config) {
         conf.Enabled = true             // default = "false"
         conf.Logging = true             // default = "false"
      })
@@ -500,16 +479,16 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
     r = gcontext.WrapRequest(r)  // Reads and Sets TraceID, RequestID, CorrelationID, User and Customer
     logger := log.NewFromRequest(r)
 
-    notifier, notifyErr := notify.NotifyFromRequest(w, r)
-    if notifyErr != nil {
-        logger.Error("notification_error", notifyErr)
+    b, be := bugsnag.BugsnagFromRequest(w, r)
+    if be != nil {
+        logger.Error("notification_error", be)
     }
 
     // Do things
 
     // Pretend we got an error
     err := errors.New("NPE")
-    notifier.ErrorWithContext(r.Context(), err, log.Fields {
+    b.ErrorWithContext(r.Context(), err, log.Fields {
         "key": "value",
     })
 }

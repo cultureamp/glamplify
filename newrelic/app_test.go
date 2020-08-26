@@ -1,6 +1,7 @@
 package newrelic_test
 
 import (
+	"context"
 	"github.com/cultureamp/glamplify/log"
 	"github.com/cultureamp/glamplify/newrelic"
 	"testing"
@@ -9,7 +10,8 @@ import (
 )
 
 func TestApplication_RecordEvent_Server_Success(t *testing.T) {
-	app, err := newrelic.NewApplication("Glamplify-Unit-Tests", func(conf *newrelic.Config) {
+	ctx := context.Background()
+	app, err := newrelic.NewApplication(ctx, "Glamplify-Unit-Tests", func(conf *newrelic.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.ServerlessMode = false
@@ -28,7 +30,8 @@ func TestApplication_RecordEvent_Server_Success(t *testing.T) {
 }
 
 func TestApplication_RecordEvent_Server_Fail(t *testing.T) {
-	app, err := newrelic.NewApplication("Glamplify-Unit-Tests", func(conf *newrelic.Config) {
+	ctx := context.Background()
+	app, err := newrelic.NewApplication(ctx,"Glamplify-Unit-Tests", func(conf *newrelic.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.ServerlessMode = false
@@ -47,7 +50,8 @@ func TestApplication_RecordEvent_Server_Fail(t *testing.T) {
 }
 
 func TestApplication_Fail_License(t *testing.T) {
-	app, err := newrelic.NewApplication("Glamplify-Unit-Tests", func(conf *newrelic.Config) {
+	ctx := context.Background()
+	app, err := newrelic.NewApplication(ctx,"Glamplify-Unit-Tests", func(conf *newrelic.Config) {
 		conf.Enabled = true
 		conf.Logging = false
 		conf.ServerlessMode = false

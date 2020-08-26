@@ -8,30 +8,16 @@ import (
 	"os"
 
 	"github.com/cultureamp/glamplify/aws"
-	"github.com/cultureamp/glamplify/config"
+	"github.com/cultureamp/glamplify/bugsnag"
 	gcontext "github.com/cultureamp/glamplify/context"
 	ghttp "github.com/cultureamp/glamplify/http"
 	"github.com/cultureamp/glamplify/jwt"
 	"github.com/cultureamp/glamplify/log"
 	"github.com/cultureamp/glamplify/newrelic"
-	"github.com/cultureamp/glamplify/bugsnag"
 )
 
 func main() {
 	ctx := context.Background()
-
-	/****** CONFIG ******/
-
-	// settings will contain configuration data as read in from the config file.
-	settings := config.Load()
-
-	// Or if you want to look for a config file from a specific location use
-	//settings = config.LoadFrom([]string{"${HOME}/settings"}, "config")
-
-	// Then you can use
-	if settings.App.Version > 2.0 {
-		// to do
-	}
 
 	/****** XRAY ******/
 	xrayTracer := aws.NewTracer(ctx, func(conf *aws.TracerConfig) {
@@ -58,7 +44,7 @@ func main() {
 	logger = log.New(transactionFields, log.Fields{"request_id": 123})
 
 	/* Monitor & Notify */
-	app, appErr := newrelic.NewApplication("GlamplifyUnitTests", func(conf *newrelic.Config) {
+	app, appErr := newrelic.NewApplication(ctx, "GlamplifyUnitTests", func(conf *newrelic.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.ServerlessMode = false
@@ -73,7 +59,7 @@ func main() {
 		logger.Fatal("monitoring_failed", appErr)
 	}
 
-	notifier, notifyErr := bugsnag.NewApplication("GlamplifyUnitTests", func(conf *bugsnag.Config) {
+	notifier, notifyErr := bugsnag.NewApplication(ctx, "GlamplifyUnitTests", func(conf *bugsnag.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.AppVersion = "1.0.0"
@@ -82,7 +68,7 @@ func main() {
 		logger.Fatal("notification_failed", notifyErr)
 	}
 
-	pattern, handler := ghttp.WrapHTTPHandler(app, notifier, "/", rootRequestHandler)
+	pattern, handler := ghttp.WrapHTTPHandlerWithNewrelicAndBusgnag(app, notifier, "/", rootRequestHandler)
 	h := xrayTracer.SegmentHandler("MyApp", http.HandlerFunc(handler))
 
 	rr := httptest.NewRecorder()
