@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/aws/aws-lambda-go v1.19.1
-	github.com/aws/aws-sdk-go v1.34.10
+	github.com/aws/aws-sdk-go v1.34.16
 	github.com/aws/aws-xray-sdk-go v1.1.0
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
@@ -14,8 +14,9 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/getsentry/sentry-go v0.7.0
+	github.com/go-errors/errors v1.0.2
 	github.com/gofrs/uuid v3.3.0+incompatible // indirect
-	github.com/gookit/color v1.2.8
+	github.com/gookit/color v1.2.9
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/magiconair/properties v1.8.2 // indirect
 	github.com/mitchellh/mapstructure v1.3.3 // indirect

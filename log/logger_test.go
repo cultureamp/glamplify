@@ -5,14 +5,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	gcontext "github.com/cultureamp/glamplify/context"
-	"gotest.tools/assert"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	gcontext "github.com/cultureamp/glamplify/context"
+	gerrors "github.com/go-errors/errors"
+	"gotest.tools/assert"
 )
 
 var (
@@ -297,7 +299,35 @@ func Test_Log_Error(t *testing.T) {
 	assertContainsString(t, msg, "aws_account_id", "aws-account-123")
 	assertScopeContainsSubDoc(t, msg, "exception")
 	assertContainsString(t, msg, "error", "something went wrong")
+	//fmt.Println(msg)
 }
+
+func Test_Log_Error_StackTrace(t *testing.T) {
+
+	memBuffer := &bytes.Buffer{}
+	writer := NewWriter(func(conf *WriterConfig) {
+		conf.Output = memBuffer
+	})
+	logger := NewWitCustomWriter(rsFields, writer)
+
+	logger.Error("error event", gerrors.New("with correct stack trace"))
+
+	msg := memBuffer.String()
+	assertContainsString(t, msg, "event", "error_event")
+	assertContainsString(t, msg, "severity", "ERROR")
+	assertContainsString(t, msg, "trace_id", "1-2-3")
+	assertContainsString(t, msg, "customer", "hooli")
+	assertContainsString(t, msg, "user", "UserAggregateID-123")
+	assertContainsString(t, msg, "product", "engagement")
+	assertContainsString(t, msg, "app", "murmur")
+	assertContainsString(t, msg, "app_version", "87.23.11")
+	assertContainsString(t, msg, "aws_region", "us-west-02")
+	assertContainsString(t, msg, "aws_account_id", "aws-account-123")
+	assertScopeContainsSubDoc(t, msg, "exception")
+	assertContainsString(t, msg, "error", "with correct stack trace")
+	//fmt.Println(msg)
+}
+
 
 func Test_Log_ErrorWithFields(t *testing.T) {
 

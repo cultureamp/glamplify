@@ -10,7 +10,17 @@ import (
 	"time"
 
 	gcontext "github.com/cultureamp/glamplify/context"
+	"github.com/go-errors/errors"
 )
+
+type errorWithStack interface {
+	Stack() []byte
+}
+
+type errorWithStackTrace interface {
+	StackTrace() string
+}
+
 
 // SystemValues
 type SystemValues struct {
@@ -44,12 +54,12 @@ func (df SystemValues) getErrorValues(err error, fields Fields) Fields {
 	errorMessage := strings.TrimSpace(err.Error())
 
 	stats := &debug.GCStats{}
-	buf := debug.Stack()
+	stack := df.getErrorStackTrace(err)
 	debug.ReadGCStats(stats)
 
 	fields[Exception] = Fields{
 		"error":    errorMessage,
-		"trace":    string(buf),
+		"trace":    stack,
 		"gc_stats": Fields{
 			"last_gc": stats.LastGC,
 			"num_gc": stats.NumGC,
@@ -61,6 +71,29 @@ func (df SystemValues) getErrorValues(err error, fields Fields) Fields {
 	}
 
 	return fields
+}
+
+func (df SystemValues) getErrorStackTrace(err error) string {
+	// is it the standard google error type?
+	se, ok := err.(*errors.Error)
+	if ok {
+		return string(se.Stack())
+	}
+
+	// does it support a Stack interface?
+	ews, ok := err.(errorWithStack)
+	if ok {
+		return string(ews.Stack())
+	}
+
+	// does it support a StackTrace interface?
+	ewst, ok := err.(errorWithStackTrace)
+	if ok {
+		return ewst.StackTrace()
+	}
+
+	// best we can do is record the stack from here
+	return string(debug.Stack())
 }
 
 func (df SystemValues) getEnvFields(fields Fields) Fields {
