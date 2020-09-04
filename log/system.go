@@ -1,6 +1,7 @@
 package log
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"runtime"
@@ -10,17 +11,18 @@ import (
 	"time"
 
 	gcontext "github.com/cultureamp/glamplify/context"
-	"github.com/go-errors/errors"
+	gerrors "github.com/go-errors/errors"
+	perrors "github.com/pkg/errors"
 )
 
-type errorWithStack interface {
-	Stack() []byte
-}
+const (
+	errorSkipFrames = 4
+)
 
-type errorWithStackTrace interface {
-	StackTrace() string
+// "github.com/pkg/errors" supports this interface for retrieving stack trace on an error
+type stackTracer interface {
+	StackTrace() perrors.StackTrace
 }
-
 
 // SystemValues
 type SystemValues struct {
@@ -75,26 +77,49 @@ func (df SystemValues) getErrorValues(err error, fields Fields) Fields {
 
 func (df SystemValues) getErrorStackTrace(err error) string {
 	// is it the standard google error type?
-	se, ok := err.(*errors.Error)
+	se, ok := err.(*gerrors.Error)
 	if ok {
 		return string(se.Stack())
 	}
 
 	// does it support a Stack interface?
-	ews, ok := err.(errorWithStack)
+	ews, ok := err.(stackTracer)
 	if ok {
-		return string(ews.Stack())
+		return df.getStackTracer(ews)
 	}
 
-	// does it support a StackTrace interface?
-	ewst, ok := err.(errorWithStackTrace)
-	if ok {
-		return ewst.StackTrace()
-	}
-
-	// best we can do is record the stack from here
-	return string(debug.Stack())
+	// skip 4 frames that belong to glamplify
+	return df.getCurrentStack(errorSkipFrames)
 }
+
+func (df SystemValues) getStackTracer(ews stackTracer) string {
+
+	frames := ews.StackTrace()
+
+	buf := bytes.Buffer{}
+	for _, f := range frames {
+		s := fmt.Sprintf("%+s:%d\n", f, f)
+		buf.WriteString(s)
+	}
+
+	return string(buf.Bytes())
+}
+
+
+func (df SystemValues) getCurrentStack(skip int) string {
+	stack := make([]uintptr, gerrors.MaxStackDepth)
+	length := runtime.Callers(skip, stack[:])
+	stack = stack[:length]
+
+	buf := bytes.Buffer{}
+	for _, pc := range stack {
+		frame := gerrors.NewStackFrame(pc)
+		buf.WriteString(frame.String())
+	}
+
+	return string(buf.Bytes())
+}
+
 
 func (df SystemValues) getEnvFields(fields Fields) Fields {
 
@@ -167,3 +192,4 @@ func (df SystemValues) hostName() string {
 func (df SystemValues) targetOS() string {
 	return runtime.GOOS
 }
+

@@ -2,9 +2,13 @@ package log
 
 import (
 	"errors"
-	"gotest.tools/assert"
+	"fmt"
 	"testing"
 	"time"
+
+	gerrors "github.com/go-errors/errors"
+	perrors "github.com/pkg/errors"
+	"gotest.tools/assert"
 )
 
 func Test_HostName(t *testing.T) {
@@ -69,3 +73,34 @@ func Test_DurationAsIso8601(t *testing.T) {
 	s = DurationAsISO8601(d)
 	assert.Assert(t, s == "P1.456S", "was: %s", s)
 }
+
+func Test_StackTrace(t *testing.T) {
+	df := newSystemValues()
+
+	stdStackFrame := df.getErrorStackTrace(errors.New("system error"))
+	gStackFrame := df.getErrorStackTrace(gerrors.New("g error"))
+	pStackFrame := df.getErrorStackTrace(perrors.New("p error"))
+
+	assert.Assert(t, stdStackFrame != gStackFrame)
+	assert.Assert(t, stdStackFrame != pStackFrame)
+	fmt.Println("------ Standard Error Stack ------")
+	fmt.Println(stdStackFrame)
+	fmt.Println("------ go-errors ------")
+	fmt.Println(gStackFrame)
+	fmt.Println("------ pkg-errors ------")
+	fmt.Println(pStackFrame)
+}
+
+func Test_CurrentStack(t *testing.T) {
+	df := newSystemValues()
+
+	stack0 := df.getCurrentStack(0)
+	assert.Assert(t, stack0 != "")
+	fmt.Println(stack0)
+
+	stack1 := df.getCurrentStack(1)
+	assert.Assert(t, stack1 != "")
+	fmt.Println("------")
+	fmt.Println(stack1)
+}
+
