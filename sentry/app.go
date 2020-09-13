@@ -38,7 +38,7 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 		DSN:          os.Getenv("SENTRY_DSN"),
 		AppName:      name,
 		AppVersion:   helper.GetEnvString(log.AppVerEnv, "1.0.0"),
-		ReleaseStage: helper.GetEnvString(log.AppEnvEnv, "production"),
+		ReleaseStage: helper.GetEnvString(log.AppFarmEnv, "production"),
 	}
 
 	host, err := os.Hostname()
