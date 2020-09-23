@@ -37,7 +37,7 @@ func newSystemValues() *SystemValues {
 	return &SystemValues{}
 }
 
-func (df SystemValues) getSystemValues(rsFields gcontext.RequestScopedFields, event string, severity string) Fields {
+func (df SystemValues) getSystemValues(rsFields gcontext.RequestScopedFields, properties Fields, event string, severity string) Fields {
 	fields := Fields{
 		Time:     df.timeNow(RFC3339Milli),
 		Event:    event,
@@ -46,8 +46,8 @@ func (df SystemValues) getSystemValues(rsFields gcontext.RequestScopedFields, ev
 		Severity: severity,
 	}
 
-	fields = df.getMandatoryFields(rsFields, fields)
-	fields = df.getEnvFields(fields)
+	fields = df.getMandatoryFields(rsFields, fields, properties)
+	fields = df.getEnvFields(fields, properties)
 
 	return fields
 }
@@ -121,34 +121,40 @@ func (df SystemValues) getCurrentStack(skip int) string {
 }
 
 
-func (df SystemValues) getEnvFields(fields Fields) Fields {
+func (df SystemValues) getEnvFields(fields Fields, properties Fields) Fields {
 
-	fields = df.addEnvFieldIfMissing(Product, ProductEnv, fields)
-	fields = df.addEnvFieldIfMissing(App, AppNameEnv, fields)
-	fields = df.addEnvFieldIfMissing(Farm, AppFarmEnv, fields)
-	fields = df.addEnvFieldIfMissing(Farm, AppFarmLegacyEnv, fields)	// spec changed, delete this after a while: 14/09/2020 Mike
-	fields = df.addEnvFieldIfMissing(AppVer, AppVerEnv, fields)
-	fields = df.addEnvFieldIfMissing(AwsRegion, AwsRegionEnv, fields)
-	fields = df.addEnvFieldIfMissing(AwsAccountID, AwsAccountIDEnv, fields)
-
-	return fields
-}
-
-func (df SystemValues) getMandatoryFields(rsFields gcontext.RequestScopedFields, fields Fields) Fields {
-
-	fields = df.addMandatoryFieldIfMissing(TraceID, rsFields.TraceID, fields)
-	fields = df.addMandatoryFieldIfMissing(RequestID, rsFields.RequestID, fields)
-	fields = df.addMandatoryFieldIfMissing(CorrelationID, rsFields.CorrelationID, fields)
-	fields = df.addMandatoryFieldIfMissing(Customer, rsFields.CustomerAggregateID, fields)
-	fields = df.addMandatoryFieldIfMissing(User, rsFields.UserAggregateID, fields)
+	fields = df.addEnvFieldIfMissing(Product, ProductEnv, fields, properties)
+	fields = df.addEnvFieldIfMissing(App, AppNameEnv, fields, properties)
+	fields = df.addEnvFieldIfMissing(Farm, AppFarmEnv, fields, properties)
+	fields = df.addEnvFieldIfMissing(Farm, AppFarmLegacyEnv, fields, properties)	// spec changed, delete this after a while: 14/09/2020 Mike
+	fields = df.addEnvFieldIfMissing(AppVer, AppVerEnv, fields, properties)
+	fields = df.addEnvFieldIfMissing(AwsRegion, AwsRegionEnv, fields, properties)
+	fields = df.addEnvFieldIfMissing(AwsAccountID, AwsAccountIDEnv, fields, properties)
 
 	return fields
 }
 
-func (df SystemValues) addEnvFieldIfMissing(fieldName string, osVar string, fields Fields) Fields {
+func (df SystemValues) getMandatoryFields(rsFields gcontext.RequestScopedFields, fields Fields, properties Fields) Fields {
+
+	fields = df.addMandatoryFieldIfMissing(TraceID, rsFields.TraceID, fields, properties)
+	fields = df.addMandatoryFieldIfMissing(RequestID, rsFields.RequestID, fields, properties)
+	fields = df.addMandatoryFieldIfMissing(CorrelationID, rsFields.CorrelationID, fields, properties)
+	fields = df.addMandatoryFieldIfMissing(Customer, rsFields.CustomerAggregateID, fields, properties)
+	fields = df.addMandatoryFieldIfMissing(User, rsFields.UserAggregateID, fields, properties)
+
+	return fields
+}
+
+func (df SystemValues) addEnvFieldIfMissing(fieldName string, osVar string, fields Fields, properties Fields) Fields {
 
 	// If it contains it already, all good!
 	if _, ok := fields[fieldName]; ok {
+		return fields
+	}
+
+	// If it is in the properties, then lift it out
+	if fv, ok := properties[fieldName]; ok {
+		fields[fieldName] = fv
 		return fields
 	}
 
@@ -159,10 +165,16 @@ func (df SystemValues) addEnvFieldIfMissing(fieldName string, osVar string, fiel
 	return fields
 }
 
-func (df SystemValues) addMandatoryFieldIfMissing(fieldName string, fieldValue string, fields Fields) Fields {
+func (df SystemValues) addMandatoryFieldIfMissing(fieldName string, fieldValue string, fields Fields, properties Fields) Fields {
 
 	// If it contains it already, all good!
 	if _, ok := fields[fieldName]; ok {
+		return fields
+	}
+
+	// If it is in the properties, then lift it out
+	if fv, ok := properties[fieldName]; ok {
+		fields[fieldName] = fv
 		return fields
 	}
 

@@ -174,12 +174,12 @@ func (logger Logger) write(rsFields gcontext.RequestScopedFields, event string, 
 
 	sev := sevLevel.stringToLevel(severity)
 	if sevLevel.shouldLog(sev) {
-		system := logger.sysValues.getSystemValues(rsFields, event, severity)
+		properties := logger.fields.Merge(fields...)
+		system := logger.sysValues.getSystemValues(rsFields, properties, event, severity)
 		if err != nil {
 			system = logger.sysValues.getErrorValues(err, system)
 		}
 
-		properties := logger.fields.Merge(fields...)
 		logger.writer.WriteFields(sev, system, properties)
 	}
 
