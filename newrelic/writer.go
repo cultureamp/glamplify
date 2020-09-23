@@ -13,77 +13,94 @@ import (
 	"time"
 )
 
-// writerConfig for setting initial values for Monitor Writer
-type writerConfig struct {
+type NRWriter interface {
+	WriteFields(sev int, system log.Fields, fields ...log.Fields)
+	WaitAll()
+}
+
+// NRFieldWriter sends logging output to NR as per https://docs.newrelic.com/docs/logs/new-relic-logs/log-api/introduction-log-api
+type NRFieldWriter struct {
 	// license is your New Relic license key.
 	//
 	// https://docs.newrelic.com/docs/accounts/install-new-relic/account-setup/license-key
-	license string
+	License string
 
 	// URL
 	// US: https://log-api.newrelic.com/log/v1  (default)
 	// EU: https://log-api.eu.newrelic.com/log/v1
-	endpoint string
+	Endpoint string
 
-	// timeout
-	timeout time.Duration
+	// Timeout on HTTP requests
+	Timeout time.Duration
 
-	omitempty bool
-}
+	// Omitempty will remove empty fields before sending
+	Omitempty bool
 
-// FieldWriter sends logging output to NR as per https://docs.newrelic.com/docs/logs/new-relic-logs/log-api/introduction-log-api
-type FieldWriter struct {
-	mutex  sync.Mutex
-	config writerConfig
+	// WaitGroup can optionally be to a valid wait group, and the writer will signal when it sends and completes
+	// so clients can
+	WaitGroup *sync.WaitGroup
 }
 
 // newWriter creates a new FieldWriter. The optional configure func lets you set values on the underlying standard writer.
 // Useful for CLI apps that want to direct logging to a file or stderr
 // eg. SetOutput
-func newWriter(configure ...func(*writerConfig)) *FieldWriter { // https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
-	conf := writerConfig{
-		license:  os.Getenv("NEW_RELIC_LICENSE_KEY"),
-		endpoint: helper.GetEnvString("NEW_RELIC_LOG_ENDPOINT", "https://log-api.newrelic.com/log/v1"),
-		timeout:  time.Second * time.Duration(helper.GetEnvInt("NEW_RELIC_TIMEOUT", 5)),
-		omitempty: helper.GetEnvBool(log.OmitEmpty, false),
+func newWriter(configure ...func(*NRFieldWriter)) NRWriter {
+	// https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
+	writer := &NRFieldWriter{
+		License:  os.Getenv("NEW_RELIC_LICENSE_KEY"),
+		Endpoint: helper.GetEnvString("NEW_RELIC_LOG_ENDPOINT", "https://log-api.newrelic.com/log/v1"),
+		Timeout:  time.Second * time.Duration(helper.GetEnvInt("NEW_RELIC_TIMEOUT", 5)),
+		Omitempty: helper.GetEnvBool(log.OmitEmpty, false),
+		WaitGroup: nil,
 	}
 
 	for _, config := range configure {
-		config(&conf)
-	}
-
-	writer := &FieldWriter{
-		config: conf,
+		config(writer)
 	}
 
 	return writer
 }
 
-func (writer *FieldWriter) WriteFields(sev int, system log.Fields, fields ...log.Fields) {
+func (writer *NRFieldWriter) WriteFields(sev int, system log.Fields, fields ...log.Fields) {
 	merged := log.Fields{}
 	properties := merged.Merge(fields...)
 	if len(properties) > 0 {
 		system[log.Properties] = properties
 	}
 
-	json := system.ToSnakeCase().ToJson(writer.config.omitempty)
+	json := system.ToSnakeCase().ToJson(writer.Omitempty)
 
-	go post(writer.config, json)
+	if writer.WaitGroup != nil {
+		writer.WaitGroup.Add(1)
+	}
+	go post(writer, json)
 }
 
-func post(config writerConfig, jsonStr string) error {
+func (writer *NRFieldWriter) WaitAll() {
+	if writer.WaitGroup != nil {
+		writer.WaitGroup.Wait()
+	} else {
+		time.Sleep(writer.Timeout)
+	}
+}
+
+func post(writer *NRFieldWriter, jsonStr string) error {
+	if writer.WaitGroup != nil {
+		defer writer.WaitGroup.Done()
+	}
+
 	// https://docs.newrelic.com/docs/logs/new-relic-logs/log-api/introduction-log-api
 	jsonBytes := []byte(jsonStr)
 
-	req, err := http.NewRequest("POST", config.endpoint, bytes.NewBuffer(jsonBytes))
+	req, err := http.NewRequest("POST", writer.Endpoint, bytes.NewBuffer(jsonBytes))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-license-Key", config.license)
+	req.Header.Set("X-license-Key", writer.License)
 
 	var client = &http.Client{
-		Timeout: config.timeout,
+		Timeout: writer.Timeout,
 	}
 	resp, err := client.Do(req)
 	if err != nil {
