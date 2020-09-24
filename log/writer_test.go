@@ -13,10 +13,10 @@ func Test_WriteFields(t *testing.T) {
 	memBuffer := &bytes.Buffer{}
 	writer := NewWriter(func(conf *WriterConfig) {
 		conf.Output = memBuffer
+		conf.OmitEmpty = false
 	})
 
-	writer.WriteFields(DebugLevel,
-		Fields{
+	writer.WriteFields(DebugLevel, Fields{
 		"system":       "system_value",
 		"system_empty": "",
 	}, Fields{
@@ -31,7 +31,7 @@ func Test_WriteFields(t *testing.T) {
 	assertStringContains(t, msg, "properties_empty", "")
 }
 
-func Test_WriteFields_Filtered(t *testing.T) {
+func Test_WriteFields_OmitEmpty(t *testing.T) {
 
 	memBuffer := &bytes.Buffer{}
 	writer := NewWriter(func(conf *WriterConfig) {
@@ -41,12 +41,12 @@ func Test_WriteFields_Filtered(t *testing.T) {
 
 	writer.WriteFields(DebugLevel,
 		Fields{
-		"system":       "system_value",
-		"system_empty": "",
-	}, Fields{
-		"properties":       "properties_value",
-		"properties_empty": "",
-	})
+			"system":       "system_value",
+			"system_empty": "",
+		}, Fields{
+			"properties":       "properties_value",
+			"properties_empty": "",
+		})
 
 	msg := memBuffer.String()
 	assertStringContains(t, msg, "system", "system_value")
