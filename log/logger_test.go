@@ -102,6 +102,25 @@ func Test_Log_IsEnabled(t *testing.T) {
 	assert.Assert(t, sevLevel.shouldLog(level), sevLevel.shouldLog(level))
 }
 
+func Test_Log_Global_Scope(t *testing.T) {
+	memBuffer := &bytes.Buffer{}
+	writer := NewWriter(func(conf *WriterConfig) {
+		conf.Output = memBuffer
+	})
+	logger := NewWitCustomWriter(rsFields, writer)
+
+	logger.Event( "detail_event").Fields(Fields{
+		AppNameEnv: "app_name",
+		AppFarmEnv: "app_farm",
+	}).Debug("debug")
+
+	msg := memBuffer.String()
+	assertContainsString(t, msg, "event", "detail_event")
+	assertContainsString(t, msg, "severity", "DEBUG")
+	assertContainsString(t, msg, "app", "app_name")
+	assertContainsString(t, msg, "farm", "app_farm")
+}
+
 func Test_Log_Debug(t *testing.T) {
 
 	memBuffer := &bytes.Buffer{}

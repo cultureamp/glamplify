@@ -23,7 +23,7 @@ func Test_HostName(t *testing.T) {
 func Test_Default(t *testing.T) {
 	df := newSystemValues()
 
-	fields := df.getSystemValues(rsFields, "event_name", DebugSev)
+	fields := df.getSystemValues(rsFields, nil, "event_name", DebugSev)
 
 	_, ok := fields[Time]
 	assert.Assert(t, ok, "missing 'time' in default fields")
@@ -56,7 +56,7 @@ func Test_Default(t *testing.T) {
 func Test_ErrorDefault(t *testing.T) {
 	df := newSystemValues()
 
-	fields := df.getSystemValues(rsFields, "event_name", DebugSev)
+	fields := df.getSystemValues(rsFields, nil, "event_name", DebugSev)
 	fields = df.getErrorValues(errors.New("test err"), fields)
 
 	_, ok := fields[Exception]
