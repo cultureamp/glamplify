@@ -17,7 +17,6 @@ type Logger struct {
 }
 
 var (
-	sevLevel = newSystemLogLevel()
 	internalWriter = NewWriter(func(conf *WriterConfig) {})
 	defaultLogger  = NewWitCustomWriter(gcontext.RequestScopedFields{}, internalWriter)
 )
@@ -165,26 +164,19 @@ func (logger Logger) Event(event string) *Segment {
 
 // IsEnabled returns true if the given severity is enabled
 func (logger Logger) IsEnabled(severity string) bool {
-	sev := sevLevel.stringToLevel(severity)
-	return sevLevel.shouldLog(sev)
+	return logger.writer.IsEnabled(severity)
 }
 
 func (logger Logger) write(rsFields gcontext.RequestScopedFields, event string, err error, severity string, fields ...Fields) string {
 	event = helper.ToSnakeCase(event)
 
-	sev := sevLevel.stringToLevel(severity)
-	if sevLevel.shouldLog(sev) {
-		properties := logger.fields.Merge(fields...)
-		system := logger.sysValues.getSystemValues(rsFields, properties, event, severity)
-		if err != nil {
-			system = logger.sysValues.getErrorValues(err, system)
-		}
-
-		return logger.writer.WriteFields(sev, system, properties)
+	properties := logger.fields.Merge(fields...)
+	system := logger.sysValues.getSystemValues(rsFields, properties, event, severity)
+	if err != nil {
+		system = logger.sysValues.getErrorValues(err, system)
 	}
 
-	// Nothing was logged, so return empty string
-	return ""
+	return logger.writer.WriteFields(severity, system, properties)
 }
 
 

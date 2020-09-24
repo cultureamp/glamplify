@@ -14,12 +14,15 @@ import (
 )
 
 type NRWriter interface {
-	WriteFields(sev int, system log.Fields, fields ...log.Fields) string
+	WriteFields(sev string, system log.Fields, fields ...log.Fields) string
+	IsEnabled(sev string) bool
 	WaitAll()
 }
 
 // NRFieldWriter sends logging output to NR as per https://docs.newrelic.com/docs/logs/new-relic-logs/log-api/introduction-log-api
 type NRFieldWriter struct {
+	// PUBLIC
+
 	// license is your New Relic license key.
 	//
 	// https://docs.newrelic.com/docs/accounts/install-new-relic/account-setup/license-key
@@ -36,21 +39,30 @@ type NRFieldWriter struct {
 	// OmitEmpty will remove empty fields before sending
 	OmitEmpty bool
 
+	// Level we are logging, DEBUG, INFO, etc.
+	Level string
+
+	// PRIVATE
+
 	// Allows us to WaitAll if clients want to make sure all pending writes have been sent
 	waitGroup sync.WaitGroup
+	// converts to and from string <-> int
+	leveller *log.Leveller
 }
 
-// newWriter creates a new FieldWriter. The optional configure func lets you set values on the underlying standard writer.
+// NewNRWriter creates a new FieldWriter. The optional configure func lets you set values on the underlying standard writer.
 // Useful for CLI apps that want to direct logging to a file or stderr
 // eg. SetOutput
-func newWriter(configure ...func(*NRFieldWriter)) NRWriter {
+func NewNRWriter(configure ...func(*NRFieldWriter)) NRWriter {
 	// https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
 	writer := &NRFieldWriter{
 		License:   os.Getenv("NEW_RELIC_LICENSE_KEY"),
 		Endpoint:  helper.GetEnvString("NEW_RELIC_LOG_ENDPOINT", "https://log-api.newrelic.com/log/v1"),
 		Timeout:   time.Second * time.Duration(helper.GetEnvInt("NEW_RELIC_TIMEOUT", 5)),
 		OmitEmpty: helper.GetEnvBool(log.OmitEmpty, false),
+		Level:     helper.GetEnvString(log.Level, log.DebugSev),
 		waitGroup: sync.WaitGroup{},
+		leveller:  log.NewLevelMap(),
 	}
 
 	for _, config := range configure {
@@ -60,7 +72,7 @@ func newWriter(configure ...func(*NRFieldWriter)) NRWriter {
 	return writer
 }
 
-func (writer *NRFieldWriter) WriteFields(sev int, system log.Fields, fields ...log.Fields) string {
+func (writer *NRFieldWriter) WriteFields(sev string, system log.Fields, fields ...log.Fields) string {
 	merged := log.Fields{}
 	properties := merged.Merge(fields...)
 	if len(properties) > 0 {
@@ -69,9 +81,18 @@ func (writer *NRFieldWriter) WriteFields(sev int, system log.Fields, fields ...l
 
 	json := system.ToSnakeCase().ToJson(writer.OmitEmpty)
 
-	writer.waitGroup.Add(1)
-	go post(writer, json)
+	if writer.IsEnabled(sev) {
+		writer.waitGroup.Add(1)
+		go post(writer, json)
+	}
 	return json
+}
+
+func (writer NRFieldWriter) IsEnabled(sev string) bool {
+	if writer.leveller.ShouldLogSeverity(writer.Level, sev) {
+		return true
+	}
+	return false
 }
 
 func (writer *NRFieldWriter) WaitAll() {

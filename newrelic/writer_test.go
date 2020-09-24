@@ -2,12 +2,13 @@ package newrelic
 
 import (
 	"context"
-	"github.com/cultureamp/glamplify/log"
-	"gotest.tools/assert"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/cultureamp/glamplify/log"
+	"gotest.tools/assert"
 )
 
 func Test_NewRelic_Writer(t *testing.T) {
@@ -18,7 +19,7 @@ func Test_NewRelic_Writer(t *testing.T) {
 	ctx := context.Background()
 
 	// https://log-api.newrelic.com/log/v1
-	writer := newWriter(func(config *NRFieldWriter) {
+	writer := NewNRWriter(func(config *NRFieldWriter) {
 		config.Endpoint ="https://log-api.newrelic.com/log/v1"
 		config.Timeout =  time.Second * time.Duration(2)
 	})
@@ -29,4 +30,22 @@ func Test_NewRelic_Writer(t *testing.T) {
 
 	assert.Assert(t, json != "", json)
 	assert.Assert(t, strings.Contains(json, "hello"), json)
+}
+
+func Test_NewRelic_Writer_IsEnabled(t *testing.T) {
+
+	writer := NewNRWriter(func(config *NRFieldWriter) {
+		config.Level = log.WarnSev
+	})
+
+	ok := writer.IsEnabled(log.DebugSev)
+	assert.Assert(t, !ok, ok)
+	ok = writer.IsEnabled(log.InfoSev)
+	assert.Assert(t, !ok, ok)
+	ok = writer.IsEnabled(log.WarnSev)
+	assert.Assert(t, ok, ok)
+	ok = writer.IsEnabled(log.ErrorSev)
+	assert.Assert(t, ok, ok)
+	ok = writer.IsEnabled(log.FatalSev)
+	assert.Assert(t, ok, ok)
 }

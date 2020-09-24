@@ -1,12 +1,8 @@
 package log
 
-import (
-	"os"
-)
-
-type systemLogLevel struct {
-	sysLogLevel int
-	stol        map[string]int
+// Leveller manages the conversion of log levels to and from string to int
+type Leveller struct {
+	stol map[string]int
 }
 
 const (
@@ -17,8 +13,7 @@ const (
 	FatalLevel
 )
 
-
-func newSystemLogLevel() *systemLogLevel {
+func NewLevelMap() *Leveller {
 
 	table := map[string]int{
 		DebugSev: DebugLevel,
@@ -28,22 +23,12 @@ func newSystemLogLevel() *systemLogLevel {
 		FatalSev: FatalLevel,
 	}
 
-	level, ok := os.LookupEnv(Level)
-	if !ok {
-		level = DebugSev
-	}
-	logLevel, found := table[level]
-	if !found {
-		logLevel = DebugLevel
-	}
-
-	return &systemLogLevel{
-		sysLogLevel: logLevel,
-		stol:        table,
+	return &Leveller{
+		stol: table,
 	}
 }
 
-func (sev systemLogLevel) stringToLevel(severity string) int {
+func (sev Leveller) StringToLevel(severity string) int {
 	level, ok := sev.stol[severity]
 	if ok {
 		return level
@@ -52,12 +37,16 @@ func (sev systemLogLevel) stringToLevel(severity string) int {
 	return DebugLevel
 }
 
-func (sev systemLogLevel) shouldLog(severity int) bool {
+func (sev Leveller) ShouldLogSeverity(level string, severity string) bool {
+	l := sev.StringToLevel(level)
+	s := sev.StringToLevel(severity)
 
-	if severity >= sev.sysLogLevel {
-		return true
-	}
-
-	return false
+	return sev.ShouldLogLevel(l, s)
 }
 
+func (sev Leveller) ShouldLogLevel(level int, severity int) bool {
+	if severity >= level {
+		return true
+	}
+	return false
+}

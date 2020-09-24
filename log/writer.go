@@ -15,18 +15,23 @@ type WriterConfig struct {
 	Output     io.Writer
 	OmitEmpty  bool
 	UseColours bool
+	Level      string
 }
 
 // FieldWriter wraps the standard library writer and add structured types as quoted key value pairs
 type FieldWriter struct {
-	mutex     sync.Mutex
+	mutex    sync.Mutex
+	levelMap *Leveller
+
 	output    io.Writer
 	omitempty bool
 	useColors bool
+	level     int
 }
 
 type Writer interface {
-	WriteFields(sev int, system Fields, fields ...Fields) string
+	WriteFields(sev string, system Fields, fields ...Fields) string
+	IsEnabled(sev string) bool
 }
 
 // NewWriter creates a new FieldWriter. The optional configure func lets you set values on the underlying standard writer.
@@ -36,9 +41,10 @@ func NewWriter(configure ...func(*WriterConfig)) *FieldWriter { // https://dave.
 
 	writer := &FieldWriter{}
 	conf := WriterConfig{
-		Output:    os.Stdout,
-		OmitEmpty: helper.GetEnvBool(OmitEmpty, false),
+		Output:     os.Stdout,
+		OmitEmpty:  helper.GetEnvBool(OmitEmpty, false),
 		UseColours: helper.GetEnvBool(UseColours, false),
+		Level:      helper.GetEnvString(Level, DebugSev),
 	}
 	for _, config := range configure {
 		config(&conf)
@@ -47,25 +53,38 @@ func NewWriter(configure ...func(*WriterConfig)) *FieldWriter { // https://dave.
 	writer.mutex.Lock()
 	defer writer.mutex.Unlock()
 
+	writer.levelMap = NewLevelMap()
 	writer.output = conf.Output
 	writer.omitempty = conf.OmitEmpty
 	writer.useColors = conf.UseColours
+	writer.level = writer.levelMap.StringToLevel(conf.Level)
 
 	return writer
 }
 
-func (writer *FieldWriter) WriteFields(sev int, system Fields, fields ...Fields) string {
+func (writer *FieldWriter) WriteFields(sev string, system Fields, fields ...Fields) string {
 	merged := Fields{}
 	properties := merged.Merge(fields...)
 	if len(properties) > 0 {
 		system[Properties] = properties
 	}
 	json := system.ToSnakeCase().ToJson(writer.omitempty)
-	writer.write(sev, json)
+
+	if writer.IsEnabled(sev) {
+		writer.write(sev, json)
+	}
 	return json
 }
 
-func (writer *FieldWriter) write(sev int, json string) {
+func (writer FieldWriter) IsEnabled(sev string) bool {
+	level := writer.levelMap.StringToLevel(sev)
+	if writer.levelMap.ShouldLogLevel(writer.level, level) {
+		return true
+	}
+	return false
+}
+
+func (writer *FieldWriter) write(sev string, json string) {
 	// This can return an error, but we just swallow it here as what can we or a client really do? Try and log it? :)
 
 	json = writer.addNewLineIfMissing(json)
@@ -78,7 +97,9 @@ func (writer *FieldWriter) write(sev int, json string) {
 		// Also we purposely print with double NewLines (1 in the string and an extra one when printing)
 		// to make it easy to separate different log lines...
 		color.SetOutput(writer.output)
-		switch sev {
+
+		level := writer.levelMap.StringToLevel(sev)
+		switch level {
 		case DebugLevel:
 			color.Debug.Println(json)
 		case InfoLevel:

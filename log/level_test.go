@@ -2,68 +2,48 @@ package log
 
 import (
 	"gotest.tools/assert"
-	"os"
 	"testing"
 )
 
-func Test_Sev_Log(t *testing.T) {
+func Test_ShouldLogLevel(t *testing.T) {
 
-	sev := newSystemLogLevel()
+	leveller := NewLevelMap()
 
-	ok := sev.shouldLog(DebugLevel)
+	ok := leveller.ShouldLogLevel(DebugLevel, DebugLevel)
 	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(InfoLevel)
-	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(WarnLevel)
-	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(ErrorLevel)
-	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(FatalLevel)
+	ok = leveller.ShouldLogLevel(InfoLevel, DebugLevel)
+	assert.Assert(t, !ok, ok)
+	ok = leveller.ShouldLogLevel(DebugLevel, InfoLevel)
 	assert.Assert(t, ok, ok)
 }
 
-func Test_Sev_Log_Env(t *testing.T) {
+func Test_ShouldLogSeverity(t *testing.T) {
 
-	os.Setenv("LOG_LEVEL", WarnSev)
-	defer os.Unsetenv("LOG_LEVEL")
+	leveller := NewLevelMap()
 
-	sev := newSystemLogLevel()
-
-	ok := sev.shouldLog(DebugLevel)
-	assert.Assert(t, !ok, ok)
-	ok = sev.shouldLog(InfoLevel)
-	assert.Assert(t, !ok, ok)
-	ok = sev.shouldLog(WarnLevel)
+	ok := leveller.ShouldLogSeverity(DebugSev, DebugSev)
 	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(ErrorLevel)
-	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(FatalLevel)
+	ok = leveller.ShouldLogSeverity(InfoSev, DebugSev)
+	assert.Assert(t, !ok, ok)
+	ok = leveller.ShouldLogSeverity(DebugSev, InfoSev)
 	assert.Assert(t, ok, ok)
 }
 
-func Test_Sev_Log_Unknown(t *testing.T) {
+func Test_StringToLevel(t *testing.T) {
 
-	sev := newSystemLogLevel()
+	leveller := NewLevelMap()
 
-	ok := sev.shouldLog(-1)
-	assert.Assert(t, !ok, ok)
-}
+	level := leveller.StringToLevel(DebugSev)
+	assert.Assert(t, level == DebugLevel)
+	level = leveller.StringToLevel(InfoSev)
+	assert.Assert(t, level == InfoLevel)
+	level = leveller.StringToLevel(WarnSev)
+	assert.Assert(t, level == WarnLevel)
+	level = leveller.StringToLevel(ErrorSev)
+	assert.Assert(t, level == ErrorLevel)
+	level = leveller.StringToLevel(FatalSev)
+	assert.Assert(t, level == FatalLevel)
+	level = leveller.StringToLevel("bad")
+	assert.Assert(t, level == DebugLevel)
 
-func Test_Sev_Log_Env_Unknown(t *testing.T) {
-
-	os.Setenv("LOG_LEVEL", "unknown")
-	defer os.Unsetenv("LOG_LEVEL")
-
-	sev := newSystemLogLevel()
-
-	ok := sev.shouldLog(DebugLevel)
-	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(InfoLevel)
-	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(WarnLevel)
-	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(ErrorLevel)
-	assert.Assert(t, ok, ok)
-	ok = sev.shouldLog(FatalLevel)
-	assert.Assert(t, ok, ok)
 }
