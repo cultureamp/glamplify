@@ -77,58 +77,58 @@ func newLogger(rsFields gcontext.RequestScopedFields, writer Writer, fields ...F
 // Useful for adding detailed tracing that you don't normally want to appear, but turned on
 // when hunting down incorrect behaviour.
 // Use snake_case keys and lower case values if possible.
-func Debug(rsFields gcontext.RequestScopedFields, event string, fields ...Fields) {
-	defaultLogger.write(rsFields, event, nil, DebugSev, fields...)
+func Debug(rsFields gcontext.RequestScopedFields, event string, fields ...Fields) string {
+	return defaultLogger.write(rsFields, event, nil, DebugSev, fields...)
 }
 
 // Debug writes a write message with optional types to the underlying standard writer.
 // Useful for adding detailed tracing that you don't normally want to appear, but turned on
 // when hunting down incorrect behaviour.
 // Use snake_case keys and lower case values if possible.
-func (logger Logger) Debug(event string, fields ...Fields) {
-	logger.write(logger.rsFields, event, nil, DebugSev, fields...)
+func (logger Logger) Debug(event string, fields ...Fields) string {
+	return logger.write(logger.rsFields, event, nil, DebugSev, fields...)
 }
 
 // Info writes a message with optional types to the underlying standard writer.
 // Useful for normal tracing that should be captured during standard operating behaviour.
 // Use snake_case keys and lower case values if possible.
-func Info(rsFields gcontext.RequestScopedFields, event string, fields ...Fields) {
-	defaultLogger.write(rsFields, event, nil, InfoSev, fields...)
+func Info(rsFields gcontext.RequestScopedFields, event string, fields ...Fields) string {
+	return defaultLogger.write(rsFields, event, nil, InfoSev, fields...)
 }
 
 // Info writes a message with optional types to the underlying standard writer.
 // Useful for normal tracing that should be captured during standard operating behaviour.
 // Use snake_case keys and lower case values if possible.
-func (logger Logger) Info(event string, fields ...Fields) {
-	logger.write(logger.rsFields, event, nil, InfoSev, fields...)
+func (logger Logger) Info(event string, fields ...Fields) string {
+	return logger.write(logger.rsFields, event, nil, InfoSev, fields...)
 }
 
 // Warn writes a message with optional types to the underlying standard writer.
 // Useful for unusual but recoverable tracing that should be captured during standard operating behaviour.
 // Use snake_case keys and lower case values if possible.
-func Warn(rsFields gcontext.RequestScopedFields, event string, fields ...Fields) {
-	defaultLogger.write(rsFields, event, nil, WarnSev, fields...)
+func Warn(rsFields gcontext.RequestScopedFields, event string, fields ...Fields) string {
+	return defaultLogger.write(rsFields, event, nil, WarnSev, fields...)
 }
 
 // Warn writes a message with optional types to the underlying standard writer.
 // Useful for unusual but recoverable tracing that should be captured during standard operating behaviour.
 // Use snake_case keys and lower case values if possible.
-func (logger Logger) Warn(event string, fields ...Fields) {
-	logger.write(logger.rsFields, event, nil, WarnSev, fields...)
+func (logger Logger) Warn(event string, fields ...Fields) string {
+	return logger.write(logger.rsFields, event, nil, WarnSev, fields...)
 }
 
 // Error writes a error message with optional types to the underlying standard writer.
 // Useful to trace errors that are usually not recoverable. These should always be logged.
 // Use snake_case keys and lower case values if possible.
-func Error(rsFields gcontext.RequestScopedFields, event string, err error, fields ...Fields) {
-	defaultLogger.write(rsFields, event, err, ErrorSev, fields...)
+func Error(rsFields gcontext.RequestScopedFields, event string, err error, fields ...Fields) string {
+	return defaultLogger.write(rsFields, event, err, ErrorSev, fields...)
 }
 
 // Error writes a error message with optional types to the underlying standard writer.
 // Useful to trace errors that are usually not recoverable. These should always be logged.
 // Use snake_case keys and lower case values if possible.
-func (logger Logger) Error(event string, err error, fields ...Fields) {
-	logger.write(logger.rsFields, event, err, ErrorSev, fields...)
+func (logger Logger) Error(event string, err error, fields ...Fields) string {
+	return logger.write(logger.rsFields, event, err, ErrorSev, fields...)
 }
 
 // Fatal writes a error message with optional types to the underlying standard writer and then calls panic!
@@ -180,10 +180,11 @@ func (logger Logger) write(rsFields gcontext.RequestScopedFields, event string, 
 			system = logger.sysValues.getErrorValues(err, system)
 		}
 
-		logger.writer.WriteFields(sev, system, properties)
+		return logger.writer.WriteFields(sev, system, properties)
 	}
 
-	return event
+	// Nothing was logged, so return empty string
+	return ""
 }
 
 

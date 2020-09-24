@@ -123,36 +123,25 @@ func Test_Log_Global_Scope(t *testing.T) {
 
 func Test_Log_Debug(t *testing.T) {
 
-	memBuffer := &bytes.Buffer{}
-	writer := NewWriter(func(conf *WriterConfig) {
-		conf.Output = memBuffer
-	})
-	logger := NewWitCustomWriter(rsFields, writer)
+	logger := New(rsFields)
+	json := logger.Debug("detail_event")
 
-	logger.Debug( "detail_event")
-
-	msg := memBuffer.String()
-	assertContainsString(t, msg, "event", "detail_event")
-	assertContainsString(t, msg, "severity", "DEBUG")
-	assertContainsString(t, msg, "trace_id", "1-2-3")
-	assertContainsString(t, msg, "customer", "hooli")
-	assertContainsString(t, msg, "user", "UserAggregateID-123")
-	assertContainsString(t, msg, "product", "engagement")
-	assertContainsString(t, msg, "app", "murmur")
-	assertContainsString(t, msg, "app_version", "87.23.11")
-	assertContainsString(t, msg, "aws_region", "us-west-02")
-	assertContainsString(t, msg, "aws_account_id", "aws-account-123")
+	assertContainsString(t, json, "event", "detail_event")
+	assertContainsString(t, json, "severity", "DEBUG")
+	assertContainsString(t, json, "trace_id", "1-2-3")
+	assertContainsString(t, json, "customer", "hooli")
+	assertContainsString(t, json, "user", "UserAggregateID-123")
+	assertContainsString(t, json, "product", "engagement")
+	assertContainsString(t, json, "app", "murmur")
+	assertContainsString(t, json, "app_version", "87.23.11")
+	assertContainsString(t, json, "aws_region", "us-west-02")
+	assertContainsString(t, json, "aws_account_id", "aws-account-123")
 }
 
 func Test_Log_DebugWithFields(t *testing.T) {
 
-	memBuffer := &bytes.Buffer{}
-	writer := NewWriter(func(conf *WriterConfig) {
-		conf.Output = memBuffer
-	})
-	logger := NewWitCustomWriter(rsFields, writer)
-
-	logger.Debug("detail_event", Fields{
+	logger := New(rsFields)
+	json := logger.Debug("detail_event", Fields{
 		"string":        "hello",
 		"int":           123,
 		"float":         42.48,
@@ -160,57 +149,45 @@ func Test_Log_DebugWithFields(t *testing.T) {
 		"string3 space": "world",
 	})
 
-	msg := memBuffer.String()
-	assertContainsString(t, msg, "event", "detail_event")
-	assertContainsString(t, msg, "severity", "DEBUG")
-	assertContainsString(t, msg, "string", "hello")
-	assertContainsInt(t, msg, "int", 123)
-	assertContainsFloat(t, msg, "float", 42.48)
-	assertContainsString(t, msg, "string2", "hello world")
-	assertContainsString(t, msg, "string3_space", "world")
-	assertContainsString(t, msg, "trace_id", "1-2-3")
-	assertContainsString(t, msg, "customer", "hooli")
-	assertContainsString(t, msg, "user", "UserAggregateID-123")
-	assertContainsString(t, msg, "product", "engagement")
-	assertContainsString(t, msg, "app", "murmur")
-	assertContainsString(t, msg, "app_version", "87.23.11")
-	assertContainsString(t, msg, "aws_region", "us-west-02")
-	assertContainsString(t, msg, "aws_account_id", "aws-account-123")
-	assertScopeContainsSubDoc(t, msg, "properties")
+	assertContainsString(t, json, "event", "detail_event")
+	assertContainsString(t, json, "severity", "DEBUG")
+	assertContainsString(t, json, "string", "hello")
+	assertContainsInt(t, json, "int", 123)
+	assertContainsFloat(t, json, "float", 42.48)
+	assertContainsString(t, json, "string2", "hello world")
+	assertContainsString(t, json, "string3_space", "world")
+	assertContainsString(t, json, "trace_id", "1-2-3")
+	assertContainsString(t, json, "customer", "hooli")
+	assertContainsString(t, json, "user", "UserAggregateID-123")
+	assertContainsString(t, json, "product", "engagement")
+	assertContainsString(t, json, "app", "murmur")
+	assertContainsString(t, json, "app_version", "87.23.11")
+	assertContainsString(t, json, "aws_region", "us-west-02")
+	assertContainsString(t, json, "aws_account_id", "aws-account-123")
+	assertScopeContainsSubDoc(t, json, "properties")
 }
 
 func Test_Log_Info(t *testing.T) {
 
-	memBuffer := &bytes.Buffer{}
-	writer := NewWriter(func(conf *WriterConfig) {
-		conf.Output = memBuffer
-	})
-	logger := NewWitCustomWriter(rsFields, writer)
+	logger := New(rsFields)
+	json := logger.Info("info_event")
 
-	logger.Info("info_event")
-
-	msg := memBuffer.String()
-	assertContainsString(t, msg, "event", "info_event")
-	assertContainsString(t, msg, "severity", "INFO")
-	assertContainsString(t, msg, "trace_id", "1-2-3")
-	assertContainsString(t, msg, "customer", "hooli")
-	assertContainsString(t, msg, "user", "UserAggregateID-123")
-	assertContainsString(t, msg, "product", "engagement")
-	assertContainsString(t, msg, "app", "murmur")
-	assertContainsString(t, msg, "app_version", "87.23.11")
-	assertContainsString(t, msg, "aws_region", "us-west-02")
-	assertContainsString(t, msg, "aws_account_id", "aws-account-123")
+	assertContainsString(t, json, "event", "info_event")
+	assertContainsString(t, json, "severity", "INFO")
+	assertContainsString(t, json, "trace_id", "1-2-3")
+	assertContainsString(t, json, "customer", "hooli")
+	assertContainsString(t, json, "user", "UserAggregateID-123")
+	assertContainsString(t, json, "product", "engagement")
+	assertContainsString(t, json, "app", "murmur")
+	assertContainsString(t, json, "app_version", "87.23.11")
+	assertContainsString(t, json, "aws_region", "us-west-02")
+	assertContainsString(t, json, "aws_account_id", "aws-account-123")
 }
 
 func Test_Log_InfoWithFields(t *testing.T) {
 
-	memBuffer := &bytes.Buffer{}
-	writer := NewWriter(func(conf *WriterConfig) {
-		conf.Output = memBuffer
-	})
-	logger := NewWitCustomWriter(rsFields, writer)
-
-	logger.Info("info_event", Fields{
+	logger := New(rsFields)
+	json := logger.Info("info_event", Fields{
 		"string":        "hello",
 		"int":           123,
 		"float":         42.48,
@@ -218,57 +195,45 @@ func Test_Log_InfoWithFields(t *testing.T) {
 		"string3 space": "world",
 	})
 
-	msg := memBuffer.String()
-	assertContainsString(t, msg, "event", "info_event")
-	assertContainsString(t, msg, "severity", "INFO")
-	assertContainsString(t, msg, "string", "hello")
-	assertContainsInt(t, msg, "int", 123)
-	assertContainsFloat(t, msg, "float", 42.48)
-	assertContainsString(t, msg, "string2", "hello world")
-	assertContainsString(t, msg, "string3_space", "world")
-	assertContainsString(t, msg, "trace_id", "1-2-3")
-	assertContainsString(t, msg, "customer", "hooli")
-	assertContainsString(t, msg, "user", "UserAggregateID-123")
-	assertContainsString(t, msg, "product", "engagement")
-	assertContainsString(t, msg, "app", "murmur")
-	assertContainsString(t, msg, "app_version", "87.23.11")
-	assertContainsString(t, msg, "aws_region", "us-west-02")
-	assertContainsString(t, msg, "aws_account_id", "aws-account-123")
-	assertScopeContainsSubDoc(t, msg, "properties")
+	assertContainsString(t, json, "event", "info_event")
+	assertContainsString(t, json, "severity", "INFO")
+	assertContainsString(t, json, "string", "hello")
+	assertContainsInt(t, json, "int", 123)
+	assertContainsFloat(t, json, "float", 42.48)
+	assertContainsString(t, json, "string2", "hello world")
+	assertContainsString(t, json, "string3_space", "world")
+	assertContainsString(t, json, "trace_id", "1-2-3")
+	assertContainsString(t, json, "customer", "hooli")
+	assertContainsString(t, json, "user", "UserAggregateID-123")
+	assertContainsString(t, json, "product", "engagement")
+	assertContainsString(t, json, "app", "murmur")
+	assertContainsString(t, json, "app_version", "87.23.11")
+	assertContainsString(t, json, "aws_region", "us-west-02")
+	assertContainsString(t, json, "aws_account_id", "aws-account-123")
+	assertScopeContainsSubDoc(t, json, "properties")
 }
 
 func Test_Log_Warn(t *testing.T) {
 
-	memBuffer := &bytes.Buffer{}
-	writer := NewWriter(func(conf *WriterConfig) {
-		conf.Output = memBuffer
-	})
-	logger := NewWitCustomWriter(rsFields, writer)
+	logger := New(rsFields)
+	json := logger.Warn("warn_event")
 
-	logger.Warn("warn_event")
-
-	msg := memBuffer.String()
-	assertContainsString(t, msg, "event", "warn_event")
-	assertContainsString(t, msg, "severity", "WARN")
-	assertContainsString(t, msg, "trace_id", "1-2-3")
-	assertContainsString(t, msg, "customer", "hooli")
-	assertContainsString(t, msg, "user", "UserAggregateID-123")
-	assertContainsString(t, msg, "product", "engagement")
-	assertContainsString(t, msg, "app", "murmur")
-	assertContainsString(t, msg, "app_version", "87.23.11")
-	assertContainsString(t, msg, "aws_region", "us-west-02")
-	assertContainsString(t, msg, "aws_account_id", "aws-account-123")
+	assertContainsString(t, json, "event", "warn_event")
+	assertContainsString(t, json, "severity", "WARN")
+	assertContainsString(t, json, "trace_id", "1-2-3")
+	assertContainsString(t, json, "customer", "hooli")
+	assertContainsString(t, json, "user", "UserAggregateID-123")
+	assertContainsString(t, json, "product", "engagement")
+	assertContainsString(t, json, "app", "murmur")
+	assertContainsString(t, json, "app_version", "87.23.11")
+	assertContainsString(t, json, "aws_region", "us-west-02")
+	assertContainsString(t, json, "aws_account_id", "aws-account-123")
 }
 
 func Test_Log_WarnWithFields(t *testing.T) {
 
-	memBuffer := &bytes.Buffer{}
-	writer := NewWriter(func(conf *WriterConfig) {
-		conf.Output = memBuffer
-	})
-	logger := NewWitCustomWriter(rsFields, writer)
-
-	logger.Warn("warn_event", Fields{
+	logger := New(rsFields)
+	json := logger.Warn("warn_event", Fields{
 		"string":        "hello",
 		"int":           123,
 		"float":         42.48,
@@ -276,36 +241,29 @@ func Test_Log_WarnWithFields(t *testing.T) {
 		"string3 space": "world",
 	})
 
-	msg := memBuffer.String()
-	assertContainsString(t, msg, "event", "warn_event")
-	assertContainsString(t, msg, "severity", "WARN")
-	assertContainsString(t, msg, "string", "hello")
-	assertContainsInt(t, msg, "int", 123)
-	assertContainsFloat(t, msg, "float", 42.48)
-	assertContainsString(t, msg, "string2", "hello world")
-	assertContainsString(t, msg, "string3_space", "world")
-	assertContainsString(t, msg, "trace_id", "1-2-3")
-	assertContainsString(t, msg, "customer", "hooli")
-	assertContainsString(t, msg, "user", "UserAggregateID-123")
-	assertContainsString(t, msg, "product", "engagement")
-	assertContainsString(t, msg, "app", "murmur")
-	assertContainsString(t, msg, "app_version", "87.23.11")
-	assertContainsString(t, msg, "aws_region", "us-west-02")
-	assertContainsString(t, msg, "aws_account_id", "aws-account-123")
-	assertScopeContainsSubDoc(t, msg, "properties")
+	assertContainsString(t, json, "event", "warn_event")
+	assertContainsString(t, json, "severity", "WARN")
+	assertContainsString(t, json, "string", "hello")
+	assertContainsInt(t, json, "int", 123)
+	assertContainsFloat(t, json, "float", 42.48)
+	assertContainsString(t, json, "string2", "hello world")
+	assertContainsString(t, json, "string3_space", "world")
+	assertContainsString(t, json, "trace_id", "1-2-3")
+	assertContainsString(t, json, "customer", "hooli")
+	assertContainsString(t, json, "user", "UserAggregateID-123")
+	assertContainsString(t, json, "product", "engagement")
+	assertContainsString(t, json, "app", "murmur")
+	assertContainsString(t, json, "app_version", "87.23.11")
+	assertContainsString(t, json, "aws_region", "us-west-02")
+	assertContainsString(t, json, "aws_account_id", "aws-account-123")
+	assertScopeContainsSubDoc(t, json, "properties")
 }
 
 func Test_Log_Error(t *testing.T) {
 
-	memBuffer := &bytes.Buffer{}
-	writer := NewWriter(func(conf *WriterConfig) {
-		conf.Output = memBuffer
-	})
-	logger := NewWitCustomWriter(rsFields, writer)
+	logger := New(rsFields)
+	msg := logger.Error("error event", errors.New("something went wrong"))
 
-	logger.Error("error event", errors.New("something went wrong"))
-
-	msg := memBuffer.String()
 	assertContainsString(t, msg, "event", "error_event")
 	assertContainsString(t, msg, "severity", "ERROR")
 	assertContainsString(t, msg, "trace_id", "1-2-3")
@@ -323,40 +281,28 @@ func Test_Log_Error(t *testing.T) {
 
 func Test_Log_Error_StackTrace(t *testing.T) {
 
-	memBuffer := &bytes.Buffer{}
-	writer := NewWriter(func(conf *WriterConfig) {
-		conf.Output = memBuffer
-	})
-	logger := NewWitCustomWriter(rsFields, writer)
+	logger := New(rsFields)
+	json := logger.Error("error event", gerrors.New("with correct stack trace"))
 
-	logger.Error("error event", gerrors.New("with correct stack trace"))
-
-	msg := memBuffer.String()
-	assertContainsString(t, msg, "event", "error_event")
-	assertContainsString(t, msg, "severity", "ERROR")
-	assertContainsString(t, msg, "trace_id", "1-2-3")
-	assertContainsString(t, msg, "customer", "hooli")
-	assertContainsString(t, msg, "user", "UserAggregateID-123")
-	assertContainsString(t, msg, "product", "engagement")
-	assertContainsString(t, msg, "app", "murmur")
-	assertContainsString(t, msg, "app_version", "87.23.11")
-	assertContainsString(t, msg, "aws_region", "us-west-02")
-	assertContainsString(t, msg, "aws_account_id", "aws-account-123")
-	assertScopeContainsSubDoc(t, msg, "exception")
-	assertContainsString(t, msg, "error", "with correct stack trace")
-	//fmt.Println(msg)
+	assertContainsString(t, json, "event", "error_event")
+	assertContainsString(t, json, "severity", "ERROR")
+	assertContainsString(t, json, "trace_id", "1-2-3")
+	assertContainsString(t, json, "customer", "hooli")
+	assertContainsString(t, json, "user", "UserAggregateID-123")
+	assertContainsString(t, json, "product", "engagement")
+	assertContainsString(t, json, "app", "murmur")
+	assertContainsString(t, json, "app_version", "87.23.11")
+	assertContainsString(t, json, "aws_region", "us-west-02")
+	assertContainsString(t, json, "aws_account_id", "aws-account-123")
+	assertScopeContainsSubDoc(t, json, "exception")
+	assertContainsString(t, json, "error", "with correct stack trace")
+	//fmt.Println(json)
 }
-
 
 func Test_Log_ErrorWithFields(t *testing.T) {
 
-	memBuffer := &bytes.Buffer{}
-	writer := NewWriter(func(conf *WriterConfig) {
-		conf.Output = memBuffer
-	})
-	logger := NewWitCustomWriter(rsFields, writer)
-
-	logger.Error("error event", errors.New("something went wrong"), Fields{
+	logger := New(rsFields)
+	json := logger.Error("error event", errors.New("something went wrong"), Fields{
 		"string":        "hello",
 		"int":           123,
 		"float":         42.48,
@@ -364,25 +310,24 @@ func Test_Log_ErrorWithFields(t *testing.T) {
 		"string3 space": "world",
 	})
 
-	msg := memBuffer.String()
-	assertContainsString(t, msg, "event", "error_event")
-	assertContainsString(t, msg, "severity", "ERROR")
-	assertContainsString(t, msg, "string", "hello")
-	assertContainsInt(t, msg, "int", 123)
-	assertContainsFloat(t, msg, "float", 42.48)
-	assertContainsString(t, msg, "string2", "hello world")
-	assertContainsString(t, msg, "string3_space", "world")
-	assertContainsString(t, msg, "trace_id", "1-2-3")
-	assertContainsString(t, msg, "customer", "hooli")
-	assertContainsString(t, msg, "user", "UserAggregateID-123")
-	assertContainsString(t, msg, "product", "engagement")
-	assertContainsString(t, msg, "app", "murmur")
-	assertContainsString(t, msg, "app_version", "87.23.11")
-	assertContainsString(t, msg, "aws_region", "us-west-02")
-	assertContainsString(t, msg, "aws_account_id", "aws-account-123")
-	assertScopeContainsSubDoc(t, msg, "properties")
-	assertScopeContainsSubDoc(t, msg, "exception")
-	assertContainsString(t, msg, "error", "something went wrong")
+	assertContainsString(t, json, "event", "error_event")
+	assertContainsString(t, json, "severity", "ERROR")
+	assertContainsString(t, json, "string", "hello")
+	assertContainsInt(t, json, "int", 123)
+	assertContainsFloat(t, json, "float", 42.48)
+	assertContainsString(t, json, "string2", "hello world")
+	assertContainsString(t, json, "string3_space", "world")
+	assertContainsString(t, json, "trace_id", "1-2-3")
+	assertContainsString(t, json, "customer", "hooli")
+	assertContainsString(t, json, "user", "UserAggregateID-123")
+	assertContainsString(t, json, "product", "engagement")
+	assertContainsString(t, json, "app", "murmur")
+	assertContainsString(t, json, "app_version", "87.23.11")
+	assertContainsString(t, json, "aws_region", "us-west-02")
+	assertContainsString(t, json, "aws_account_id", "aws-account-123")
+	assertScopeContainsSubDoc(t, json, "properties")
+	assertScopeContainsSubDoc(t, json, "exception")
+	assertContainsString(t, json, "error", "something went wrong")
 }
 
 func Test_Log_Fatal(t *testing.T) {
@@ -458,76 +403,67 @@ func Test_Log_FatalWithFields(t *testing.T) {
 func Test_Log_Namespace(t *testing.T) {
 
 	t1 := time.Now()
-	memBuffer := &bytes.Buffer{}
-	writer := NewWriter(func(conf *WriterConfig) {
-		conf.Output = memBuffer
-	})
-	logger := NewWitCustomWriter(rsFields, writer)
+	logger := New(rsFields)
 
 	time.Sleep(123 * time.Millisecond)
 	t2 := time.Now()
 	d := t2.Sub(t1)
 
-	logger.Error("error event", errors.New("something went wrong"), Fields{
+	json := logger.Error("error event", errors.New("something went wrong"), Fields{
 		"string": "hello",
 		"int":    123,
 		"float":  42.48,
 		"reports_shared": Fields{
-			"report":   "report1",
-			"user":     "userid",
-			TimeTaken: fmt.Sprintf("P%gS", d.Seconds()),
+			"report":    "report1",
+			"user":      "userid",
+			TimeTaken:   fmt.Sprintf("P%gS", d.Seconds()),
 			TimeTakenMS: d.Milliseconds(),
 		},
 	})
 
-	msg := memBuffer.String()
-	assertContainsString(t, msg, "report", "report1")
-	assertContainsString(t, msg, "user", "userid")
-	assertContainsString(t, msg, "trace_id", "1-2-3")
-	assertContainsString(t, msg, "customer", "hooli")
-	assertContainsString(t, msg, "user", "UserAggregateID-123")
-	assertContainsString(t, msg, "product", "engagement")
-	assertContainsString(t, msg, "app", "murmur")
-	assertContainsString(t, msg, "app_version", "87.23.11")
-	assertContainsString(t, msg, "aws_region", "us-west-02")
-	assertContainsString(t, msg, "aws_account_id", "aws-account-123")
+	assertContainsString(t, json, "report", "report1")
+	assertContainsString(t, json, "user", "userid")
+	assertContainsString(t, json, "trace_id", "1-2-3")
+	assertContainsString(t, json, "customer", "hooli")
+	assertContainsString(t, json, "user", "UserAggregateID-123")
+	assertContainsString(t, json, "product", "engagement")
+	assertContainsString(t, json, "app", "murmur")
+	assertContainsString(t, json, "app_version", "87.23.11")
+	assertContainsString(t, json, "aws_region", "us-west-02")
+	assertContainsString(t, json, "aws_account_id", "aws-account-123")
 
-	assertScopeContainsSubDoc(t, msg, "reports_shared")
-	assertScopeContainsSubDoc(t, msg, "properties")
+	assertScopeContainsSubDoc(t, json, "reports_shared")
+	assertScopeContainsSubDoc(t, json, "properties")
 }
 
-
 func TestScope(t *testing.T) {
+	logger := New(rsFields, Fields{
+		"requestID": 123,
+	})
+
+	json := logger.Debug("detail_event")
+	assertScopeContainsString(t, json, "event", "detail_event")
+	assertScopeContainsInt(t, json, "request_id", 123)
+
+	json = logger.Info("info_event")
+	assertScopeContainsString(t, json, "event", "info_event")
+	assertScopeContainsInt(t, json, "request_id", 123)
+
+	json = logger.Warn("warn_event")
+	assertScopeContainsString(t, json, "event", "warn_event")
+	assertScopeContainsInt(t, json, "request_id", 123)
+
+	json = logger.Error("error_event", errors.New("something went wrong"))
+	assertScopeContainsString(t, json, "event", "error_event")
+	assertScopeContainsInt(t, json, "request_id", 123)
+
 	memBuffer := &bytes.Buffer{}
 	writer := NewWriter(func(conf *WriterConfig) {
 		conf.Output = memBuffer
 	})
-	logger := NewWitCustomWriter(rsFields, writer, Fields{
+	logger = NewWitCustomWriter(rsFields, writer, Fields{
 		"requestID": 123,
 	})
-
-	logger.Debug("detail_event")
-	msg := memBuffer.String()
-	assertScopeContainsString(t, msg, "event", "detail_event")
-	assertScopeContainsInt(t, msg, "request_id", 123)
-
-	memBuffer.Reset()
-	logger.Info("info_event")
-	msg = memBuffer.String()
-	assertScopeContainsString(t, msg, "event", "info_event")
-	assertScopeContainsInt(t, msg, "request_id", 123)
-
-	memBuffer.Reset()
-	logger.Warn("warn_event")
-	msg = memBuffer.String()
-	assertScopeContainsString(t, msg, "event", "warn_event")
-	assertScopeContainsInt(t, msg, "request_id", 123)
-
-	memBuffer.Reset()
-	logger.Error("error_event", errors.New("something went wrong"))
-	msg = memBuffer.String()
-	assertScopeContainsString(t, msg, "event", "error_event")
-	assertScopeContainsInt(t, msg, "request_id", 123)
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -541,44 +477,42 @@ func TestScope(t *testing.T) {
 }
 
 func TestScope_Overwrite(t *testing.T) {
+
+	logger := New(rsFields, Fields{
+		"requestID": 123,
+	})
+
+	json := logger.Debug("detail_event", Fields{
+		"requestID": 456,
+	})
+	assertScopeContainsString(t, json, "event", "detail_event")
+	assertScopeContainsInt(t, json, "request_id", 456)
+
+	json = logger.Info("info_event", Fields{
+		"requestID": 456,
+	})
+	assertScopeContainsString(t, json, "event", "info_event")
+	assertScopeContainsInt(t, json, "request_id", 456)
+
+	json = logger.Warn("warn_event", Fields{
+		"requestID": 456,
+	})
+	assertScopeContainsString(t, json, "event", "warn_event")
+	assertScopeContainsInt(t, json, "request_id", 456)
+
+	json = logger.Error("error_event", errors.New("error"), Fields{
+		"requestID": 456,
+	})
+	assertScopeContainsString(t, json, "event", "error_event")
+	assertScopeContainsInt(t, json, "request_id", 456)
+
 	memBuffer := &bytes.Buffer{}
 	writer := NewWriter(func(conf *WriterConfig) {
 		conf.Output = memBuffer
 	})
-	logger := NewWitCustomWriter(rsFields, writer, Fields{
+	logger = NewWitCustomWriter(rsFields, writer, Fields{
 		"requestID": 123,
 	})
-
-	logger.Debug("detail_event", Fields {
-		"requestID": 456,
-	})
-	msg := memBuffer.String()
-	assertScopeContainsString(t, msg, "event", "detail_event")
-	assertScopeContainsInt(t, msg, "request_id", 456)
-
-	memBuffer.Reset()
-	logger.Info("info_event", Fields {
-		"requestID": 456,
-	})
-	msg = memBuffer.String()
-	assertScopeContainsString(t, msg, "event", "info_event")
-	assertScopeContainsInt(t, msg, "request_id", 456)
-
-	memBuffer.Reset()
-	logger.Warn("warn_event", Fields {
-		"requestID": 456,
-	})
-	msg = memBuffer.String()
-	assertScopeContainsString(t, msg, "event", "warn_event")
-	assertScopeContainsInt(t, msg, "request_id", 456)
-
-	memBuffer.Reset()
-	logger.Error("error_event", errors.New("error"), Fields {
-		"requestID": 456,
-	})
-	msg = memBuffer.String()
-	assertScopeContainsString(t, msg, "event", "error_event")
-	assertScopeContainsInt(t, msg, "request_id", 456)
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -590,7 +524,7 @@ func TestScope_Overwrite(t *testing.T) {
 	}()
 
 	// will call panic!
-	logger.Fatal("fatal_event", errors.New("fatal"), Fields {
+	logger.Fatal("fatal_event", errors.New("fatal"), Fields{
 		"request_id": 456,
 	})
 }
@@ -797,8 +731,6 @@ func Test_RealWorld_Combined(t *testing.T) {
 	})
 }
 
-
-
 func Test_RealWorld_Scope(t *testing.T) {
 
 	logger := New(rsFields, Fields{"scopeID": 123})
@@ -850,16 +782,12 @@ func Test_RealWorld_Scope(t *testing.T) {
 	})
 }
 
-func Test_RealWorld_Durations(t *testing.T) {
+func Test_Durations(t *testing.T) {
 
-	memBuffer := &bytes.Buffer{}
-	writer := NewWriter(func(conf *WriterConfig) {
-		conf.Output = memBuffer
-	})
-	logger := NewWitCustomWriter(rsFields, writer)
+	logger := New(rsFields)
 
 	d := time.Millisecond * 456
-	logger.Debug( "detail_event", Fields{
+	json := logger.Debug("detail_event", Fields{
 		"string":        "hello",
 		"int":           123,
 		"float":         42.48,
@@ -867,10 +795,9 @@ func Test_RealWorld_Durations(t *testing.T) {
 		"string3 space": "world",
 	}.Merge(NewDurationFields(d)))
 
-	msg := memBuffer.String()
-	assertContainsString(t, msg, "event", "detail_event")
-	assertContainsString(t, msg, "time_taken", "P0.456S")
-	assertContainsInt(t, msg, "time_taken_ms", 456)
+	assertContainsString(t, json, "event", "detail_event")
+	assertContainsString(t, json, "time_taken", "P0.456S")
+	assertContainsInt(t, json, "time_taken_ms", 456)
 }
 
 func BenchmarkLogging(b *testing.B) {

@@ -13,50 +13,50 @@ import (
 	"github.com/cultureamp/glamplify/log"
 )
 
-// writerConfig for setting initial values for Monitor Writer
-type writerConfig struct {
-	// license is your Data Dog API key.
-	//
-	// https://app.datadoghq.com/account/settings#api
-	apiKey string
-
-	// URL: https://http-intake.logs.datadoghq.com/v1/input  (default)
-	endpoint string
-
-	// timeout
-	timeout time.Duration
-
-	omitempty bool
+type DDWriter interface {
+	WriteFields(sev int, system log.Fields, fields ...log.Fields) string
+	WaitAll()
 }
 
-// FieldWriter sends logging output to Data Dog
-type FieldWriter struct {
-	mutex  sync.Mutex
-	config writerConfig
+// DDFieldWriter sends logging output to Data Dog
+type DDFieldWriter struct {
+	// ApiKey for Data Dog API key.
+	//
+	// https://app.datadoghq.com/account/settings#api
+	ApiKey string
+
+	// Endpoint URL: https://http-intake.logs.datadoghq.com/v1/input  (default)
+	Endpoint string
+
+	// Timeout on HTTP requests
+	Timeout time.Duration
+
+	// OmitEmpty will remove empty fields before sending
+	OmitEmpty bool
+
+	// Allows us to WaitAll if clients want to make sure all pending writes have been sent
+	waitGroup sync.WaitGroup
 }
 
 // NewDataDogWriter creates a new FieldWriter. The optional configure func lets you set values on the underlying  writer.
-func NewDataDogWriter(configure ...func(*writerConfig)) *FieldWriter { // https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
-	conf := writerConfig{
-		apiKey:    os.Getenv("DD_CLIENT_API_KEY"),
-		endpoint:  helper.GetEnvString("DATA_DOG_LOG_ENDPOINT", "https://http-intake.logs.datadoghq.com/v1/input"),
-		timeout:   time.Second * time.Duration(helper.GetEnvInt("DATA_DOG_TIMEOUT", 5)),
-		omitempty: helper.GetEnvBool(log.OmitEmpty, false),
+func NewDataDogWriter(configure ...func(*DDFieldWriter)) DDWriter { // https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
+	writer := &DDFieldWriter{
+		ApiKey:    os.Getenv("DD_CLIENT_API_KEY"),
+		Endpoint:  helper.GetEnvString("DD_LOG_ENDPOINT", "https://http-intake.logs.datadoghq.com/v1/input"),
+		Timeout:   time.Second * time.Duration(helper.GetEnvInt("DD_TIMEOUT", 5)),
+		OmitEmpty: helper.GetEnvBool(log.OmitEmpty, false),
+		waitGroup: sync.WaitGroup{},
 	}
 
 	for _, config := range configure {
-		config(&conf)
-	}
-
-	writer := &FieldWriter{
-		config: conf,
+		config(writer)
 	}
 
 	return writer
 }
 
 //WriteFields - writes fields to the Data Dog log endpoint
-func (writer *FieldWriter) WriteFields(sev int, system log.Fields, fields ...log.Fields) {
+func (writer *DDFieldWriter) WriteFields(sev int, system log.Fields, fields ...log.Fields) string {
 
 	merged := log.Fields{}
 	properties := merged.Merge(fields...)
@@ -64,24 +64,31 @@ func (writer *FieldWriter) WriteFields(sev int, system log.Fields, fields ...log
 		system[log.Properties] = properties
 	}
 
-	json := system.ToSnakeCase().ToJson(writer.config.omitempty)
+	json := system.ToSnakeCase().ToJson(writer.OmitEmpty)
 
-	go post(writer.config, json)
+	writer.waitGroup.Add(1)
+	go post(writer, json)
+	return json
 }
 
-func post(config writerConfig, jsonStr string) error {
+func (writer *DDFieldWriter) WaitAll() {
+	writer.waitGroup.Wait()
+}
+
+func post(writer *DDFieldWriter, jsonStr string) error {
+	defer writer.waitGroup.Done()
 
 	jsonBytes := []byte(jsonStr)
 
-	req, err := http.NewRequest("POST", config.endpoint, bytes.NewBuffer(jsonBytes))
+	req, err := http.NewRequest("POST", writer.Endpoint, bytes.NewBuffer(jsonBytes))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("DD-API-KEY", config.apiKey)
+	req.Header.Set("DD-API-KEY", writer.ApiKey)
 
 	var client = &http.Client{
-		Timeout: config.timeout,
+		Timeout: writer.Timeout,
 	}
 	resp, err := client.Do(req)
 	if err != nil {
