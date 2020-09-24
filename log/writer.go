@@ -26,7 +26,7 @@ type FieldWriter struct {
 }
 
 type Writer interface {
-	WriteFields(sev int, system Fields, fields ...Fields)
+	WriteFields(sev int, system Fields, fields ...Fields) string
 }
 
 // NewWriter creates a new FieldWriter. The optional configure func lets you set values on the underlying standard writer.
@@ -54,20 +54,21 @@ func NewWriter(configure ...func(*WriterConfig)) *FieldWriter { // https://dave.
 	return writer
 }
 
-func (writer *FieldWriter) WriteFields(sev int, system Fields, fields ...Fields) {
+func (writer *FieldWriter) WriteFields(sev int, system Fields, fields ...Fields) string {
 	merged := Fields{}
 	properties := merged.Merge(fields...)
 	if len(properties) > 0 {
 		system[Properties] = properties
 	}
-	str := system.ToSnakeCase().ToJson(writer.omitempty)
-	writer.write(sev, str)
+	json := system.ToSnakeCase().ToJson(writer.omitempty)
+	writer.write(sev, json)
+	return json
 }
 
-func (writer *FieldWriter) write(sev int, str string) {
+func (writer *FieldWriter) write(sev int, json string) {
 	// This can return an error, but we just swallow it here as what can we or a client really do? Try and log it? :)
 
-	str = writer.addNewLineIfMissing(str)
+	json = writer.addNewLineIfMissing(json)
 
 	writer.mutex.Lock()
 	defer writer.mutex.Unlock()
@@ -79,23 +80,23 @@ func (writer *FieldWriter) write(sev int, str string) {
 		color.SetOutput(writer.output)
 		switch sev {
 		case DebugLevel:
-			color.Debug.Println(str)
+			color.Debug.Println(json)
 		case InfoLevel:
-			color.Info.Println(str)
+			color.Info.Println(json)
 		case WarnLevel:
-			color.Warn.Println(str)
+			color.Warn.Println(json)
 		case ErrorLevel:
-			color.Error.Println(str)
+			color.Error.Println(json)
 		case FatalLevel:
-			color.Danger.Println(str)
+			color.Danger.Println(json)
 		default:
-			color.Print(str)
+			color.Print(json)
 		}
 	} else {
 		// Note: Making this faster is a good thing (while we are a sync writer - async writer is a different story)
 		// So we don't use the stdlib writer.Print(), but rather have our own optimized version
 		// Which does less, but is 3-10x faster
-		writer.output.Write([]byte(str))
+		writer.output.Write([]byte(json))
 	}
 }
 

@@ -14,7 +14,7 @@ import (
 )
 
 type DDWriter interface {
-	WriteFields(sev int, system log.Fields, fields ...log.Fields)
+	WriteFields(sev int, system log.Fields, fields ...log.Fields) string
 	WaitAll()
 }
 
@@ -34,19 +34,18 @@ type DDFieldWriter struct {
 	// Omitempty will remove empty fields before sending
 	Omitempty bool
 
-	// WaitGroup can optionally be to a valid wait group, and the writer will signal when it sends and completes
-	// so clients can
-	WaitGroup *sync.WaitGroup
+	// Allows us to WaitAll if clients want to make sure all pending writes have been sent
+	waitGroup sync.WaitGroup
 }
 
 // NewDataDogWriter creates a new FieldWriter. The optional configure func lets you set values on the underlying  writer.
 func NewDataDogWriter(configure ...func(*DDFieldWriter)) DDWriter { // https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
 	writer := &DDFieldWriter{
 		ApiKey:    os.Getenv("DD_CLIENT_API_KEY"),
-		Endpoint:  helper.GetEnvString("DATA_DOG_LOG_ENDPOINT", "https://http-intake.logs.datadoghq.com/v1/input"),
-		Timeout:   time.Second * time.Duration(helper.GetEnvInt("DATA_DOG_TIMEOUT", 5)),
+		Endpoint:  helper.GetEnvString("DD_LOG_ENDPOINT", "https://http-intake.logs.datadoghq.com/v1/input"),
+		Timeout:   time.Second * time.Duration(helper.GetEnvInt("DD_TIMEOUT", 5)),
 		Omitempty: helper.GetEnvBool(log.OmitEmpty, false),
-		WaitGroup: nil,
+		waitGroup: sync.WaitGroup{},
 	}
 
 	for _, config := range configure {
@@ -57,7 +56,7 @@ func NewDataDogWriter(configure ...func(*DDFieldWriter)) DDWriter { // https://d
 }
 
 //WriteFields - writes fields to the Data Dog log endpoint
-func (writer *DDFieldWriter) WriteFields(sev int, system log.Fields, fields ...log.Fields) {
+func (writer *DDFieldWriter) WriteFields(sev int, system log.Fields, fields ...log.Fields) string {
 
 	merged := log.Fields{}
 	properties := merged.Merge(fields...)
@@ -67,24 +66,17 @@ func (writer *DDFieldWriter) WriteFields(sev int, system log.Fields, fields ...l
 
 	json := system.ToSnakeCase().ToJson(writer.Omitempty)
 
-	if writer.WaitGroup != nil {
-		writer.WaitGroup.Add(1)
-	}
+	writer.waitGroup.Add(1)
 	go post(writer, json)
+	return json
 }
 
 func (writer *DDFieldWriter) WaitAll() {
-	if writer.WaitGroup != nil {
-		writer.WaitGroup.Wait()
-	} else {
-		time.Sleep(writer.Timeout)
-	}
+	writer.waitGroup.Wait()
 }
 
 func post(writer *DDFieldWriter, jsonStr string) error {
-	if writer.WaitGroup != nil {
-		defer writer.WaitGroup.Done()
-	}
+	defer writer.waitGroup.Done()
 
 	jsonBytes := []byte(jsonStr)
 

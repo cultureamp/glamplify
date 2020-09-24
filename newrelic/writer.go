@@ -14,7 +14,7 @@ import (
 )
 
 type NRWriter interface {
-	WriteFields(sev int, system log.Fields, fields ...log.Fields)
+	WriteFields(sev int, system log.Fields, fields ...log.Fields) string
 	WaitAll()
 }
 
@@ -36,9 +36,8 @@ type NRFieldWriter struct {
 	// Omitempty will remove empty fields before sending
 	Omitempty bool
 
-	// WaitGroup can optionally be to a valid wait group, and the writer will signal when it sends and completes
-	// so clients can
-	WaitGroup *sync.WaitGroup
+	// Allows us to WaitAll if clients want to make sure all pending writes have been sent
+	waitGroup sync.WaitGroup
 }
 
 // newWriter creates a new FieldWriter. The optional configure func lets you set values on the underlying standard writer.
@@ -51,7 +50,7 @@ func newWriter(configure ...func(*NRFieldWriter)) NRWriter {
 		Endpoint: helper.GetEnvString("NEW_RELIC_LOG_ENDPOINT", "https://log-api.newrelic.com/log/v1"),
 		Timeout:  time.Second * time.Duration(helper.GetEnvInt("NEW_RELIC_TIMEOUT", 5)),
 		Omitempty: helper.GetEnvBool(log.OmitEmpty, false),
-		WaitGroup: nil,
+		waitGroup: sync.WaitGroup{},
 	}
 
 	for _, config := range configure {
@@ -61,7 +60,7 @@ func newWriter(configure ...func(*NRFieldWriter)) NRWriter {
 	return writer
 }
 
-func (writer *NRFieldWriter) WriteFields(sev int, system log.Fields, fields ...log.Fields) {
+func (writer *NRFieldWriter) WriteFields(sev int, system log.Fields, fields ...log.Fields) string {
 	merged := log.Fields{}
 	properties := merged.Merge(fields...)
 	if len(properties) > 0 {
@@ -70,24 +69,17 @@ func (writer *NRFieldWriter) WriteFields(sev int, system log.Fields, fields ...l
 
 	json := system.ToSnakeCase().ToJson(writer.Omitempty)
 
-	if writer.WaitGroup != nil {
-		writer.WaitGroup.Add(1)
-	}
+	writer.waitGroup.Add(1)
 	go post(writer, json)
+	return json
 }
 
 func (writer *NRFieldWriter) WaitAll() {
-	if writer.WaitGroup != nil {
-		writer.WaitGroup.Wait()
-	} else {
-		time.Sleep(writer.Timeout)
-	}
+	writer.waitGroup.Wait()
 }
 
 func post(writer *NRFieldWriter, jsonStr string) error {
-	if writer.WaitGroup != nil {
-		defer writer.WaitGroup.Done()
-	}
+	defer writer.waitGroup.Done()
 
 	// https://docs.newrelic.com/docs/logs/new-relic-logs/log-api/introduction-log-api
 	jsonBytes := []byte(jsonStr)
