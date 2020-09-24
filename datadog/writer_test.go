@@ -40,3 +40,21 @@ func Test_DataDog_Writer(t *testing.T) {
 	assert.Assert(t, json != "", json)
 	assert.Assert(t, strings.Contains(json, "hello"), json)
 }
+
+func Test_DataDog_Writer_IsEnabled(t *testing.T) {
+
+	writer := NewDataDogWriter(func(config *DDFieldWriter) {
+		config.Level = log.ErrorSev
+	})
+
+	ok := writer.IsEnabled(log.DebugSev)
+	assert.Assert(t, !ok, ok)
+	ok = writer.IsEnabled(log.InfoSev)
+	assert.Assert(t, !ok, ok)
+	ok = writer.IsEnabled(log.WarnSev)
+	assert.Assert(t, !ok, ok)
+	ok = writer.IsEnabled(log.ErrorSev)
+	assert.Assert(t, ok, ok)
+	ok = writer.IsEnabled(log.FatalSev)
+	assert.Assert(t, ok, ok)
+}

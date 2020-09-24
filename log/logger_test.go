@@ -87,19 +87,16 @@ func Test_NewWithRequest(t *testing.T) {
 }
 
 func Test_Log_IsEnabled(t *testing.T) {
-	logger := NewFromCtx(ctx)
+	writer := NewWriter(func(config *WriterConfig) {
+		config.Level =  WarnSev
+	})
+	logger := NewFromCtxWithCustomerWriter(ctx, writer)
 	assert.Assert(t, logger != nil, logger)
 
-	assert.Assert(t, logger.IsEnabled(DebugSev), logger.IsEnabled(DebugSev))
-
-	os.Setenv("LOG_LEVEL", InfoSev)
-	defer os.Unsetenv("LOG_LEVEL")
-	sevLevel := newSystemLogLevel()
-
-	level := sevLevel.stringToLevel(DebugSev)
-	assert.Assert(t, !sevLevel.shouldLog(level), sevLevel.shouldLog(level))
-	level = sevLevel.stringToLevel(InfoSev)
-	assert.Assert(t, sevLevel.shouldLog(level), sevLevel.shouldLog(level))
+	assert.Assert(t, !logger.IsEnabled(DebugSev), logger.IsEnabled(DebugSev))
+	assert.Assert(t, !logger.IsEnabled(InfoSev), logger.IsEnabled(InfoSev))
+	assert.Assert(t, logger.IsEnabled(WarnSev), logger.IsEnabled(WarnSev))
+	assert.Assert(t, logger.IsEnabled(ErrorSev), logger.IsEnabled(ErrorSev))
 }
 
 func Test_Log_Global_Scope(t *testing.T) {

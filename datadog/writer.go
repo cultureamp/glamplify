@@ -14,12 +14,15 @@ import (
 )
 
 type DDWriter interface {
-	WriteFields(sev int, system log.Fields, fields ...log.Fields) string
+	WriteFields(sev string, system log.Fields, fields ...log.Fields) string
+	IsEnabled(sev string) bool
 	WaitAll()
 }
 
 // DDFieldWriter sends logging output to Data Dog
 type DDFieldWriter struct {
+	// PUBLIC
+
 	// ApiKey for Data Dog API key.
 	//
 	// https://app.datadoghq.com/account/settings#api
@@ -34,8 +37,16 @@ type DDFieldWriter struct {
 	// OmitEmpty will remove empty fields before sending
 	OmitEmpty bool
 
+	// Level we are logging, DEBUG, INFO, etc.
+	Level string
+
+	// PRIVATE
+
 	// Allows us to WaitAll if clients want to make sure all pending writes have been sent
 	waitGroup sync.WaitGroup
+	// converts to and from string <-> int
+	leveller *log.Leveller
+
 }
 
 // NewDataDogWriter creates a new FieldWriter. The optional configure func lets you set values on the underlying  writer.
@@ -45,7 +56,9 @@ func NewDataDogWriter(configure ...func(*DDFieldWriter)) DDWriter { // https://d
 		Endpoint:  helper.GetEnvString("DD_LOG_ENDPOINT", "https://http-intake.logs.datadoghq.com/v1/input"),
 		Timeout:   time.Second * time.Duration(helper.GetEnvInt("DD_TIMEOUT", 5)),
 		OmitEmpty: helper.GetEnvBool(log.OmitEmpty, false),
+		Level:     helper.GetEnvString(log.Level, log.DebugSev),
 		waitGroup: sync.WaitGroup{},
+		leveller:  log.NewLevelMap(),
 	}
 
 	for _, config := range configure {
@@ -56,7 +69,7 @@ func NewDataDogWriter(configure ...func(*DDFieldWriter)) DDWriter { // https://d
 }
 
 //WriteFields - writes fields to the Data Dog log endpoint
-func (writer *DDFieldWriter) WriteFields(sev int, system log.Fields, fields ...log.Fields) string {
+func (writer *DDFieldWriter) WriteFields(sev string, system log.Fields, fields ...log.Fields) string {
 
 	merged := log.Fields{}
 	properties := merged.Merge(fields...)
@@ -65,10 +78,18 @@ func (writer *DDFieldWriter) WriteFields(sev int, system log.Fields, fields ...l
 	}
 
 	json := system.ToSnakeCase().ToJson(writer.OmitEmpty)
-
-	writer.waitGroup.Add(1)
-	go post(writer, json)
+	if writer.IsEnabled(sev) {
+		writer.waitGroup.Add(1)
+		go post(writer, json)
+	}
 	return json
+}
+
+func (writer DDFieldWriter) IsEnabled(sev string) bool {
+	if writer.leveller.ShouldLogSeverity(writer.Level, sev) {
+		return true
+	}
+	return false
 }
 
 func (writer *DDFieldWriter) WaitAll() {
