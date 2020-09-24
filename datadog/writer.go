@@ -31,8 +31,8 @@ type DDFieldWriter struct {
 	// Timeout on HTTP requests
 	Timeout time.Duration
 
-	// Omitempty will remove empty fields before sending
-	Omitempty bool
+	// OmitEmpty will remove empty fields before sending
+	OmitEmpty bool
 
 	// Allows us to WaitAll if clients want to make sure all pending writes have been sent
 	waitGroup sync.WaitGroup
@@ -44,7 +44,7 @@ func NewDataDogWriter(configure ...func(*DDFieldWriter)) DDWriter { // https://d
 		ApiKey:    os.Getenv("DD_CLIENT_API_KEY"),
 		Endpoint:  helper.GetEnvString("DD_LOG_ENDPOINT", "https://http-intake.logs.datadoghq.com/v1/input"),
 		Timeout:   time.Second * time.Duration(helper.GetEnvInt("DD_TIMEOUT", 5)),
-		Omitempty: helper.GetEnvBool(log.OmitEmpty, false),
+		OmitEmpty: helper.GetEnvBool(log.OmitEmpty, false),
 		waitGroup: sync.WaitGroup{},
 	}
 
@@ -64,7 +64,7 @@ func (writer *DDFieldWriter) WriteFields(sev int, system log.Fields, fields ...l
 		system[log.Properties] = properties
 	}
 
-	json := system.ToSnakeCase().ToJson(writer.Omitempty)
+	json := system.ToSnakeCase().ToJson(writer.OmitEmpty)
 
 	writer.waitGroup.Add(1)
 	go post(writer, json)

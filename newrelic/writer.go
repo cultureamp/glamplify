@@ -33,8 +33,8 @@ type NRFieldWriter struct {
 	// Timeout on HTTP requests
 	Timeout time.Duration
 
-	// Omitempty will remove empty fields before sending
-	Omitempty bool
+	// OmitEmpty will remove empty fields before sending
+	OmitEmpty bool
 
 	// Allows us to WaitAll if clients want to make sure all pending writes have been sent
 	waitGroup sync.WaitGroup
@@ -46,10 +46,10 @@ type NRFieldWriter struct {
 func newWriter(configure ...func(*NRFieldWriter)) NRWriter {
 	// https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
 	writer := &NRFieldWriter{
-		License:  os.Getenv("NEW_RELIC_LICENSE_KEY"),
-		Endpoint: helper.GetEnvString("NEW_RELIC_LOG_ENDPOINT", "https://log-api.newrelic.com/log/v1"),
-		Timeout:  time.Second * time.Duration(helper.GetEnvInt("NEW_RELIC_TIMEOUT", 5)),
-		Omitempty: helper.GetEnvBool(log.OmitEmpty, false),
+		License:   os.Getenv("NEW_RELIC_LICENSE_KEY"),
+		Endpoint:  helper.GetEnvString("NEW_RELIC_LOG_ENDPOINT", "https://log-api.newrelic.com/log/v1"),
+		Timeout:   time.Second * time.Duration(helper.GetEnvInt("NEW_RELIC_TIMEOUT", 5)),
+		OmitEmpty: helper.GetEnvBool(log.OmitEmpty, false),
 		waitGroup: sync.WaitGroup{},
 	}
 
@@ -67,7 +67,7 @@ func (writer *NRFieldWriter) WriteFields(sev int, system log.Fields, fields ...l
 		system[log.Properties] = properties
 	}
 
-	json := system.ToSnakeCase().ToJson(writer.Omitempty)
+	json := system.ToSnakeCase().ToJson(writer.OmitEmpty)
 
 	writer.waitGroup.Add(1)
 	go post(writer, json)
