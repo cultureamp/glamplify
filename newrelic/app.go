@@ -47,7 +47,7 @@ type Config struct {
 	ServerlessMode bool
 
 	// coreLogger logger
-	logger *monitorLogger
+	logger *agentLogger
 }
 
 // Application is a wrapper over the underlying implementation
@@ -91,7 +91,7 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 	if conf.Logging {
 		//cfg.Logger = newrelic.NewDebugLogger(os.Stdout) <- this writes JSON to Stdout :(
 		// So we have our own implementation that wraps our standard logger
-		conf.logger = newMonitorLogger(ctx)
+		conf.logger = newAgentLogger(ctx)
 		cfg.Logger = conf.logger
 
 		cfg.Logger.Debug("configuration", log.Fields{

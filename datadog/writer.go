@@ -52,9 +52,9 @@ type DDFieldWriter struct {
 // NewDataDogWriter creates a new FieldWriter. The optional configure func lets you set values on the underlying  writer.
 func NewDataDogWriter(configure ...func(*DDFieldWriter)) DDWriter { // https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
 	writer := &DDFieldWriter{
-		ApiKey:    os.Getenv("DD_CLIENT_API_KEY"),
-		Endpoint:  helper.GetEnvString("DD_LOG_ENDPOINT", "https://http-intake.logs.datadoghq.com/v1/input"),
-		Timeout:   time.Second * time.Duration(helper.GetEnvInt("DD_TIMEOUT", 5)),
+		ApiKey:    os.Getenv(DDApiKey),
+		Endpoint:  helper.GetEnvString(DDLogEndpoint, "https://http-intake.logs.datadoghq.com/v1/input"),
+		Timeout:   time.Second * time.Duration(helper.GetEnvInt(DDTimeout, 5)),
 		OmitEmpty: helper.GetEnvBool(log.OmitEmpty, false),
 		Level:     helper.GetEnvString(log.Level, log.DebugSev),
 		waitGroup: sync.WaitGroup{},
