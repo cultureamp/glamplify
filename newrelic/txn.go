@@ -14,7 +14,7 @@ type Transaction struct {
 	app     *Application
 	name    string
 	logging bool
-	logger  *monitorLogger
+	logger  *agentLogger
 }
 
 // GetApplication gets the Application from the current Transaction

@@ -14,7 +14,7 @@ import (
 
 func Test_DataDog_Writer(t *testing.T) {
 
-	if key := os.Getenv("DD_CLIENT_API_KEY"); key == "" {
+	if key := os.Getenv(DDApiKey); key == "" {
 		t.Skip("no data dog api key set")
 	}
 
