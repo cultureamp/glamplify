@@ -2,12 +2,11 @@ package datadog
 
 import (
 	"context"
-	"os"
-
 	ddlambda "github.com/DataDog/datadog-lambda-go"
 	"github.com/cultureamp/glamplify/helper"
 	"github.com/cultureamp/glamplify/log"
 	ddtracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	"os"
 )
 
 // Tags are key value pairs used to roll up applications into specific categories
@@ -21,6 +20,7 @@ type Config struct {
 	// servers and spawn goroutines.  Setting this to be false is useful in
 	// testing and staging situations.
 	Enabled bool
+	Name    string
 
 	Logging            bool
 	ApiKey             string
@@ -49,7 +49,7 @@ type Application struct {
 }
 
 // NewApplication creates a new Application - you should only create 1 Application per process
-func NewApplication(ctx context.Context, name string, configure ...func(*Config)) (*Application, *Application) {
+func NewApplication(ctx context.Context, name string, configure ...func(*Config)) *Application {
 
 	// https://docs.datadoghq.com/tracing/setup/go/
 	// https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/?tab=kubernetes
@@ -57,6 +57,7 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 
 	conf := Config{
 		Enabled:            false,
+		Name:               name,
 		Logging:            false,
 		ApiKey:             os.Getenv(DDApiKey),
 		AppName:            helper.GetEnvString(DDService, os.Getenv(log.AppNameEnv)),
@@ -79,7 +80,7 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 	}
 
 	if !conf.Enabled {
-		return app, nil
+		return app
 	}
 
 	if !conf.ServerlessMode {
@@ -109,7 +110,15 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 		ddtracer.Start(options...)
 	}
 
-	return app, nil
+	return app
+}
+
+// Shutdown flushes any remaining data to the SAAS endpoint
+func (app Application) Shutdown() {
+
+	if !app.conf.ServerlessMode {
+		ddtracer.Stop()
+	}
 }
 
 func (app Application) WrapLambdaHandler(handler interface{}) interface{} {
@@ -126,10 +135,11 @@ func (app Application) WrapLambdaHandler(handler interface{}) interface{} {
 	return ddlambda.WrapHandler(handler, c)
 }
 
-// Shutdown flushes any remaining data to the SAAS endpoint
-func (app Application) Shutdown() {
-
-	if !app.conf.ServerlessMode {
-		ddtracer.Stop()
-	}
+func (app Application) RecordLambdaMetric(metricName string, metricValue float64, fields log.Fields) {
+	tags := fields.ToTags(true)
+	ddlambda.Metric(
+		metricName,
+		metricValue,
+		tags...,
+	)
 }

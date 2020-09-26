@@ -10,13 +10,12 @@ import (
 
 func Test_DataDog_Application(t *testing.T) {
 	ctx := context.Background()
-	app, err := datadog.NewApplication(ctx, "Glamplify-Unit-Tests", func(conf *datadog.Config) {
+	app := datadog.NewApplication(ctx, "Glamplify-Unit-Tests", func(conf *datadog.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.ServerlessMode = false
 	})
 
-	assert.Assert(t, err == nil, err)
 	assert.Assert(t, app != nil, "application was nil")
 
 	app.Shutdown()

@@ -65,6 +65,28 @@ func (fields Fields) ToJson(omitempty bool) string {
 	return string(bytes)
 }
 
+func (fields Fields) ToTags(omitempty bool) []string {
+	var tags []string
+	for k, v := range fields {
+
+		switch f := v.(type) {
+		case Fields:
+			t := f.ToTags(omitempty)
+			tags = append(tags, t...)
+
+		case string:
+			if v != "" {
+				tags = append(tags, k+":"+fmt.Sprintf("%v", v))
+			}
+
+		default:
+			tags = append(tags, k+":"+fmt.Sprintf("%v", v))
+		}
+	}
+
+	return tags
+}
+
 func (fields Fields) filterNonSerializableValues() Fields {
 	filtered := Fields{}
 	for k, v := range fields {
