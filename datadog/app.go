@@ -2,11 +2,14 @@ package datadog
 
 import (
 	"context"
+	"io/ioutil"
+	stdlog "log"
+	"os"
+
 	ddlambda "github.com/DataDog/datadog-lambda-go"
 	"github.com/cultureamp/glamplify/helper"
 	"github.com/cultureamp/glamplify/log"
 	ddtracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
-	"os"
 )
 
 // Tags are key value pairs used to roll up applications into specific categories
@@ -122,13 +125,17 @@ func (app Application) Shutdown() {
 func (app Application) WrapLambdaHandler(handler interface{}) interface{} {
 	if app.conf.Enabled {
 		c := &ddlambda.Config{
-			APIKey:       app.conf.ApiKey,
-			DebugLogging: app.conf.Logging,
-			Site:         app.conf.MetricSite,
-
-			// TODO support other config values?
+			APIKey:                app.conf.ApiKey,
+			DebugLogging:          app.conf.Logging,
+			Site:                  app.conf.MetricSite,
+			EnhancedMetrics:       true,
 			ShouldRetryOnFailure:  false,
 			ShouldUseLogForwarder: true,
+		}
+
+		if !app.conf.Logging {
+			// data dog lambda library uses the standard logger, so if we don't want logging, write it all to dev/null
+			stdlog.SetOutput(ioutil.Discard)
 		}
 
 		return ddlambda.WrapHandler(handler, c)
