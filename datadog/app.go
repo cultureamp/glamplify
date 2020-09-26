@@ -50,7 +50,6 @@ type Application struct {
 
 // NewApplication creates a new Application - you should only create 1 Application per process
 func NewApplication(ctx context.Context, name string, configure ...func(*Config)) *Application {
-
 	// https://docs.datadoghq.com/tracing/setup/go/
 	// https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/?tab=kubernetes
 	// We highly recommend using DDEnv, DDService, and DDVersion to set env, service, and version for your services.
@@ -115,31 +114,36 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 
 // Shutdown flushes any remaining data to the SAAS endpoint
 func (app Application) Shutdown() {
-
-	if !app.conf.ServerlessMode {
+	if app.conf.Enabled && !app.conf.ServerlessMode {
 		ddtracer.Stop()
 	}
 }
 
 func (app Application) WrapLambdaHandler(handler interface{}) interface{} {
-	c := &ddlambda.Config{
-		APIKey:       app.conf.ApiKey,
-		DebugLogging: app.conf.Logging,
-		Site:         app.conf.MetricSite,
+	if app.conf.Enabled {
+		c := &ddlambda.Config{
+			APIKey:       app.conf.ApiKey,
+			DebugLogging: app.conf.Logging,
+			Site:         app.conf.MetricSite,
 
-		// TODO support other config values?
-		ShouldRetryOnFailure:  false,
-		ShouldUseLogForwarder: true,
+			// TODO support other config values?
+			ShouldRetryOnFailure:  false,
+			ShouldUseLogForwarder: true,
+		}
+
+		return ddlambda.WrapHandler(handler, c)
 	}
 
-	return ddlambda.WrapHandler(handler, c)
+	return handler
 }
 
 func (app Application) RecordLambdaMetric(metricName string, metricValue float64, fields log.Fields) {
-	tags := fields.ToTags(true)
-	ddlambda.Metric(
-		metricName,
-		metricValue,
-		tags...,
-	)
+	if app.conf.Enabled {
+		tags := fields.ToTags(true)
+		ddlambda.Metric(
+			metricName,
+			metricValue,
+			tags...,
+		)
+	}
 }
