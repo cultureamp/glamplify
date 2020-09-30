@@ -2,8 +2,6 @@ package datadog
 
 import (
 	"context"
-	"io/ioutil"
-	stdlog "log"
 	"os"
 
 	ddlambda "github.com/DataDog/datadog-lambda-go"
@@ -131,11 +129,6 @@ func (app Application) WrapLambdaHandler(handler interface{}) interface{} {
 			EnhancedMetrics:       true,
 			ShouldRetryOnFailure:  false,
 			ShouldUseLogForwarder: true,
-		}
-
-		if !app.conf.Logging {
-			// data dog lambda library uses the standard logger, so if we don't want logging, write it all to dev/null
-			stdlog.SetOutput(ioutil.Discard)
 		}
 
 		return ddlambda.WrapHandler(handler, c)
