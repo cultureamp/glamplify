@@ -99,7 +99,7 @@ func (app Application) Flush(timeout time.Duration) {
 	}
 }
 
-// Adds a Bugsnag when used as middleware
+// Adds Sentry as a middleware
 func (app *Application) Middleware(next http.Handler) http.Handler {
 	if !app.conf.Enabled {
 		return next

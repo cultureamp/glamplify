@@ -17,6 +17,7 @@ func TestSentry_Error_Success(t *testing.T) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.AppVersion = "1.0.0"
+		conf.DSN = "https://177fbd4b35304a80aeaef835f938de69@o19604.ingest.sentry.io/5447011"
 	})
 	assert.Assert(t, err == nil, err)
 
@@ -33,6 +34,7 @@ func TestSentry_Context_Success(t *testing.T) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.AppVersion = "1.0.0"
+		conf.DSN = "https://177fbd4b35304a80aeaef835f938de69@o19604.ingest.sentry.io/5447011"
 	})
 	assert.Assert(t, err == nil, err)
 

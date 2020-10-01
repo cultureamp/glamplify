@@ -3,14 +3,14 @@ package main
 import (
 	"context"
 	"errors"
+	"github.com/cultureamp/glamplify/datadog"
+	"github.com/cultureamp/glamplify/sentry"
 	"net/http"
 	"net/http/httptest"
 	"os"
 
 	"github.com/cultureamp/glamplify/aws"
-	"github.com/cultureamp/glamplify/bugsnag"
 	gcontext "github.com/cultureamp/glamplify/context"
-	ghttp "github.com/cultureamp/glamplify/http"
 	"github.com/cultureamp/glamplify/jwt"
 	"github.com/cultureamp/glamplify/log"
 	"github.com/cultureamp/glamplify/newrelic"
@@ -43,39 +43,30 @@ func main() {
 	// or if you want a field to be present on each subsequent logging call do this:
 	logger = log.New(transactionFields, log.Fields{"request_id": 123})
 
-	/* Monitor & Notify */
-	app, appErr := newrelic.NewApplication(ctx, "GlamplifyUnitTests", func(conf *newrelic.Config) {
+	/* DataDog */
+	datadogApp := datadog.NewApplication(ctx, "GlamplifyUnitTests", func(conf *datadog.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.ServerlessMode = false
-		conf.Labels = newrelic.Labels{
-			"asset":          log.Unknown,
-			"classification": "restricted",
-			"workload":       "development",
-			"camp":           "amplify",
-		}
 	})
-	if appErr != nil {
-		logger.Fatal("monitoring_failed", appErr)
-	}
 
-	notifier, notifyErr := bugsnag.NewApplication(ctx, "GlamplifyUnitTests", func(conf *bugsnag.Config) {
+	sentryApp, sentryErr := sentry.NewApplication(ctx, "GlamplifyUnitTests", func(conf *sentry.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.AppVersion = "1.0.0"
 	})
-	if notifyErr != nil {
-		logger.Fatal("notification_failed", notifyErr)
+	if sentryErr != nil {
+		logger.Fatal("sentry_failed", sentryErr)
 	}
 
-	pattern, handler := ghttp.WrapHTTPHandlerWithNewrelicAndBusgnag(app, notifier, "/", rootRequestHandler)
-	h := xrayTracer.SegmentHandler("MyApp", http.HandlerFunc(handler))
+	h := xrayTracer.SegmentHandler("MyApp", sentryApp.Middleware(datadogApp.WrapHandler("MyApp", rootRequestHandler)))
 
 	rr := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", pattern, nil)
+	req, _ := http.NewRequest("GET", "/", nil)
 	h.ServeHTTP(rr, req)
 
-	app.Shutdown()
+	datadogApp.Shutdown()
+	sentryApp.Shutdown()
 }
 
 func rootRequestHandler(w http.ResponseWriter, r *http.Request) {

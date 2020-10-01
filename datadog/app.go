@@ -2,11 +2,13 @@ package datadog
 
 import (
 	"context"
+	"net/http"
 	"os"
 
 	ddlambda "github.com/DataDog/datadog-lambda-go"
 	"github.com/cultureamp/glamplify/helper"
 	"github.com/cultureamp/glamplify/log"
+	ddhttp "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
 	ddtracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
@@ -111,6 +113,15 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 	}
 
 	return app
+}
+
+func (app Application) WrapHandler(resource string, handler http.HandlerFunc) http.Handler {
+	if !app.conf.Enabled {
+		return handler
+	}
+
+	var options []ddhttp.Option
+	return ddhttp.WrapHandler(handler, app.conf.AppName, resource, options...)
 }
 
 // Shutdown flushes any remaining data to the SAAS endpoint
