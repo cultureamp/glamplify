@@ -3,10 +3,10 @@ module github.com/cultureamp/glamplify
 go 1.14
 
 require (
-	github.com/DataDog/datadog-go v4.0.0+incompatible // indirect
+	github.com/DataDog/datadog-go v4.0.1+incompatible // indirect
 	github.com/DataDog/datadog-lambda-go v0.7.0
 	github.com/aws/aws-lambda-go v1.19.1
-	github.com/aws/aws-sdk-go v1.34.16
+	github.com/aws/aws-sdk-go v1.34.34
 	github.com/aws/aws-xray-sdk-go v1.1.0
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
@@ -27,7 +27,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect
 	golang.org/x/sys v0.0.0-20200824131525-c12d262b63d8 // indirect
-	golang.org/x/text v0.3.3 // indirect
+	golang.org/x/text v0.3.4 // indirect
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e // indirect
 	gopkg.in/DataDog/dd-trace-go.v1 v1.26.0
 	gotest.tools v2.2.0+incompatible
