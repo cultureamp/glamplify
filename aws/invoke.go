@@ -74,7 +74,7 @@ func createInvokeRequest(input Input) (*messages.InvokeRequest, error) {
 	Deadline := input.Deadline
 
 	if Deadline == nil {
-		t := time.Now()
+		t := time.Now().Add(5 * time.Second)
 		Deadline = &messages.InvokeRequest_Timestamp{
 			Seconds: t.Unix(),
 			Nanos:   int64(t.Nanosecond()),
