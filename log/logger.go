@@ -152,6 +152,21 @@ func (logger Logger) Fatal(event string, err error, fields ...Fields) {
 	panic(event)
 }
 
+// Audit writes a write message with optional types to the underlying standard writer.
+// The unified logging system can then filter these to produce an audit log of events.
+// Use snake_case keys and lower case values if possible.
+func Audit(rsFields gcontext.RequestScopedFields, event string, fields ...Fields) string {
+	return defaultLogger.write(rsFields, event, nil, AuditSev, fields...)
+}
+
+// Audit writes a write message with optional types to the underlying standard writer.
+// The unified logging system can then filter these to produce an audit log of events.
+// Use snake_case keys and lower case values if possible.
+func (logger Logger) Audit(event string, fields ...Fields) string {
+	return logger.write(logger.rsFields, event, nil, AuditSev, fields...)
+}
+
+
 // Event method uses expressive syntax format: logger.Event("event_name").Fields(fields...).Info("message")
 func (logger Logger) Event(event string) *Segment {
 

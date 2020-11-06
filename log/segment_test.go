@@ -48,6 +48,24 @@ func Test_Segment_Info(t *testing.T) {
 	assertContainsInt(t, msg, "int", 123)
 }
 
+func Test_Segment_Audit(t *testing.T) {
+
+	memBuffer, logger := getTestLogger()
+
+	properties := log.Fields{
+		"string": "hello world",
+		"int":    123,
+	}
+	logger.Event("something_happened").Fields(properties).Audit("not sure what is going on!")
+
+	msg := memBuffer.String()
+	assertContainsString(t, msg, "event", "something_happened")
+	assertContainsString(t, msg, "severity", "AUDIT")
+	assertContainsString(t, msg, "message", "not sure what is going on!")
+	assertContainsString(t, msg, "string", "hello world")
+	assertContainsInt(t, msg, "int", 123)
+}
+
 func Test_Segment_Warn(t *testing.T) {
 
 	memBuffer, logger := getTestLogger()

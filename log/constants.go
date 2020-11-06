@@ -42,6 +42,7 @@ const (
 	WarnSev  = "WARN"
 	ErrorSev = "ERROR"
 	FatalSev = "FATAL"
+	AuditSev = "AUDIT"
 
 	// ENVIRONMENT VARIABLES
 	Level            = "LOG_LEVEL"

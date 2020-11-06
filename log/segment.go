@@ -60,4 +60,13 @@ func (segment *Segment) Fatal(err error) {
 	)
 }
 
+func (segment *Segment) Audit(message string) {
+
+	segment.fields[Message] = message
+
+	segment.logger.Audit(
+		segment.event,
+		segment.fields,
+	)
+}
 

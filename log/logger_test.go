@@ -397,6 +397,52 @@ func Test_Log_FatalWithFields(t *testing.T) {
 	})
 }
 
+func Test_Log_Audit(t *testing.T) {
+
+	logger := New(rsFields)
+	json := logger.Audit("audit_event")
+
+	assertContainsString(t, json, "event", "audit_event")
+	assertContainsString(t, json, "severity", "AUDIT")
+	assertContainsString(t, json, "trace_id", "1-2-3")
+	assertContainsString(t, json, "customer", "hooli")
+	assertContainsString(t, json, "user", "UserAggregateID-123")
+	assertContainsString(t, json, "product", "engagement")
+	assertContainsString(t, json, "app", "murmur")
+	assertContainsString(t, json, "app_version", "87.23.11")
+	assertContainsString(t, json, "aws_region", "us-west-02")
+	assertContainsString(t, json, "aws_account_id", "aws-account-123")
+}
+
+func Test_Log_AuditWithFields(t *testing.T) {
+
+	logger := New(rsFields)
+	json := logger.Audit("audit_event", Fields{
+		"string":        "hello",
+		"int":           123,
+		"float":         42.48,
+		"string2":       "hello world",
+		"string3 space": "world",
+	})
+
+	assertContainsString(t, json, "event", "audit_event")
+	assertContainsString(t, json, "severity", "AUDIT")
+	assertContainsString(t, json, "string", "hello")
+	assertContainsInt(t, json, "int", 123)
+	assertContainsFloat(t, json, "float", 42.48)
+	assertContainsString(t, json, "string2", "hello world")
+	assertContainsString(t, json, "string3_space", "world")
+	assertContainsString(t, json, "trace_id", "1-2-3")
+	assertContainsString(t, json, "customer", "hooli")
+	assertContainsString(t, json, "user", "UserAggregateID-123")
+	assertContainsString(t, json, "product", "engagement")
+	assertContainsString(t, json, "app", "murmur")
+	assertContainsString(t, json, "app_version", "87.23.11")
+	assertContainsString(t, json, "aws_region", "us-west-02")
+	assertContainsString(t, json, "aws_account_id", "aws-account-123")
+	assertScopeContainsSubDoc(t, json, "properties")
+}
+
 func Test_Log_Namespace(t *testing.T) {
 
 	t1 := time.Now()
@@ -454,6 +500,10 @@ func TestScope(t *testing.T) {
 	assertScopeContainsString(t, json, "event", "error_event")
 	assertScopeContainsInt(t, json, "request_id", 123)
 
+	json = logger.Audit("audit_event")
+	assertScopeContainsString(t, json, "event", "audit_event")
+	assertScopeContainsInt(t, json, "request_id", 123)
+
 	memBuffer := &bytes.Buffer{}
 	writer := NewWriter(func(conf *WriterConfig) {
 		conf.Output = memBuffer
@@ -501,6 +551,12 @@ func TestScope_Overwrite(t *testing.T) {
 		"requestID": 456,
 	})
 	assertScopeContainsString(t, json, "event", "error_event")
+	assertScopeContainsInt(t, json, "request_id", 456)
+
+	json = logger.Audit("audit_event", Fields{
+		"requestID": 456,
+	})
+	assertScopeContainsString(t, json, "event", "audit_event")
 	assertScopeContainsInt(t, json, "request_id", 456)
 
 	memBuffer := &bytes.Buffer{}
@@ -568,6 +624,20 @@ func Test_RealWorld(t *testing.T) {
 		"string3 space": "world",
 	})
 	Warn(rsFields, "info_event", Fields{
+		"string":        "hello",
+		"int":           123,
+		"float":         42.48,
+		"string2":       "hello world",
+		"string3 space": "world",
+	})
+	logger.Audit("audit_event", Fields{
+		"string":        "hello",
+		"int":           123,
+		"float":         42.48,
+		"string2":       "hello world",
+		"string3 space": "world",
+	})
+	Audit(rsFields, "audit_event", Fields{
 		"string":        "hello",
 		"int":           123,
 		"float":         42.48,
@@ -678,6 +748,25 @@ func Test_RealWorld_Combined(t *testing.T) {
 		"float2":  78.98,
 	})
 
+	logger.Audit("audit_event", Fields{
+		"string1": "hello",
+		"int1":    123,
+		"float1":  42.48,
+	}, Fields{
+		"string2": "world",
+		"int2":    456,
+		"float2":  78.98,
+	})
+	Audit(rsFields, "audit_event", Fields{
+		"string1": "hello",
+		"int1":    123,
+		"float1":  42.48,
+	}, Fields{
+		"string2": "world",
+		"int2":    456,
+		"float2":  78.98,
+	})
+
 	logger.Error("error_event", errors.New("error"), Fields{
 		"string1": "hello",
 		"int1":    123,
@@ -750,6 +839,14 @@ func Test_RealWorld_Scope(t *testing.T) {
 	})
 
 	logger.Warn("info_event", Fields{
+		"string":        "hello",
+		"int":           123,
+		"float":         42.48,
+		"string2":       "hello world",
+		"string3 space": "world",
+	})
+
+	logger.Audit("audit_event", Fields{
 		"string":        "hello",
 		"int":           123,
 		"float":         42.48,

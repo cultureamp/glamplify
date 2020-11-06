@@ -110,6 +110,8 @@ func (writer *FieldWriter) write(sev string, json string) {
 			color.Error.Println(json)
 		case FatalLevel:
 			color.Danger.Println(json)
+		case AuditLevel:
+			color.Notice.Println(json)
 		default:
 			color.Print(json)
 		}

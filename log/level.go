@@ -11,6 +11,7 @@ const (
 	WarnLevel
 	ErrorLevel
 	FatalLevel
+	AuditLevel
 )
 
 func NewLevelMap() *Leveller {
@@ -21,6 +22,7 @@ func NewLevelMap() *Leveller {
 		WarnSev:  WarnLevel,
 		ErrorSev: ErrorLevel,
 		FatalSev: FatalLevel,
+		AuditSev: AuditLevel,
 	}
 
 	return &Leveller{

@@ -70,6 +70,8 @@ func Test_WriteFields_IsEnabled(t *testing.T) {
 	assert.Assert(t, ok, ok)
 	ok = writer.IsEnabled(FatalSev)
 	assert.Assert(t, ok, ok)
+	ok = writer.IsEnabled(AuditSev)
+	assert.Assert(t, ok, ok)
 }
 
 func assertStringContains(t *testing.T, log string, key string, val string) {
