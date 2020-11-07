@@ -11,35 +11,35 @@ import (
 	"golang.org/x/net/context"
 )
 
-type HttpClient interface {
+type HttpCommunicator interface {
 	Post(url, contentType string, body io.Reader) (resp *http.Response, err error)
 }
 
-type OPAHttpClient struct {}
+type HttpClient struct {}
 
-func NewOPAHttpClient() HttpClient {
-	return &OPAHttpClient{}
+func NewOPAHttpClient() HttpCommunicator {
+	return &HttpClient{}
 }
 
-func (client OPAHttpClient) Post(url, contentType string, body io.Reader) (resp *http.Response, err error) {
+func (client HttpClient) Post(url, contentType string, body io.Reader) (resp *http.Response, err error) {
 	return http.Post(url, contentType, body)
 }
 
-type OPAClient struct {
+type Client struct {
 	authzAPIEndpoint string
-	http             HttpClient
+	http             HttpCommunicator
 	cache            *cache.Cache
 }
 
-func NewOPAClient(authzAPIEndpoint string, http HttpClient) *OPAClient {
-	return &OPAClient{
+func NewClient(authzAPIEndpoint string, http HttpCommunicator) *Client {
+	return &Client{
 		authzAPIEndpoint: authzAPIEndpoint,
 		http:             http,
 		cache:            cache.New(1*time.Minute, 1*time.Minute), // TODO pass args and/or read from ENV
 	}
 }
 
-func (client OPAClient) EvaluateBooleanPolicy(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (*EvaluationResponse, error) {
+func (client Client) EvaluateBooleanPolicy(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (*EvaluationResponse, error) {
 
 	if item, found := client.cache.Get(policy); found {
 		result, ok := item.(*EvaluationResponse)
@@ -57,7 +57,7 @@ func (client OPAClient) EvaluateBooleanPolicy(ctx context.Context, policy string
 	return result, nil
 }
 
-func (client OPAClient) evaluateBooleanPolicy(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (*EvaluationResponse, error) {
+func (client Client) evaluateBooleanPolicy(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (*EvaluationResponse, error) {
 	postBody, err := client.createRequestPostBody(ctx, policy, identity, input)
 
 	response, err := client.http.Post(client.authzAPIEndpoint, "application/json", bytes.NewBuffer([]byte(postBody)))
@@ -73,7 +73,7 @@ func (client OPAClient) evaluateBooleanPolicy(ctx context.Context, policy string
 	return &policyResponse.Result[0], nil
 }
 
-func (client OPAClient) createRequestPostBody(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (string, error) {
+func (client Client) createRequestPostBody(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (string, error) {
 	data := PolicyEvalRequest{}
 	policyRequest := PolicyRequest{
 		Policy: policy,
@@ -92,7 +92,7 @@ func (client OPAClient) createRequestPostBody(ctx context.Context, policy string
 	return postBody, nil
 }
 
-func (client OPAClient) readResponse(ctx context.Context, response *http.Response) (*PolicyResponse, error) {
+func (client Client) readResponse(ctx context.Context, response *http.Response) (*PolicyResponse, error) {
 
 	bodyBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {

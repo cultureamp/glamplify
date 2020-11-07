@@ -13,13 +13,13 @@ import (
 )
 
 func Test_OPAClient_New(t *testing.T) {
-	client := NewOPAClient("dummy", mockHttpClient{})
+	client := NewClient("dummy", mockHttpClient{})
 	assert.Assert(t, client != nil, client)
 }
 
 func Test_OPAClient_Throw_Error(t *testing.T) {
 	ctx := context.Background()
-	client := NewOPAClient("dummy", mockHttpClient{throwError: true})
+	client := NewClient("dummy", mockHttpClient{throwError: true})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
 	assert.Assert(t, err != nil, err)
@@ -28,7 +28,7 @@ func Test_OPAClient_Throw_Error(t *testing.T) {
 
 func Test_OPAClient_Return_Empty(t *testing.T) {
 	ctx := context.Background()
-	client := NewOPAClient("dummy", mockHttpClient{returnEmpty: true})
+	client := NewClient("dummy", mockHttpClient{returnEmpty: true})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
 	assert.Assert(t, err != nil, err)
@@ -37,7 +37,7 @@ func Test_OPAClient_Return_Empty(t *testing.T) {
 
 func Test_OPAClient_Return_Bad_JSON(t *testing.T) {
 	ctx := context.Background()
-	client := NewOPAClient("dummy", mockHttpClient{returnBadJson: true})
+	client := NewClient("dummy", mockHttpClient{returnBadJson: true})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
 	assert.Assert(t, err != nil, err)
@@ -46,7 +46,7 @@ func Test_OPAClient_Return_Bad_JSON(t *testing.T) {
 
 func Test_OPAClient_Return_Not_Allowed(t *testing.T) {
 	ctx := context.Background()
-	client := NewOPAClient("dummy", mockHttpClient{returnNotAllowed: true})
+	client := NewClient("dummy", mockHttpClient{returnNotAllowed: true})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
 	assert.Assert(t, err == nil, err)
@@ -56,7 +56,7 @@ func Test_OPAClient_Return_Not_Allowed(t *testing.T) {
 
 func Test_OPAClient_Return_Allowed(t *testing.T) {
 	ctx := context.Background()
-	client := NewOPAClient("dummy", mockHttpClient{})
+	client := NewClient("dummy", mockHttpClient{})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
 	assert.Assert(t, err == nil, err)
