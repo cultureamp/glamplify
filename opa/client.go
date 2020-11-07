@@ -11,27 +11,27 @@ import (
 	"golang.org/x/net/context"
 )
 
-type HttpCommunicator interface {
+type Transport interface {
 	Post(url, contentType string, body io.Reader) (resp *http.Response, err error)
 }
 
-type HttpClient struct {}
+type HttpTransport struct {}
 
-func NewOPAHttpClient() HttpCommunicator {
-	return &HttpClient{}
+func NewOPAHttpClient() Transport {
+	return &HttpTransport{}
 }
 
-func (client HttpClient) Post(url, contentType string, body io.Reader) (resp *http.Response, err error) {
+func (client HttpTransport) Post(url, contentType string, body io.Reader) (resp *http.Response, err error) {
 	return http.Post(url, contentType, body)
 }
 
 type Client struct {
 	authzAPIEndpoint string
-	http             HttpCommunicator
+	http             Transport
 	cache            *cache.Cache
 }
 
-func NewClient(authzAPIEndpoint string, http HttpCommunicator) *Client {
+func NewClient(authzAPIEndpoint string, http Transport) *Client {
 	return &Client{
 		authzAPIEndpoint: authzAPIEndpoint,
 		http:             http,
