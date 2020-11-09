@@ -1,19 +1,38 @@
 package cache
 
 import (
+	"github.com/cultureamp/glamplify/helper"
 	cachego "github.com/patrickmn/go-cache"
 	"time"
 )
 
+type Config struct {
+	CacheDuration time.Duration
+}
+
 type Cache struct {
+	conf Config
 	cache *cachego.Cache
 }
 
-func New() *Cache {
-	c := cachego.New(5*time.Minute, 1*time.Minute)
+func New(configure ...func(*Config)) *Cache {
+
+	c := helper.GetEnvInt(CacheDurationEnv, 60)
+	cacheDuration := time.Duration(c) * time.Second
+
+	conf := Config{
+		CacheDuration:  cacheDuration,
+	}
+
+	for _, config := range configure {
+		config(&conf)
+	}
+
+	cache := cachego.New(conf.CacheDuration, conf.CacheDuration)
 
 	return &Cache {
-		cache: c,
+		conf: conf,
+		cache: cache,
 	}
 }
 

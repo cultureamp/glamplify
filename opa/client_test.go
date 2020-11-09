@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	"gotest.tools/assert"
 )
@@ -23,6 +24,16 @@ func Test_OPAClient_Throw_Error(t *testing.T) {
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
 	assert.Assert(t, err != nil, err)
+	assert.Assert(t, response == nil, response)
+}
+
+func Test_OPAClient_Sleep(t *testing.T) {
+	ctx := context.Background()
+	client := NewClient("dummy", mockHttpClient{sleep: true})
+
+	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
+	assert.Assert(t, err != nil, err)
+	assert.Assert(t, err.Error() == "context deadline exceeded")
 	assert.Assert(t, response == nil, response)
 }
 
@@ -65,15 +76,21 @@ func Test_OPAClient_Return_Allowed(t *testing.T) {
 }
 
 type mockHttpClient struct {
-	throwError    bool
-	returnEmpty   bool
-	returnBadJson bool
+	throwError       bool
+	sleep            bool
+	returnEmpty      bool
+	returnBadJson    bool
 	returnNotAllowed bool
 }
 
-func (client mockHttpClient) Post(url, contentType string, body io.Reader) (resp *http.Response, err error) {
+func (client mockHttpClient) Post(ctx context.Context, url string, contentType string, body io.Reader) (resp *http.Response, err error) {
 	if client.throwError {
 		return nil, errors.New("internal server error")
+	}
+
+	if client.sleep {
+		time.Sleep(500 * time.Millisecond)
+		return nil, ctx.Err()
 	}
 
 	if client.returnEmpty {

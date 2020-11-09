@@ -7,35 +7,65 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/cultureamp/glamplify/helper"
 	"github.com/patrickmn/go-cache"
+	cachecontrol "github.com/pquerna/cachecontrol/cacheobject"
 	"golang.org/x/net/context"
 )
 
 type Transport interface {
-	Post(url, contentType string, body io.Reader) (resp *http.Response, err error)
+	Post(ctx context.Context, url string, contentType string, body io.Reader) (resp *http.Response, err error)
 }
 
-type HttpTransport struct {}
+type HttpTransport struct{}
 
-func NewOPAHttpClient() Transport {
+func NewHttpClient() Transport {
 	return &HttpTransport{}
 }
 
-func (client HttpTransport) Post(url, contentType string, body io.Reader) (resp *http.Response, err error) {
-	return http.Post(url, contentType, body)
+func (client HttpTransport) Post(ctx context.Context, url string, contentType string, body io.Reader) (resp *http.Response, err error) {
+	req, err := http.NewRequestWithContext(ctx, "POST", url, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", contentType)
+	return http.DefaultClient.Do(req)
+}
+
+type Config struct {
+	Timeout       time.Duration
+	CacheDuration time.Duration
 }
 
 type Client struct {
+	config           Config
 	authzAPIEndpoint string
 	http             Transport
 	cache            *cache.Cache
 }
 
-func NewClient(authzAPIEndpoint string, http Transport) *Client {
+func NewClient(authzAPIEndpoint string, http Transport, configure ...func(*Config)) *Client {
+
+	c := helper.GetEnvInt(CacheDurationEnv, 60)
+	cacheDuration := time.Duration(c) * time.Second
+
+	t := helper.GetEnvInt(ClientTimeoutEnv, 200)
+	timeOutDuration := time.Duration(t) * time.Millisecond
+
+	conf := Config{
+		Timeout: timeOutDuration,
+		CacheDuration:  cacheDuration,
+	}
+
+	for _, config := range configure {
+		config(&conf)
+	}
+
 	return &Client{
+		config:           conf,
 		authzAPIEndpoint: authzAPIEndpoint,
 		http:             http,
-		cache:            cache.New(1*time.Minute, 1*time.Minute), // TODO pass args and/or read from ENV
+		cache:            cache.New(conf.CacheDuration, conf.CacheDuration*5),
 	}
 }
 
@@ -48,29 +78,49 @@ func (client Client) EvaluateBooleanPolicy(ctx context.Context, policy string, i
 		}
 	}
 
-	result, err := client.evaluateBooleanPolicy(ctx, policy, identity, input)
+	response, result, err := client.evaluateBooleanPolicy(ctx, policy, identity, input)
 	if err != nil {
 		return nil, err // if there is a compile error, etc. assume the kill switch is OFF
 	}
 
-	client.cache.Set(policy, result, cache.DefaultExpiration)  // todo should be Cache-Control header value
+	controlDirective, err := client.ParseResponseCacheControl(ctx, response)
+	if err == nil && controlDirective.MaxAge > 0 {
+		cacheExpiry := time.Duration(controlDirective.MaxAge) * time.Second
+		client.cache.Set(policy, result, cacheExpiry)
+	}
+
 	return result, nil
 }
 
-func (client Client) evaluateBooleanPolicy(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (*EvaluationResponse, error) {
-	postBody, err := client.createRequestPostBody(ctx, policy, identity, input)
+func (client Client) ParseResponseCacheControl(ctx context.Context, response *http.Response) (*cachecontrol.ResponseCacheDirectives, error) {
+	if response == nil || response.Header == nil {
+		return nil, nil
+	}
 
-	response, err := client.http.Post(client.authzAPIEndpoint, "application/json", bytes.NewBuffer([]byte(postBody)))
+	controlDirective, err := cachecontrol.ParseResponseCacheControl(response.Header.Get("Cache-Control"))
 	if err != nil {
 		return nil, err
+	}
+
+	return controlDirective, nil
+}
+
+func (client Client) evaluateBooleanPolicy(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (*http.Response, *EvaluationResponse, error) {
+	postBody, err := client.createRequestPostBody(ctx, policy, identity, input)
+
+	httpctx, _ := context.WithTimeout(context.Background(), client.config.Timeout)
+
+	response, err := client.http.Post(httpctx, client.authzAPIEndpoint, "application/json", bytes.NewBuffer([]byte(postBody)))
+	if err != nil {
+		return response, nil, err
 	}
 
 	policyResponse, err := client.readResponse(ctx, response)
 	if err != nil {
-		return nil, err
+		return response, nil, err
 	}
 
-	return &policyResponse.Result[0], nil
+	return response, &policyResponse.Result[0], nil
 }
 
 func (client Client) createRequestPostBody(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (string, error) {
@@ -79,7 +129,7 @@ func (client Client) createRequestPostBody(ctx context.Context, policy string, i
 		Policy: policy,
 		Context: ContextRequest{
 			Identity: identity,
-			Input: input,
+			Input:    input,
 		},
 	}
 	data.Policies = append(data.Policies, policyRequest)
