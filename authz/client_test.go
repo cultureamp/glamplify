@@ -1,4 +1,4 @@
-package opa
+package authz
 
 import (
 	"context"
@@ -20,7 +20,9 @@ func Test_OPAClient_New(t *testing.T) {
 
 func Test_OPAClient_Throw_Error(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHttpClient{throwError: true})
+	client := NewClient("dummy", mockHttpClient{throwError: true},  func(config *Config) {
+		config.Timeout = 100 * time.Millisecond
+	})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
 	assert.Assert(t, err != nil, err)
@@ -29,7 +31,9 @@ func Test_OPAClient_Throw_Error(t *testing.T) {
 
 func Test_OPAClient_Sleep(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHttpClient{sleep: true})
+	client := NewClient("dummy", mockHttpClient{sleep: true}, func(config *Config) {
+		config.Timeout = 100 * time.Millisecond
+	})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
 	assert.Assert(t, err != nil, err)
@@ -39,7 +43,9 @@ func Test_OPAClient_Sleep(t *testing.T) {
 
 func Test_OPAClient_Return_Empty(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHttpClient{returnEmpty: true})
+	client := NewClient("dummy", mockHttpClient{returnEmpty: true}, func(config *Config) {
+		config.Timeout = 100 * time.Millisecond
+	})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
 	assert.Assert(t, err != nil, err)
@@ -48,7 +54,9 @@ func Test_OPAClient_Return_Empty(t *testing.T) {
 
 func Test_OPAClient_Return_Bad_JSON(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHttpClient{returnBadJson: true})
+	client := NewClient("dummy", mockHttpClient{returnBadJson: true},  func(config *Config) {
+		config.Timeout = 100 * time.Millisecond
+	})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
 	assert.Assert(t, err != nil, err)
@@ -57,7 +65,9 @@ func Test_OPAClient_Return_Bad_JSON(t *testing.T) {
 
 func Test_OPAClient_Return_Not_Allowed(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHttpClient{returnNotAllowed: true})
+	client := NewClient("dummy", mockHttpClient{returnNotAllowed: true},  func(config *Config) {
+		config.Timeout = 100 * time.Millisecond
+	})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
 	assert.Assert(t, err == nil, err)
@@ -67,7 +77,9 @@ func Test_OPAClient_Return_Not_Allowed(t *testing.T) {
 
 func Test_OPAClient_Return_Allowed(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHttpClient{})
+	client := NewClient("dummy", mockHttpClient{},  func(config *Config) {
+		config.Timeout = 100 * time.Millisecond
+	})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
 	assert.Assert(t, err == nil, err)

@@ -1,4 +1,4 @@
-package opa
+package authz
 
 import "encoding/json"
 
@@ -10,6 +10,7 @@ type EvaluationResponse struct {
 	Policy string `json:"policy"`
 	Allow bool `json:"allow"`
 	Status string `json:"status"`
+	StatusCode int `json:"statusCode"`
 }
 
 type PolicyResponseParser struct {

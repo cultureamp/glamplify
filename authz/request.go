@@ -1,4 +1,4 @@
-package opa
+package authz
 
 import "encoding/json"
 

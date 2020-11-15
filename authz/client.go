@@ -1,7 +1,8 @@
-package opa
+package authz
 
 import (
 	"bytes"
+	"github.com/go-errors/errors"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -29,7 +30,7 @@ func NewClient(authzAPIEndpoint string, http Transport, configure ...func(*Confi
 	c := helper.GetEnvInt(CacheDurationEnv, 60)
 	cacheDuration := time.Duration(c) * time.Second
 
-	t := helper.GetEnvInt(ClientTimeoutEnv, 200)
+	t := helper.GetEnvInt(ClientTimeoutEnv, 10000) // 1- secs
 	timeOutDuration := time.Duration(t) * time.Millisecond
 
 	conf := Config{
@@ -124,6 +125,9 @@ func (client Client) createRequestPostBody(ctx context.Context, policy string, i
 
 func (client Client) readResponse(ctx context.Context, response *http.Response) (*PolicyResponse, error) {
 
+	if response == nil {
+		return nil, errors.New("response is nil")
+	}
 	bodyBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
