@@ -26,7 +26,6 @@ type stackTracer interface {
 
 // SystemValues
 type SystemValues struct {
-
 }
 
 func DurationAsISO8601(duration time.Duration) string {
@@ -44,6 +43,7 @@ func (df SystemValues) getSystemValues(rsFields gcontext.RequestScopedFields, pr
 		Resource: df.hostName(),
 		Os:       df.targetOS(),
 		Severity: severity,
+		Loc:      df.getLocation(4),
 	}
 
 	fields = df.getMandatoryFields(rsFields, fields, properties)
@@ -60,14 +60,14 @@ func (df SystemValues) getErrorValues(err error, fields Fields) Fields {
 	debug.ReadGCStats(stats)
 
 	fields[Exception] = Fields{
-		"error":    errorMessage,
-		"trace":    stack,
+		"error": errorMessage,
+		"trace": stack,
 		"gc_stats": Fields{
-			"last_gc": stats.LastGC,
-			"num_gc": stats.NumGC,
-			"pause_total": stats.PauseTotal,
-			"pause_history": stats.Pause,
-			"pause_end": stats.PauseEnd,
+			"last_gc":        stats.LastGC,
+			"num_gc":         stats.NumGC,
+			"pause_total":    stats.PauseTotal,
+			"pause_history":  stats.Pause,
+			"pause_end":      stats.PauseEnd,
 			"page_quantiles": stats.PauseQuantiles,
 		},
 	}
@@ -105,7 +105,6 @@ func (df SystemValues) getStackTracer(ews stackTracer) string {
 	return string(buf.Bytes())
 }
 
-
 func (df SystemValues) getCurrentStack(skip int) string {
 	stack := make([]uintptr, gerrors.MaxStackDepth)
 	length := runtime.Callers(skip, stack[:])
@@ -120,13 +119,12 @@ func (df SystemValues) getCurrentStack(skip int) string {
 	return string(buf.Bytes())
 }
 
-
 func (df SystemValues) getEnvFields(fields Fields, properties Fields) Fields {
 
 	fields = df.addEnvFieldIfMissing(Product, ProductEnv, fields, properties)
 	fields = df.addEnvFieldIfMissing(App, AppNameEnv, fields, properties)
 	fields = df.addEnvFieldIfMissing(Farm, AppFarmEnv, fields, properties)
-	fields = df.addEnvFieldIfMissing(Farm, AppFarmLegacyEnv, fields, properties)	// spec changed, delete this after a while: 14/09/2020 Mike
+	fields = df.addEnvFieldIfMissing(Farm, AppFarmLegacyEnv, fields, properties) // spec changed, delete this after a while: 14/09/2020 Mike
 	fields = df.addEnvFieldIfMissing(AppVer, AppVerEnv, fields, properties)
 	fields = df.addEnvFieldIfMissing(AwsRegion, AwsRegionEnv, fields, properties)
 	fields = df.addEnvFieldIfMissing(AwsAccountID, AwsAccountIDEnv, fields, properties)
@@ -186,6 +184,17 @@ func (df SystemValues) timeNow(format string) string {
 	return time.Now().UTC().Format(format)
 }
 
+func (df SystemValues) getLocation(caller int) string {
+	pc, file, line, ok := runtime.Caller(caller)
+	if !ok {
+		return "unknown:0:unknown"
+	}
+
+	fn := runtime.FuncForPC(pc)
+	methodName := fn.Name()
+	return fmt.Sprintf("%s:%d:%s", file, line, methodName)
+}
+
 var host string
 var hostOnce sync.Once
 
@@ -205,4 +214,3 @@ func (df SystemValues) hostName() string {
 func (df SystemValues) targetOS() string {
 	return runtime.GOOS
 }
-

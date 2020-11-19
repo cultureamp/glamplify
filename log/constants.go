@@ -23,6 +23,7 @@ const (
 	AwsAccountID        = "aws_account_id"
 	Resource            = "resource"
 	Os                  = "os"
+	Loc                 = "loc"
 	Customer            = "customer"
 	User                = "user"
 	Exception           = "exception"

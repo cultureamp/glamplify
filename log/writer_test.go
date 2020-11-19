@@ -85,3 +85,4 @@ func assertKeyMissing(t *testing.T, log string, key string) {
 	find := fmt.Sprintf("\"%s\"", key)
 	assert.Assert(t, !strings.Contains(log, find), "Expected '%s' in '%s'", find, log)
 }
+
