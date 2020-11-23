@@ -75,6 +75,12 @@ func Test_Set_Unset_Bit(t *testing.T) {
 	bit, err = bb.getBit(0)
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, !bit, bit)
+
+	// out of range
+	err = bb.setBit(1024)
+	assert.Assert(t, err != nil, err)
+	err = bb.unsetBit(1024)
+	assert.Assert(t, err != nil, err)
 }
 
 func Test_Fill_Clear(t *testing.T) {
@@ -94,7 +100,8 @@ func Test_Fill_Clear(t *testing.T) {
 		assert.Assert(t, !bit, bit)
 	}
 
-	bb.fill(63)
+	err := bb.fill(63)
+	assert.Assert(t, err == nil, err)
 	bit, err := bb.getBit(62)
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, bit, bit)
@@ -102,7 +109,8 @@ func Test_Fill_Clear(t *testing.T) {
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, !bit, bit)
 
-	bb.fill(65)
+	err = bb.fill(65)
+	assert.Assert(t, err == nil, err)
 	bit, err = bb.getBit(64)
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, bit, bit)
@@ -110,7 +118,8 @@ func Test_Fill_Clear(t *testing.T) {
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, !bit, bit)
 
-	bb.fill(1021)
+	err = bb.fill(1021)
+	assert.Assert(t, err == nil, err)
 	bit, err = bb.getBit(1020)
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, bit, bit)
@@ -124,7 +133,8 @@ func Test_Fill_Clear(t *testing.T) {
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, !bit, bit)
 
-	bb.clear(35)
+	err = bb.clear(35)
+	assert.Assert(t, err == nil, err)
 	bit, err = bb.getBit(34)
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, !bit, bit)
@@ -134,6 +144,12 @@ func Test_Fill_Clear(t *testing.T) {
 	bit, err = bb.getBit(36)
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, bit, bit)
+
+	// out of range
+	err = bb.fill(1025)
+	assert.Assert(t, err != nil, err)
+	err = bb.clear(1025)
+	assert.Assert(t, err != nil, err)
 }
 
 func Test_And_AndCount(t *testing.T) {
@@ -302,6 +318,46 @@ func Test_Count(t *testing.T) {
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, count==3, count)
 
+	count, err = bb.count(1025)
+	assert.Assert(t, err != nil, err)
+}
+
+func Test_Clone(t *testing.T) {
+
+	bb := newBitBlock()
+
+	bb.setBit(0)
+	bb.setBit(1)
+	bb.setBit(2)
+	bb.setBit(1021)
+	bb.setBit(1022)
+	bb.setBit(1023)
+
+	clone := bb.clone()
+	count := clone.countAll()
+	assert.Assert(t, count==6, count)
+
+	bit, err := bb.getBit(0)
+	assert.Assert(t, err == nil, err)
+	assert.Assert(t, bit, bit)
+	bit, err = bb.getBit(1)
+	assert.Assert(t, err == nil, err)
+	assert.Assert(t, bit, bit)
+	bit, err = bb.getBit(2)
+	assert.Assert(t, err == nil, err)
+	assert.Assert(t, bit, bit)
+	bit, err = bb.getBit(1021)
+	assert.Assert(t, err == nil, err)
+	assert.Assert(t, bit, bit)
+	bit, err = bb.getBit(1022)
+	assert.Assert(t, err == nil, err)
+	assert.Assert(t, bit, bit)
+	bit, err = bb.getBit(1023)
+	assert.Assert(t, err == nil, err)
+	assert.Assert(t, bit, bit)
+	bit, err = bb.getBit(56)
+	assert.Assert(t, err == nil, err)
+	assert.Assert(t, !bit, bit)
 }
 
 func Benchmark_And(b *testing.B) {
