@@ -185,7 +185,8 @@ func (bb *bitBLock) getBit(index int) (bool, error) {
 	i := index / BitsPerLong
 	bits := bb.bits[i]
 	bit := index % BitsPerLong
-	mask := Long(1) << (BitsPerLong - Long(1) - Long(bit))
+	shift := BitsPerLong - Long(1) - Long(bit)
+	mask := Long(1) << shift
 
 	return (bits & mask) != 0, nil
 }
@@ -197,7 +198,8 @@ func (bb *bitBLock) setBit(index int) error {
 
 	i := index / BitsPerLong
 	bit := index % BitsPerLong
-	mask := Long(1) << (BitsPerLong - Long(1) - Long(bit))
+	shift := BitsPerLong - Long(1) - Long(bit)
+	mask := Long(1) << shift
 
 	bb.bits[i] |= mask
 	return nil
