@@ -322,44 +322,6 @@ func Test_Count(t *testing.T) {
 	assert.Assert(t, err != nil, err)
 }
 
-func Test_Clone(t *testing.T) {
-
-	bb := newBitBlock()
-
-	bb.setBit(0)
-	bb.setBit(1)
-	bb.setBit(2)
-	bb.setBit(1021)
-	bb.setBit(1022)
-	bb.setBit(1023)
-
-	clone := bb.clone()
-	count := clone.countAll()
-	assert.Assert(t, count==6, count)
-
-	bit, err := bb.getBit(0)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
-	bit, err = bb.getBit(1)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
-	bit, err = bb.getBit(2)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
-	bit, err = bb.getBit(1021)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
-	bit, err = bb.getBit(1022)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
-	bit, err = bb.getBit(1023)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
-	bit, err = bb.getBit(56)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
-}
-
 func Benchmark_And(b *testing.B) {
 
 	lhs := newBitBlock()

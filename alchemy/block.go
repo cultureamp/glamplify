@@ -13,22 +13,22 @@ const (
 	AllOnesBitPattern = Long(18446744073709551615)
 )
 
-type bitBLock struct {
+type bitBlock struct {
 	bits [LongsPerBlock]Long
 }
 
-func newBitBlock() *bitBLock {
-	return &bitBLock{
+func newBitBlock() *bitBlock {
+	return &bitBlock{
 	}
 }
 
-func newBitBlockWithBits(bits [LongsPerBlock]Long) *bitBLock {
-	return &bitBLock{
+func newBitBlockWithBits(bits [LongsPerBlock]Long) *bitBlock {
+	return &bitBlock{
 		bits: bits,
 	}
 }
 
-func (bb *bitBLock) and(rhs *bitBLock) *bitBLock {
+func (bb bitBlock) and(rhs *bitBlock) *bitBlock {
 	var result [LongsPerBlock]Long
 
 	for i := 0; i < LongsPerBlock; i++ {
@@ -38,7 +38,7 @@ func (bb *bitBLock) and(rhs *bitBLock) *bitBLock {
 	return newBitBlockWithBits(result)
 }
 
-func (bb *bitBLock) or(rhs *bitBLock) *bitBLock {
+func (bb bitBlock) or(rhs *bitBlock) *bitBlock {
 	var result [LongsPerBlock]Long
 
 	for i := 0; i < LongsPerBlock; i++ {
@@ -48,14 +48,14 @@ func (bb *bitBLock) or(rhs *bitBLock) *bitBLock {
 	return newBitBlockWithBits(result)
 }
 
-func (bb *bitBLock) notAll() *bitBLock {
+func (bb *bitBlock) notAll() *bitBlock {
 	block, _ := bb.not(BitsPerBlock)
 	return block
 }
 
-func (bb *bitBLock) not(len int) (*bitBLock, error) {
+func (bb bitBlock) not(len int) (*bitBlock, error) {
 	if len > BitsPerBlock {
-		return nil, errors.New("length out of range for not(len int)")
+		return nil, errors.New("length out of range for Not(len int)")
 	}
 
 	var result [LongsPerBlock]Long
@@ -67,13 +67,9 @@ func (bb *bitBLock) not(len int) (*bitBLock, error) {
 		result[i] = ^bb.bits[i]
 	}
 
-	// create a mask and apply the last one
+	// create a mask And apply the last one
 	if lastBits > 0 {
 		lastLong := numLongs
-		//if (LongsPerBlock - 1) < numLongs {
-		//	lastLong = LongsPerBlock - 1
-		//}
-
 		mask := bb.getMask(lastBits)
 		notBits := ^(bb.bits[lastLong])
 		notBits &= mask
@@ -83,7 +79,7 @@ func (bb *bitBLock) not(len int) (*bitBLock, error) {
 	return newBitBlockWithBits(result), nil
 }
 
-func (bb *bitBLock) andCount(rhs *bitBLock) Long {
+func (bb bitBlock) andCount(rhs *bitBlock) Long {
 	var count Long = 0
 
 	for i := 0; i < LongsPerBlock; i++ {
@@ -94,7 +90,7 @@ func (bb *bitBLock) andCount(rhs *bitBLock) Long {
 	return count
 }
 
-func (bb *bitBLock) orCount(rhs *bitBLock) Long {
+func (bb bitBlock) orCount(rhs *bitBlock) Long {
 	var count Long = 0
 
 	for i := 0; i < LongsPerBlock; i++ {
@@ -105,14 +101,14 @@ func (bb *bitBLock) orCount(rhs *bitBLock) Long {
 	return count
 }
 
-func (bb *bitBLock) notAllCount() Long {
+func (bb bitBlock) notAllCount() Long {
 	count, _ := bb.notCount(BitsPerBlock)
 	return count
 }
 
-func (bb *bitBLock) notCount(len int) (Long, error) {
+func (bb bitBlock) notCount(len int) (Long, error) {
 	if len > BitsPerBlock {
-		return ZeroBitPattern, errors.New("length out of range for notCount(len int)")
+		return ZeroBitPattern, errors.New("length out of range for NotCount(len int)")
 	}
 
 	var count Long = 0
@@ -125,13 +121,9 @@ func (bb *bitBLock) notCount(len int) (Long, error) {
 		count += bb.numberOfSetBits(result)
 	}
 
-	// create a mask and apply the last one
+	// create a mask And apply the last one
 	if lastBits > 0 {
 		lastLong := numLongs
-		//if (LongsPerBlock - 1) < numLongs {
-		//	lastLong = LongsPerBlock - 1
-		//}
-
 		mask := bb.getMask(lastBits)
 		notBits := ^(bb.bits[lastLong])
 		notBits &= mask
@@ -141,12 +133,12 @@ func (bb *bitBLock) notCount(len int) (Long, error) {
 	return count, nil
 }
 
-func (bb *bitBLock) countAll() Long {
+func (bb bitBlock) countAll() Long {
 	count, _ := bb.count(BitsPerBlock)
 	return count
 }
 
-func (bb *bitBLock) count(len int) (Long, error) {
+func (bb bitBlock) count(len int) (Long, error) {
 	if len > BitsPerBlock {
 		return ZeroBitPattern, errors.New("length out of range for count(len int)")
 	}
@@ -160,13 +152,9 @@ func (bb *bitBLock) count(len int) (Long, error) {
 		count += bb.numberOfSetBits(bb.bits[i])
 	}
 
-	// create a mask and apply the last one
+	// create a mask And apply the last one
 	if lastBits > 0 {
 		lastLong := numLongs
-		//if (LongsPerBlock - 1) < numLongs {
-		//	lastLong = LongsPerBlock - 1
-		//}
-
 		mask := bb.getMask(lastBits)
 		bits := bb.bits[lastLong]
 		bits &= mask
@@ -176,9 +164,9 @@ func (bb *bitBLock) count(len int) (Long, error) {
 	return count, nil
 }
 
-func (bb *bitBLock) getBit(index int) (bool, error) {
+func (bb bitBlock) getBit(index int) (bool, error) {
 	if index >= BitsPerBlock {
-		return false, errors.New("length out of range for getBit(index int)")
+		return false, errors.New("length out of range for GetBit(index int)")
 	}
 	// http://stackoverflow.com/questions/4854207/get-a-specific-bit-from-byte
 
@@ -191,9 +179,9 @@ func (bb *bitBLock) getBit(index int) (bool, error) {
 	return (bits & mask) != 0, nil
 }
 
-func (bb *bitBLock) setBit(index int) error {
+func (bb *bitBlock) setBit(index int) error {
 	if index >= BitsPerBlock {
-		return errors.New("length out of range for setBit(index int)")
+		return errors.New("length out of range for SetBit(index int)")
 	}
 
 	i := index / BitsPerLong
@@ -205,9 +193,9 @@ func (bb *bitBLock) setBit(index int) error {
 	return nil
 }
 
-func (bb *bitBLock) unsetBit(index int) error {
+func (bb *bitBlock) unsetBit(index int) error {
 	if index >= BitsPerBlock {
-		return errors.New("length out of range for unsetBit(index int)")
+		return errors.New("length out of range for UnsetBit(index int)")
 	}
 
 	i := index / BitsPerLong
@@ -218,13 +206,13 @@ func (bb *bitBLock) unsetBit(index int) error {
 	return nil
 }
 
-func (bb *bitBLock) fillAll() {
+func (bb *bitBlock) fillAll() {
 	bb.fill(BitsPerBlock)
 }
 
-func (bb *bitBLock) fill(len int) error {
+func (bb *bitBlock) fill(len int) error {
 	if len > BitsPerBlock {
-		return errors.New("length out of range for fill(len int)")
+		return errors.New("length out of range for Fill(len int)")
 	}
 
 	numLongs := len / BitsPerLong
@@ -236,10 +224,6 @@ func (bb *bitBLock) fill(len int) error {
 
 	if lastBits > 0 {
 		lastLong := numLongs
-		//if (LongsPerBlock - 1) < numLongs {
-		//	lastLong = LongsPerBlock - 1
-		//}
-
 		mask := bb.getMask(lastBits)
 		bb.bits[lastLong] = mask
 	}
@@ -247,13 +231,13 @@ func (bb *bitBLock) fill(len int) error {
 	return nil
 }
 
-func (bb *bitBLock) clearAll() {
+func (bb *bitBlock) clearAll() {
 	bb.clear(BitsPerBlock)
 }
 
-func (bb *bitBLock) clear(len int) error {
+func (bb *bitBlock) clear(len int) error {
 	if len > BitsPerBlock {
-		return errors.New("length out of range for fill(len int)")
+		return errors.New("length out of range for Fill(len int)")
 	}
 
 	numLongs := len / BitsPerLong
@@ -265,10 +249,6 @@ func (bb *bitBLock) clear(len int) error {
 
 	if lastBits > 0 {
 		lastLong := numLongs
-		//if (LongsPerBlock - 1) < numLongs {
-		//	lastLong = LongsPerBlock - 1
-		//}
-
 		mask := bb.getMask(lastBits)
 		bb.bits[lastLong] &= ^mask
 	}
@@ -276,14 +256,7 @@ func (bb *bitBLock) clear(len int) error {
 	return nil
 }
 
-func (bb *bitBLock) clone() *bitBLock {
-	// copy (not * to)
-	bits := bb.bits
-
-	return newBitBlockWithBits(bits)
-}
-
-func (bb *bitBLock) getMask(bitIndex int) Long {
+func (bb bitBlock) getMask(bitIndex int) Long {
 	var shift Long
 	var l Long
 
@@ -292,6 +265,7 @@ func (bb *bitBLock) getMask(bitIndex int) Long {
 	return l << shift
 }
 
-func (bb *bitBLock) numberOfSetBits(x Long) Long {
+func (bb bitBlock) numberOfSetBits(x Long) Long {
 	return Long(bits.OnesCount64(uint64(x)))
 }
+

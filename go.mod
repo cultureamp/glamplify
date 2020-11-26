@@ -17,7 +17,7 @@ require (
 	github.com/getsentry/sentry-go v0.7.0
 	github.com/go-errors/errors v1.0.2
 	github.com/gofrs/uuid v3.3.0+incompatible // indirect
-	github.com/google/uuid v1.1.2 // indirect
+	github.com/google/uuid v1.1.2
 	github.com/gookit/color v1.2.9
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/newrelic/go-agent v3.8.1+incompatible
