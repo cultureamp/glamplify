@@ -323,7 +323,6 @@ func Test_BitBlock_Count(t *testing.T) {
 }
 
 func Benchmark_BitBlock_And(b *testing.B) {
-
 	lhs := newBitBlock()
 	rhs := newBitBlock()
 
@@ -340,7 +339,6 @@ func Benchmark_BitBlock_And(b *testing.B) {
 	rhs.setBit(1021)
 	rhs.setBit(1022)
 	rhs.setBit(1023)
-
 
 	for n := 0; n < b.N; n++ {
 		lhs.and(rhs)
@@ -348,7 +346,6 @@ func Benchmark_BitBlock_And(b *testing.B) {
 }
 
 func Benchmark_BitBlock_AndCount(b *testing.B) {
-
 	lhs := newBitBlock()
 	rhs := newBitBlock()
 
@@ -366,8 +363,83 @@ func Benchmark_BitBlock_AndCount(b *testing.B) {
 	rhs.setBit(1022)
 	rhs.setBit(1023)
 
-
 	for n := 0; n < b.N; n++ {
 		lhs.andCount(rhs)
+	}
+}
+
+func Benchmark_BitBlock_Or(b *testing.B) {
+	lhs := newBitBlock()
+	rhs := newBitBlock()
+
+	lhs.setBit(0)
+	lhs.setBit(1)
+	lhs.setBit(2)
+	lhs.setBit(1021)
+	lhs.setBit(1022)
+	lhs.setBit(1023)
+
+	rhs.setBit(0)
+	rhs.setBit(1)
+	rhs.setBit(2)
+	rhs.setBit(3)
+	rhs.setBit(511)
+	rhs.setBit(512)
+
+	for n := 0; n < b.N; n++ {
+		lhs.or(rhs)
+	}
+}
+
+func Benchmark_BitBlock_OrCount(b *testing.B) {
+	lhs := newBitBlock()
+	rhs := newBitBlock()
+
+	lhs.setBit(0)
+	lhs.setBit(1)
+	lhs.setBit(2)
+	lhs.setBit(1021)
+	lhs.setBit(1022)
+	lhs.setBit(1023)
+
+	rhs.setBit(0)
+	rhs.setBit(1)
+	rhs.setBit(2)
+	rhs.setBit(3)
+	rhs.setBit(511)
+	rhs.setBit(512)
+
+	for n := 0; n < b.N; n++ {
+		lhs.orCount(rhs)
+	}
+}
+
+func Benchmark_BitBlock_Not(b *testing.B) {
+	set := newBitBlock()
+
+	set.setBit(0)
+	set.setBit(1)
+	set.setBit(2)
+	set.setBit(1021)
+	set.setBit(1022)
+	set.setBit(1023)
+
+	for n := 0; n < b.N; n++ {
+		set.notAll()
+	}
+}
+
+func Benchmark_BitBlock_NotCount(b *testing.B) {
+	set := newBitBlock()
+
+	set.setBit(0)
+	set.setBit(1)
+	set.setBit(2)
+	set.setBit(1021)
+	set.setBit(1022)
+	set.setBit(1023)
+
+	for n := 0; n < b.N; n++ {
+		set.notAllCount()
 	}
 }

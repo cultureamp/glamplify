@@ -334,7 +334,6 @@ func Benchmark_BitSet_AndCount(b *testing.B) {
 	}
 }
 
-
 func Benchmark_BitSet_Or(b *testing.B) {
 
 	lhs := newBitSet(testCauldron)
@@ -372,5 +371,40 @@ func Benchmark_BitSet_OrCount(b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
 		lhs.OrCount(rhs)
+	}
+}
+
+
+func Benchmark_BitSet_Not(b *testing.B) {
+
+	set := newBitSet(testCauldron)
+
+	s1 := rand.NewSource(time.Now().UnixNano())
+	rand := rand.New(s1)
+
+	for i := 0; i < TestNumberOfBits; i++ {
+		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		set.SetBit(bitIdx)
+	}
+
+	for n := 0; n < b.N; n++ {
+		set.Not()
+	}
+}
+
+func Benchmark_BitSet_NotCount(b *testing.B) {
+
+	set := newBitSet(testCauldron)
+
+	s1 := rand.NewSource(time.Now().UnixNano())
+	rand := rand.New(s1)
+
+	for i := 0; i < TestNumberOfBits; i++ {
+		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		set.SetBit(bitIdx)
+	}
+
+	for n := 0; n < b.N; n++ {
+		set.NotCount()
 	}
 }
