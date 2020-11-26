@@ -1,30 +1,30 @@
 package alchemy
 
 import (
-	"github.com/go-errors/errors"
 	"sync"
+
+	"github.com/go-errors/errors"
 )
 
 type Long uint64
 type Item string
 
 type Cauldron interface {
-	GetAspect(name string) (Aspect, error)
-	GetAspects() ([]Aspect, error)
+	Aspect(name string) (Aspect, error)
+	Aspects() ([]Aspect, error)
 	NewAspect(name string) (Aspect, error)
 	NewAspectWithDisplayName(name string, displayName string) (Aspect, error)
 
-	GetCapacity() Long
-	GetCount() Long
+	Capacity() Long
+	Count() Long
 
-	GetIndexFor(item Item) (Long, error)
-	GetItemFor(index Long) (Item, error)
+	IndexFor(item Item) (Long, error)
+	ItemFor(index Long) (Item, error)
 
 	Upsert(item Item) Long
 	TryRemove(item Item) bool
 
-	GetEmptySet() ReadOnlySet
-	GetAllSet() ReadOnlySet
+	AllSet() ReadOnlySet
 
 	NewSet() Set
 }
@@ -35,7 +35,6 @@ type bitCauldron struct {
 
 	freeSlots stack
 	allSet    Set
-	emptySet  Set
 
 	indexToItem map[Long]Item
 	itemToIndex map[Item]Long
@@ -61,12 +60,11 @@ func newBitCauldron() Cauldron {
 	}
 
 	cauldron.allSet = newBitSet(cauldron)
-	cauldron.emptySet = newBitSet(cauldron)
 
 	return cauldron
 }
 
-func (cauldron bitCauldron) GetAspect(name string) (Aspect, error) {
+func (cauldron bitCauldron) Aspect(name string) (Aspect, error) {
 	cauldron.lock.RLock()
 	defer cauldron.lock.RUnlock()
 
@@ -78,7 +76,7 @@ func (cauldron bitCauldron) GetAspect(name string) (Aspect, error) {
 	return aspect, nil
 }
 
-func (cauldron bitCauldron) GetAspects() ([]Aspect, error) {
+func (cauldron bitCauldron) Aspects() ([]Aspect, error) {
 	cauldron.lock.RLock()
 	defer cauldron.lock.RUnlock()
 
@@ -113,21 +111,15 @@ func (cauldron *bitCauldron) NewAspectWithDisplayName(name string, displayName s
 	return aspect, nil
 }
 
-func (cauldron bitCauldron) GetCapacity() Long {
-	cauldron.lock.RLock()
-	defer cauldron.lock.RUnlock()
-
+func (cauldron bitCauldron) Capacity() Long {
 	return cauldron.capacity
 }
 
-func (cauldron bitCauldron) GetCount() Long {
-	cauldron.lock.RLock()
-	defer cauldron.lock.RUnlock()
-
+func (cauldron bitCauldron) Count() Long {
 	return cauldron.count
 }
 
-func (cauldron bitCauldron) GetIndexFor(item Item) (Long, error) {
+func (cauldron bitCauldron) IndexFor(item Item) (Long, error) {
 	cauldron.lock.RLock()
 	defer cauldron.lock.RUnlock()
 
@@ -139,7 +131,7 @@ func (cauldron bitCauldron) GetIndexFor(item Item) (Long, error) {
 	return index, nil
 }
 
-func (cauldron bitCauldron) GetItemFor(index Long) (Item, error) {
+func (cauldron bitCauldron) ItemFor(index Long) (Item, error) {
 	cauldron.lock.RLock()
 	defer cauldron.lock.RUnlock()
 
@@ -153,7 +145,7 @@ func (cauldron bitCauldron) GetItemFor(index Long) (Item, error) {
 
 func (cauldron *bitCauldron) Upsert(item Item) Long {
 
-	index, err := cauldron.GetIndexFor(item)
+	index, err := cauldron.IndexFor(item)
 	if err == nil {
 		// it already exists, so no-op just return it
 		return index
@@ -179,27 +171,30 @@ func (cauldron *bitCauldron) Upsert(item Item) Long {
 }
 
 func (cauldron *bitCauldron) TryRemove(item Item) bool {
-	cauldron.lock.Lock()
-	defer cauldron.lock.Unlock()
 
-	index, err := cauldron.GetIndexFor(item)
+	index, err := cauldron.IndexFor(item)
 	if err != nil {
 		// it does not exists, so no-op nothing to do
 		return false
 	}
+
+	// needs to outside the Lock() as it calls RLock itself
+	// and GO doesn't support recursive locks :(
+	aspects, _ := cauldron.Aspects()
+
+	cauldron.lock.Lock()
+	defer cauldron.lock.Unlock()
 
 	delete(cauldron.itemToIndex, item)
 	delete(cauldron.indexToItem, index)
 
 	cauldron.allSet.UnsetBit(index)
 
-	// TODO - can we just AND all results with the cauldron.allSet which will do this for us?
 	// need to set all the bits in this index for all facets to ZERO
-	aspects, _ := cauldron.GetAspects()
 	for _, aspect := range aspects{
-		facets, _ := aspect.GetFacets()
+		facets, _ := aspect.Facets()
 		for _, facet := range facets {
-			facet.UnseByIndex(index)
+			facet.UnsetBitForIndex(index)
 		}
 	}
 
@@ -208,11 +203,7 @@ func (cauldron *bitCauldron) TryRemove(item Item) bool {
 	return true
 }
 
-func (cauldron bitCauldron) GetEmptySet() ReadOnlySet {
-	return cauldron.emptySet
-}
-
-func (cauldron bitCauldron) GetAllSet() ReadOnlySet {
+func (cauldron bitCauldron) AllSet() ReadOnlySet {
 	return cauldron.allSet
 }
 

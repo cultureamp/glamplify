@@ -171,12 +171,13 @@ func Test_BitSet_OrCount(t *testing.T) {
 
 func Test_BitSet_Not(t *testing.T) {
 	set := newBitSet(testCauldron)
+	cauldronCount := testCauldron.Count()
 
 	// Not empty set
 	result, err := set.Not()
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == TestSetMaxSize, result.Count())
+	assert.Assert(t, result.Count() == cauldronCount, result.Count())
 
 	// Add some values
 	s1 := rand.NewSource(time.Now().UnixNano())
@@ -193,16 +194,17 @@ func Test_BitSet_Not(t *testing.T) {
 	result, err = set.Not()
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == (TestSetMaxSize-countBeforeNot), result.Count())
+	assert.Assert(t, result.Count() == (cauldronCount-countBeforeNot), result.Count())
 }
 
 func Test_BitSet_NotCount(t *testing.T) {
 	set := newBitSet(testCauldron)
+	cauldronCount := testCauldron.Count()
 
 	// Not empty set
 	count, err := set.NotCount()
 	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == TestSetMaxSize, count)
+	assert.Assert(t, count == cauldronCount, count)
 
 	// Add some values
 	s1 := rand.NewSource(time.Now().UnixNano())
@@ -218,13 +220,13 @@ func Test_BitSet_NotCount(t *testing.T) {
 
 	count, err = set.NotCount()
 	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == (TestSetMaxSize-countBeforeNot), count)
+	assert.Assert(t, count == (cauldronCount-countBeforeNot), count)
 }
 
 func Test_BitSet_Size(t *testing.T) {
 	set := newBitSet(testCauldron)
 
-	assert.Assert(t, set.Size() == testCauldron.GetCapacity(), set.Size())
+	assert.Assert(t, set.Size() == testCauldron.Capacity(), set.Size())
 }
 
 func Test_BitSet_ToSlice(t *testing.T) {
@@ -237,7 +239,6 @@ func Test_BitSet_ToSlice(t *testing.T) {
 	slice := set.ToSlice()
 	assert.Assert(t, Long(len(slice)) == set.Count(), len(slice))
 }
-
 
 func Test_BitSet_SetBit_GetBit_UnsetBit(t *testing.T) {
 	set := newBitSet(testCauldron)
@@ -276,7 +277,7 @@ func Test_BitSet_Fill(t *testing.T) {
 
 	// fill empty set
 	set.Fill()
-	cap := testCauldron.GetCapacity()
+	cap := testCauldron.Capacity()
 	count := set.Count()
 	assert.Assert(t, count == cap, count)
 
@@ -288,7 +289,7 @@ func Test_BitSet_Fill(t *testing.T) {
 
 	// fill partial set
 	set.Fill()
-	cap = testCauldron.GetCapacity()
+	cap = testCauldron.Capacity()
 	count = set.Count()
 	assert.Assert(t, count == cap, count)
 }

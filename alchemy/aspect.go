@@ -1,32 +1,33 @@
 package alchemy
 
 import (
-	"github.com/go-errors/errors"
 	"sync"
+
+	"github.com/go-errors/errors"
 )
 
 type Aspect interface {
-	GetName() string
-	GetDisplayName() string
+	Name() string
+	DisplayName() string
 
 	NewFacet(name string) (Facet, error)
 	NewFacetWithDisplayName(name string, displayName string) (Facet, error)
 
-	GetFacet(name string) (Facet, error)
-	GetFacets() ([]Facet, error)
+	Facet(name string) (Facet, error)
+	Facets() ([]Facet, error)
 }
 
 type bitAspect struct {
 	name        string
 	displayName string
-	cauldron    *bitCauldron
+	cauldron    Cauldron
 
 	childFacets map[string]Facet
 
 	lock *sync.RWMutex
 }
 
-func newBitAspect(name string, displayName string, cauldron *bitCauldron) Aspect {
+func newBitAspect(name string, displayName string, cauldron Cauldron) Aspect {
 	return &bitAspect{
 		name:        name,
 		displayName: displayName,
@@ -36,11 +37,11 @@ func newBitAspect(name string, displayName string, cauldron *bitCauldron) Aspect
 	}
 }
 
-func (aspect bitAspect) GetName() string {
+func (aspect bitAspect) Name() string {
 	return aspect.name
 }
 
-func (aspect bitAspect) GetDisplayName() string {
+func (aspect bitAspect) DisplayName() string {
 	return aspect.displayName
 }
 
@@ -62,7 +63,7 @@ func (aspect bitAspect) NewFacetWithDisplayName(name string, displayName string)
 	return facet, nil
 }
 
-func (aspect bitAspect) GetFacet(name string) (Facet, error) {
+func (aspect bitAspect) Facet(name string) (Facet, error) {
 	aspect.lock.RLock()
 	defer aspect.lock.RUnlock()
 
@@ -74,7 +75,7 @@ func (aspect bitAspect) GetFacet(name string) (Facet, error) {
 	return facet, nil
 }
 
-func (aspect bitAspect) GetFacets() ([]Facet, error) {
+func (aspect bitAspect) Facets() ([]Facet, error) {
 	aspect.lock.RLock()
 	defer aspect.lock.RUnlock()
 

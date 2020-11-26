@@ -1,8 +1,9 @@
 package alchemy
 
 import (
-	"github.com/go-errors/errors"
 	"math/bits"
+
+	"github.com/go-errors/errors"
 )
 
 const (

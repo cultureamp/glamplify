@@ -1,8 +1,9 @@
 package alchemy
 
 import (
-	"github.com/go-errors/errors"
 	"sync"
+
+	"github.com/go-errors/errors"
 )
 
 type ReadOnlySet interface {
@@ -142,7 +143,7 @@ func (set bitSet) Not() (Set, error) {
 	}
 
 	//  make sure to And the result with cauldron.AllSet so we don't have dangling 1s
-	return result.And(set.cauldron.GetAllSet())
+	return result.And(set.cauldron.AllSet())
 }
 func (set bitSet) AndCount(rhsSet ReadOnlySet) (Long, error) {
 	rhs, ok := rhsSet.(*bitSet)
@@ -227,7 +228,7 @@ func (set bitSet) NotCount() (Long, error) {
 	}
 
 	//  make sure to And the result with cauldron.AllSet so we don't have dangling 1s
-	cleanNot, err := result.And(set.cauldron.GetAllSet())
+	cleanNot, err := result.And(set.cauldron.AllSet())
 	if err != nil {
 		return 0, err
 	}
@@ -254,28 +255,25 @@ func (set bitSet) Count() Long {
 }
 
 func (set bitSet) Size() Long {
-	return set.cauldron.GetCapacity()
+	return set.cauldron.Capacity()
 }
 
 func (set bitSet) ToSlice() []Item {
 	set.lock.RLock()
 	defer set.lock.RUnlock()
 
-
-	var items []Item
-
 	// not the most efficient way to do this,
 	//but we'll see if we need to optimize this further later
+	var items []Item
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
-
 		block, ok := set.getBlock(i)
 		if ok {
 			for j := 0; j < BitsPerBlock; j++ {
 				bit, err := block.getBit(j)
 				if err == nil && bit {
 					index := (Long(i)*BitsPerBlock) + Long(j)
-					item, err := set.cauldron.GetItemFor(index)
+					item, err := set.cauldron.ItemFor(index)
 					if err == nil {
 						items = append(items, item)
 					}
@@ -380,7 +378,7 @@ func (set *bitSet) Fill() {
 }
 
 func (set bitSet) getBlockCount() int {
-	cap := set.cauldron.GetCapacity()
+	cap := set.cauldron.Capacity()
 
 	blocks := int(cap / BitsPerBlock)
 	if cap%BitsPerBlock > 0 {
@@ -389,7 +387,6 @@ func (set bitSet) getBlockCount() int {
 
 	return blocks
 }
-
 
 func (set bitSet) getBlock(id int) (*bitBlock, bool) {
 	block, ok := set.blocks[id]

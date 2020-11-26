@@ -1,23 +1,24 @@
 package alchemy
 
 import (
-	"sync"
+	"github.com/go-errors/errors"
 )
 
 type Facet interface {
-	GetName() string
-	GetDisplayName() string
-	GetAspect() Aspect
-
+	Name() string
+	DisplayName() string
+	Aspect() Aspect
 	Set() ReadOnlySet
+	Count() Long
+	ToSlice() []Item
 
-	GetByItem(item Item) (bool, error)
-	GetByIndex(index Long) (bool, error)
+	GetBitForItem(item Item) (bool, error)
+	GetBitForIndex(index Long) (bool, error)
 
-	SetByItem(item Item) error
-	SetByIndex(index Long) error
-	UnsetByItem(item Item) error
-	UnseByIndex(index Long) error
+	SetBitForItem(item Item) error
+	SetBitForIndex(index Long) error
+	UnsetBitForItem(item Item) error
+	UnsetBitForIndex(index Long) error
 
 	And(rhs Facet) (Set, error)
 	AndSet(rhs ReadOnlySet) (Set, error)
@@ -36,31 +37,29 @@ type bitFacet struct {
 	name        string
 	displayName string
 	aspect      Aspect
-	cauldron    *bitCauldron
+	cauldron    Cauldron
 	set         Set
-	lock        *sync.RWMutex
 }
 
-func newBitFacet(name string, displayName string, aspect Aspect, cauldron *bitCauldron) Facet {
+func newBitFacet(name string, displayName string, aspect Aspect, cauldron Cauldron) Facet {
 	return &bitFacet{
 		name:        name,
 		displayName: displayName,
 		aspect:      aspect,
 		cauldron:    cauldron,
 		set:         cauldron.NewSet(),
-		lock:        &sync.RWMutex{},
 	}
 }
 
-func (facet bitFacet) GetName() string {
+func (facet bitFacet) Name() string {
 	return facet.name
 }
 
-func (facet bitFacet) GetDisplayName() string {
+func (facet bitFacet) DisplayName() string {
 	return facet.displayName
 }
 
-func (facet bitFacet) GetAspect() Aspect {
+func (facet bitFacet) Aspect() Aspect {
 	return facet.aspect
 }
 
@@ -68,42 +67,59 @@ func (facet bitFacet) Set() ReadOnlySet {
 	return facet.set
 }
 
-func (facet bitFacet) GetByItem(item Item) (bool, error) {
-	index, err := facet.cauldron.GetIndexFor(item)
+func (facet *bitFacet) Count() Long {
+	return facet.set.Count()
+}
+
+func (facet *bitFacet) ToSlice() []Item {
+	return facet.set.ToSlice()
+}
+
+func (facet bitFacet) GetBitForItem(item Item) (bool, error) {
+	index, err := facet.cauldron.IndexFor(item)
 	if err != nil {
 		return false, err
 	}
 
-	return facet.GetByIndex(index)
+	return facet.GetBitForIndex(index)
 }
 
-func (facet bitFacet) GetByIndex(index Long) (bool, error) {
+func (facet bitFacet) GetBitForIndex(index Long) (bool, error) {
+	if index >= facet.cauldron.Capacity() {
+		return false, errors.New("index greater than cauldron capacity")
+	}
 	return facet.set.GetBit(index)
 }
 
-func (facet *bitFacet) SetByItem(item Item) error {
-	index, err := facet.cauldron.GetIndexFor(item)
+func (facet *bitFacet) SetBitForItem(item Item) error {
+	index, err := facet.cauldron.IndexFor(item)
 	if err != nil {
 		return err
 	}
 
-	return facet.SetByIndex(index)
+	return facet.SetBitForIndex(index)
 }
 
-func (facet *bitFacet) SetByIndex(index Long) error {
+func (facet *bitFacet) SetBitForIndex(index Long) error {
+	if index >= facet.cauldron.Capacity() {
+		return errors.New("index greater than cauldron capacity")
+	}
 	return facet.set.SetBit(index)
 }
 
-func (facet *bitFacet) UnsetByItem(item Item) error {
-	index, err := facet.cauldron.GetIndexFor(item)
+func (facet *bitFacet) UnsetBitForItem(item Item) error {
+	index, err := facet.cauldron.IndexFor(item)
 	if err != nil {
 		return err
 	}
 
-	return facet.UnseByIndex(index)
+	return facet.UnsetBitForIndex(index)
 }
 
-func (facet *bitFacet) UnseByIndex(index Long) error {
+func (facet *bitFacet) UnsetBitForIndex(index Long) error {
+	if index >= facet.cauldron.Capacity() {
+		return errors.New("index greater than cauldron capacity")
+	}
 	return facet.set.UnsetBit(index)
 }
 

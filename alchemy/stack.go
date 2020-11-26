@@ -1,8 +1,9 @@
 package alchemy
 
 import (
-	"github.com/go-errors/errors"
 	"sync"
+
+	"github.com/go-errors/errors"
 )
 
 type node struct {
