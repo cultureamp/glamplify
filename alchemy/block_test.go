@@ -19,7 +19,7 @@ func Test_New_BitBlock(t *testing.T) {
 	assert.Assert(t, bb.bits[0] == AllOnesBitPattern, bb.bits[0])
 }
 
-func Test_GetBit(t *testing.T) {
+func Test_BitBlock_GetBit(t *testing.T) {
 	var bits [LongsPerBlock]Long
 	bits[0] = AllOnesBitPattern
 
@@ -45,7 +45,7 @@ func Test_GetBit(t *testing.T) {
 	assert.Assert(t, !bit, bit)
 }
 
-func Test_Set_Unset_Bit(t *testing.T) {
+func Test_BitBlock_Set_Unset_Bit(t *testing.T) {
 	bb := newBitBlock()
 
 	bit, err := bb.getBit(0)
@@ -83,7 +83,7 @@ func Test_Set_Unset_Bit(t *testing.T) {
 	assert.Assert(t, err != nil, err)
 }
 
-func Test_Fill_Clear(t *testing.T) {
+func Test_BitBlock_Fill_Clear(t *testing.T) {
 	bb := newBitBlock()
 
 	bb.fillAll()
@@ -152,7 +152,7 @@ func Test_Fill_Clear(t *testing.T) {
 	assert.Assert(t, err != nil, err)
 }
 
-func Test_And_AndCount(t *testing.T) {
+func Test_BitBlock_And_AndCount(t *testing.T) {
 	lhs := newBitBlock()
 	rhs := newBitBlock()
 
@@ -196,7 +196,7 @@ func Test_And_AndCount(t *testing.T) {
 	assert.Assert(t, bit, bit)
 }
 
-func Test_Or_OrCount(t *testing.T) {
+func Test_BitBlock_Or_OrCount(t *testing.T) {
 	lhs := newBitBlock()
 	rhs := newBitBlock()
 
@@ -252,7 +252,7 @@ func Test_Or_OrCount(t *testing.T) {
 	assert.Assert(t, bit, bit)
 }
 
-func Test_Not_NotCount(t *testing.T) {
+func Test_BitBlock_Not_NotCount(t *testing.T) {
 	bb := newBitBlock()
 
 	bb.setBit(0)
@@ -301,7 +301,7 @@ func Test_Not_NotCount(t *testing.T) {
 	assert.Assert(t, err != nil, err)
 }
 
-func Test_Count(t *testing.T) {
+func Test_BitBlock_Count(t *testing.T) {
 	bb := newBitBlock()
 
 	count := bb.countAll()
@@ -322,7 +322,7 @@ func Test_Count(t *testing.T) {
 	assert.Assert(t, err != nil, err)
 }
 
-func Benchmark_And(b *testing.B) {
+func Benchmark_BitBlock_And(b *testing.B) {
 
 	lhs := newBitBlock()
 	rhs := newBitBlock()
@@ -347,7 +347,7 @@ func Benchmark_And(b *testing.B) {
 	}
 }
 
-func Benchmark_AndCount(b *testing.B) {
+func Benchmark_BitBlock_AndCount(b *testing.B) {
 
 	lhs := newBitBlock()
 	rhs := newBitBlock()

@@ -271,7 +271,7 @@ func (set bitSet) ToSlice() []Item {
 
 		block, ok := set.getBlock(i)
 		if ok {
-			for j := 0; i < BitsPerBlock; j++ {
+			for j := 0; j < BitsPerBlock; j++ {
 				bit, err := block.getBit(j)
 				if err == nil && bit {
 					index := (Long(i)*BitsPerBlock) + Long(j)
@@ -329,9 +329,8 @@ func (set *bitSet) UnsetBit(index Long) error {
 
 	block, ok := set.getBlock(blockID)
 	if !ok {
-		// create the block
-		block = newBitBlock()
-		set.blocks[blockID] = block
+		// no need to do anything, it already is assumed to be all 0's
+		return nil
 	}
 
 	return block.unsetBit(idx)
@@ -348,6 +347,7 @@ func (set *bitSet) Clear() {
 		if !ok {
 			// no block here, nothing to do
 		} else {
+			// Note: should we just remove all the blocks (as block=nil assumes all 0's)
 			block.clearAll()
 		}
 	}
@@ -367,6 +367,15 @@ func (set *bitSet) Fill() {
 			set.blocks[i] = block
 		}
 		block.fillAll()
+	}
+
+	// the last block will likely have extra dangling 1's
+	// options are to AND it with the Cauldron's AllSet or,
+	// handle the last block as a special case.
+	lastBlock, ok := set.getBlock(blocks-1)
+	if ok {
+		lastBits := int(set.Size() % BitsPerBlock)
+		lastBlock.fill(lastBits)
 	}
 }
 

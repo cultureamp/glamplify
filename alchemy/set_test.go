@@ -220,3 +220,156 @@ func Test_BitSet_NotCount(t *testing.T) {
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, count == (TestSetMaxSize-countBeforeNot), count)
 }
+
+func Test_BitSet_Size(t *testing.T) {
+	set := newBitSet(testCauldron)
+
+	assert.Assert(t, set.Size() == testCauldron.GetCapacity(), set.Size())
+}
+
+func Test_BitSet_ToSlice(t *testing.T) {
+	set := newBitSet(testCauldron)
+	for i := 0; i < TestNumberOfBits; i++ {
+		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		set.SetBit(bitIdx)
+	}
+
+	slice := set.ToSlice()
+	assert.Assert(t, Long(len(slice)) == set.Count(), len(slice))
+}
+
+
+func Test_BitSet_SetBit_GetBit_UnsetBit(t *testing.T) {
+	set := newBitSet(testCauldron)
+	for i := 0; i < TestNumberOfBits; i++ {
+		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+
+		err := set.SetBit(bitIdx)
+		assert.Assert(t, err == nil, err)
+
+		bit, err := set.GetBit(bitIdx)
+		assert.Assert(t, err == nil, err)
+		assert.Assert(t, bit, bit)
+
+		err = set.UnsetBit(bitIdx)
+		assert.Assert(t, err == nil, err)
+
+		bit, err = set.GetBit(bitIdx)
+		assert.Assert(t, err == nil, err)
+		assert.Assert(t, !bit, bit)
+	}
+}
+
+func Test_BitSet_Clear(t *testing.T) {
+	set := newBitSet(testCauldron)
+	for i := 0; i < TestNumberOfBits; i++ {
+		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		set.SetBit(bitIdx)
+	}
+
+	set.Clear()
+	assert.Assert(t, set.Count() == 0, set.Count())
+}
+
+func Test_BitSet_Fill(t *testing.T) {
+	set := newBitSet(testCauldron)
+
+	// fill empty set
+	set.Fill()
+	cap := testCauldron.GetCapacity()
+	count := set.Count()
+	assert.Assert(t, count == cap, count)
+
+	set = newBitSet(testCauldron)
+	for i := 0; i < TestNumberOfBits; i++ {
+		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		set.SetBit(bitIdx)
+	}
+
+	// fill partial set
+	set.Fill()
+	cap = testCauldron.GetCapacity()
+	count = set.Count()
+	assert.Assert(t, count == cap, count)
+}
+
+func Benchmark_BitSet_And(b *testing.B) {
+
+	lhs := newBitSet(testCauldron)
+	rhs := newBitSet(testCauldron)
+
+	s1 := rand.NewSource(time.Now().UnixNano())
+	rand := rand.New(s1)
+
+	for i := 0; i < TestNumberOfBits; i++ {
+		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		rhs.SetBit(bitIdx)
+		bitIdx = Long(rand.Int63n(TestSetMaxSize))
+		lhs.SetBit(bitIdx)
+	}
+
+	for n := 0; n < b.N; n++ {
+		lhs.And(rhs)
+	}
+}
+
+func Benchmark_BitSet_AndCount(b *testing.B) {
+
+	lhs := newBitSet(testCauldron)
+	rhs := newBitSet(testCauldron)
+
+	s1 := rand.NewSource(time.Now().UnixNano())
+	rand := rand.New(s1)
+
+	for i := 0; i < TestNumberOfBits; i++ {
+		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		rhs.SetBit(bitIdx)
+		bitIdx = Long(rand.Int63n(TestSetMaxSize))
+		lhs.SetBit(bitIdx)
+	}
+
+	for n := 0; n < b.N; n++ {
+		lhs.AndCount(rhs)
+	}
+}
+
+
+func Benchmark_BitSet_Or(b *testing.B) {
+
+	lhs := newBitSet(testCauldron)
+	rhs := newBitSet(testCauldron)
+
+	s1 := rand.NewSource(time.Now().UnixNano())
+	rand := rand.New(s1)
+
+	for i := 0; i < TestNumberOfBits; i++ {
+		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		rhs.SetBit(bitIdx)
+		bitIdx = Long(rand.Int63n(TestSetMaxSize))
+		lhs.SetBit(bitIdx)
+	}
+
+	for n := 0; n < b.N; n++ {
+		lhs.Or(rhs)
+	}
+}
+
+func Benchmark_BitSet_OrCount(b *testing.B) {
+
+	lhs := newBitSet(testCauldron)
+	rhs := newBitSet(testCauldron)
+
+	s1 := rand.NewSource(time.Now().UnixNano())
+	rand := rand.New(s1)
+
+	for i := 0; i < TestNumberOfBits; i++ {
+		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		rhs.SetBit(bitIdx)
+		bitIdx = Long(rand.Int63n(TestSetMaxSize))
+		lhs.SetBit(bitIdx)
+	}
+
+	for n := 0; n < b.N; n++ {
+		lhs.OrCount(rhs)
+	}
+}

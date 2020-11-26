@@ -222,11 +222,17 @@ func (bb *bitBlock) fill(len int) error {
 		bb.bits[i] = AllOnesBitPattern
 	}
 
+	lastLong := numLongs
 	if lastBits > 0 {
-		lastLong := numLongs
 		mask := bb.getMask(lastBits)
 		bb.bits[lastLong] = mask
+		lastLong++
 	}
+
+	for i := lastLong; i < LongsPerBlock; i++ {
+		bb.bits[i] = ZeroBitPattern
+	}
+
 
 	return nil
 }
