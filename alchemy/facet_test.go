@@ -58,14 +58,14 @@ func Test_BitFacet_Set_Get_Unset_ByIndex(t *testing.T) {
 	assert.Assert(t, !bit, bit)
 
 	// out of bounds
-	bit, err = facet.GetBitForIndex(TestSetMaxSize+1)
+	bit, err = facet.GetBitForIndex(TestSetSize+1)
 	assert.Assert(t, err != nil, err)
 	assert.Assert(t, !bit, bit)
 
-	err = facet.SetBitForIndex(TestSetMaxSize+1)
+	err = facet.SetBitForIndex(TestSetSize+1)
 	assert.Assert(t, err != nil, err)
 
-	err = facet.UnsetBitForIndex(TestSetMaxSize+1)
+	err = facet.UnsetBitForIndex(TestSetSize+1)
 	assert.Assert(t, err != nil, err)
 }
 
@@ -116,7 +116,7 @@ func Test_BitFacet_ToSlice(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		idx := Long(rand.Int63n(TestSetMaxSize))
+		idx := Long(rand.Int63n(TestSetSize))
 		melbourne.SetBitForIndex(idx)
 	}
 
@@ -145,7 +145,7 @@ func Test_BitFacet_And(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		idx := Long(rand.Int63n(TestSetMaxSize))
+		idx := Long(rand.Int63n(TestSetSize))
 		melbourne.SetBitForIndex(idx)
 		oneYear.SetBitForIndex(idx)
 	}
@@ -187,7 +187,7 @@ func Test_BitFacet_AndCount(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		idx := Long(rand.Int63n(TestSetMaxSize))
+		idx := Long(rand.Int63n(TestSetSize))
 		melbourne.SetBitForIndex(idx)
 		oneYear.SetBitForIndex(idx)
 	}
@@ -226,7 +226,7 @@ func Test_BitFacet_Or(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		idx := Long(rand.Int63n(TestSetMaxSize))
+		idx := Long(rand.Int63n(TestSetSize))
 		melbourne.SetBitForIndex(idx)
 		oneYear.SetBitForIndex(idx)
 	}
@@ -262,7 +262,7 @@ func Test_BitFacet_OrCount(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		idx := Long(rand.Int63n(TestSetMaxSize))
+		idx := Long(rand.Int63n(TestSetSize))
 		melbourne.SetBitForIndex(idx)
 		oneYear.SetBitForIndex(idx)
 	}
@@ -295,7 +295,7 @@ func Test_BitFacet_Not(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		melbourne.SetBitForIndex(bitIdx)
 	}
 
@@ -324,7 +324,7 @@ func Test_BitFacet_NotCount(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		melbourne.SetBitForIndex(bitIdx)
 	}
 

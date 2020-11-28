@@ -1,11 +1,91 @@
 package alchemy
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"testing"
+	"time"
 
 	"gotest.tools/assert"
 )
+
+const (
+	TestRealWorldLoops = 100
+	TestRealWorldSize = Long(10000000) // 10 million
+)
+
+func Test_BitCauldron_RealWorld(t *testing.T) {
+	caul := newBitCauldron()
+
+	start := time.Now()
+	items := make([]Item, 0, TestRealWorldSize)
+	for i := Long(0); i < TestRealWorldSize; i++ {
+		item := Item(uuid.New().String())
+		caul.Upsert(item)
+		items = append(items, item)
+	}
+	stop := time.Now()
+	fmt.Printf("time to upsert %d items = %f sec\n", TestRealWorldSize, stop.Sub(start).Seconds())
+
+	loc, _ := caul.NewAspect("Location")
+	vic, _ := loc.NewFacet("Victoria")
+	nsw, _ := loc.NewFacet("New South Wales")
+	qld, _ := loc.NewFacet("Queensland")
+	sa, _ := loc.NewFacet("South Australia")
+	wa, _ := loc.NewFacet("Western Australia")
+	tas, _ := loc.NewFacet("Tasmania")
+	act, _ := loc.NewFacet("Australian Capital Territory")
+
+	start = time.Now()
+	for i := Long(0); i < TestRealWorldSize-7; i = i + 7 {
+		vic.SetBitForIndex(i)
+		nsw.SetBitForIndex(i+1)
+		qld.SetBitForIndex(i+2)
+		sa.SetBitForIndex(i+3)
+		wa.SetBitForIndex(i+4)
+		tas.SetBitForIndex(i+5)
+		act.SetBitForIndex(i+6)
+	}
+	stop = time.Now()
+	fmt.Printf("time to set up states for %d items = %f sec\n", TestRealWorldSize, stop.Sub(start).Seconds())
+
+	typ, _ := caul.NewAspect("Type")
+	mgr, _ := typ.NewFacet("Manager")
+	ic, _ := typ.NewFacet("IC")
+
+	start = time.Now()
+	for i := Long(0); i < TestRealWorldSize-2; i = i + 2 {
+		mgr.SetBitForIndex(i)
+		ic.SetBitForIndex(i+1)
+	}
+	stop = time.Now()
+	fmt.Printf("time to set up types for %d items = %f sec\n", TestRealWorldSize, stop.Sub(start).Seconds())
+
+	dept, _ := caul.NewAspect("Department")
+	product, _ := dept.NewFacet("Product")
+	customer, _ := dept.NewFacet("Customer")
+	org, _ := dept.NewFacet("Org")
+
+	start = time.Now()
+	for i := Long(0); i < TestRealWorldSize-3; i = i + 3 {
+		product.SetBitForIndex(i)
+		customer.SetBitForIndex(i+1)
+		org.SetBitForIndex(i+2)
+	}
+	stop = time.Now()
+	fmt.Printf("time to set up departmentsyt67789i9o for %d items = %f sec\n", TestRealWorldSize, stop.Sub(start).Seconds())
+
+	var result Set
+
+	start = time.Now()
+	for i := 0; i < TestRealWorldLoops; i++ {
+		result, _ = vic.Or(nsw)
+		result, _ = mgr.AndSet(result)
+		result, _ = product.AndSet(result)
+	}
+	stop = time.Now()
+	fmt.Printf("time to vic.Or(nsw).And(mgr).And(product) %d times for %d items = %f sec\n", TestRealWorldLoops, TestRealWorldSize, stop.Sub(start).Seconds())
+}
 
 func Test_New_BitCauldron(t *testing.T) {
 	caul := newBitCauldron()

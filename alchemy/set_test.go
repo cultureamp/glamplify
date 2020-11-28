@@ -32,7 +32,7 @@ func Test_BitSet_And(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		rhs.SetBit(bitIdx)
 		lhs.SetBit(bitIdx)
 	}
@@ -72,7 +72,7 @@ func Test_BitSet_AndCount(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		rhs.SetBit(bitIdx)
 		lhs.SetBit(bitIdx)
 	}
@@ -110,7 +110,7 @@ func Test_BitSet_Or(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		rhs.SetBit(bitIdx)
 		lhs.SetBit(bitIdx)
 	}
@@ -150,7 +150,7 @@ func Test_BitSet_OrCount(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		rhs.SetBit(bitIdx)
 		lhs.SetBit(bitIdx)
 	}
@@ -185,7 +185,7 @@ func Test_BitSet_Not(t *testing.T) {
 
 	set = newBitSet(testCauldron)
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		set.SetBit(bitIdx)
 	}
 
@@ -212,7 +212,7 @@ func Test_BitSet_NotCount(t *testing.T) {
 
 	set = newBitSet(testCauldron)
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		set.SetBit(bitIdx)
 	}
 
@@ -232,7 +232,7 @@ func Test_BitSet_Size(t *testing.T) {
 func Test_BitSet_ToSlice(t *testing.T) {
 	set := newBitSet(testCauldron)
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		set.SetBit(bitIdx)
 	}
 
@@ -243,7 +243,7 @@ func Test_BitSet_ToSlice(t *testing.T) {
 func Test_BitSet_SetBit_GetBit_UnsetBit(t *testing.T) {
 	set := newBitSet(testCauldron)
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 
 		err := set.SetBit(bitIdx)
 		assert.Assert(t, err == nil, err)
@@ -264,7 +264,7 @@ func Test_BitSet_SetBit_GetBit_UnsetBit(t *testing.T) {
 func Test_BitSet_Clear(t *testing.T) {
 	set := newBitSet(testCauldron)
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		set.SetBit(bitIdx)
 	}
 
@@ -283,7 +283,7 @@ func Test_BitSet_Fill(t *testing.T) {
 
 	set = newBitSet(testCauldron)
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		set.SetBit(bitIdx)
 	}
 
@@ -303,9 +303,9 @@ func Benchmark_BitSet_And(b *testing.B) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		rhs.SetBit(bitIdx)
-		bitIdx = Long(rand.Int63n(TestSetMaxSize))
+		bitIdx = Long(rand.Int63n(TestSetSize))
 		lhs.SetBit(bitIdx)
 	}
 
@@ -323,9 +323,9 @@ func Benchmark_BitSet_AndCount(b *testing.B) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		rhs.SetBit(bitIdx)
-		bitIdx = Long(rand.Int63n(TestSetMaxSize))
+		bitIdx = Long(rand.Int63n(TestSetSize))
 		lhs.SetBit(bitIdx)
 	}
 
@@ -343,9 +343,9 @@ func Benchmark_BitSet_Or(b *testing.B) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		rhs.SetBit(bitIdx)
-		bitIdx = Long(rand.Int63n(TestSetMaxSize))
+		bitIdx = Long(rand.Int63n(TestSetSize))
 		lhs.SetBit(bitIdx)
 	}
 
@@ -363,9 +363,9 @@ func Benchmark_BitSet_OrCount(b *testing.B) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		rhs.SetBit(bitIdx)
-		bitIdx = Long(rand.Int63n(TestSetMaxSize))
+		bitIdx = Long(rand.Int63n(TestSetSize))
 		lhs.SetBit(bitIdx)
 	}
 
@@ -383,7 +383,7 @@ func Benchmark_BitSet_Not(b *testing.B) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		set.SetBit(bitIdx)
 	}
 
@@ -400,7 +400,7 @@ func Benchmark_BitSet_NotCount(b *testing.B) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetMaxSize))
+		bitIdx := Long(rand.Int63n(TestSetSize))
 		set.SetBit(bitIdx)
 	}
 

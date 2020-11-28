@@ -9,8 +9,9 @@ import (
 
 const (
 	TestNumberOfBits = 10000
-	TestSetMaxSize = 1000000
+	TestSetSize = 1000000  // 1 million
 )
+
 
 var (
 	testCauldron Cauldron
@@ -25,7 +26,7 @@ func TestMain(m *testing.M) {
 
 func setup() {
 	testCauldron = newBitCauldron()
-	for k := 0; k < TestSetMaxSize; k++ {
+	for k := 0; k < TestSetSize; k++ {
 		testCauldron.Upsert(Item(uuid.New().String()))
 	}
 }
