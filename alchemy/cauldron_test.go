@@ -3,6 +3,7 @@ package alchemy
 import (
 	"fmt"
 	"github.com/google/uuid"
+	"strconv"
 	"testing"
 	"time"
 
@@ -10,8 +11,8 @@ import (
 )
 
 const (
-	TestRealWorldLoops = 100
-	TestRealWorldSize = Long(10000000) // 10 million
+	TestRealWorldLoops = 1000			// 1,000
+	TestRealWorldSize = Long(10000000) 	// 10 million
 )
 
 func Test_BitCauldron_RealWorld(t *testing.T) {
@@ -20,7 +21,7 @@ func Test_BitCauldron_RealWorld(t *testing.T) {
 	start := time.Now()
 	items := make([]Item, 0, TestRealWorldSize)
 	for i := Long(0); i < TestRealWorldSize; i++ {
-		item := Item(uuid.New().String())
+		item := Item(strconv.FormatInt(int64(i), 10))
 		caul.Upsert(item)
 		items = append(items, item)
 	}
@@ -73,18 +74,20 @@ func Test_BitCauldron_RealWorld(t *testing.T) {
 		org.SetBitForIndex(i+2)
 	}
 	stop = time.Now()
-	fmt.Printf("time to set up departmentsyt67789i9o for %d items = %f sec\n", TestRealWorldSize, stop.Sub(start).Seconds())
+	fmt.Printf("time to set up departments for %d items = %f sec\n", TestRealWorldSize, stop.Sub(start).Seconds())
 
 	var result Set
+	var count Long
 
 	start = time.Now()
 	for i := 0; i < TestRealWorldLoops; i++ {
 		result, _ = vic.Or(nsw)
 		result, _ = mgr.AndSet(result)
-		result, _ = product.AndSet(result)
+		count, _ = product.AndCountSet(result)
 	}
 	stop = time.Now()
-	fmt.Printf("time to vic.Or(nsw).And(mgr).And(product) %d times for %d items = %f sec\n", TestRealWorldLoops, TestRealWorldSize, stop.Sub(start).Seconds())
+	d := stop.Sub(start)
+	fmt.Printf("time to vic.Or(nsw).And(mgr).AndCount(product) = %d, %d times for %d items = %f sec (%f ms per op)\n", count, TestRealWorldLoops, TestRealWorldSize, d.Seconds(), float32(d.Milliseconds())/TestRealWorldLoops)
 }
 
 func Test_New_BitCauldron(t *testing.T) {

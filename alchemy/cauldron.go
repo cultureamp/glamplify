@@ -145,21 +145,29 @@ func (cauldron bitCauldron) ItemFor(index Long) (Item, error) {
 
 func (cauldron *bitCauldron) Upsert(item Item) Long {
 
-	index, err := cauldron.IndexFor(item)
-	if err == nil {
+	cauldron.lock.Lock()
+	defer cauldron.lock.Unlock()
+
+	index, ok := cauldron.itemToIndex[item]
+	if ok {
 		// it already exists, so no-op just return it
 		return index
 	}
 
-	cauldron.lock.Lock()
-	defer cauldron.lock.Unlock()
-
-	// doesn't exist, so add it
-	index, err = cauldron.freeSlots.pop()
-	if err != nil {
+	// if isEmpty is a quick test to see if we can re-use an index
+	if cauldron.freeSlots.isEmpty() {
 		// we don't have a spare slot we can re-use
 		index = cauldron.capacity
 		cauldron.capacity++
+	} else {
+		// try and pop a free slot
+		var err error
+		index, err = cauldron.freeSlots.pop()
+		if err != nil {
+			// we don't have a spare slot we can re-use
+			index = cauldron.capacity
+			cauldron.capacity++
+		}
 	}
 
 	cauldron.allSet.SetBit(index)
