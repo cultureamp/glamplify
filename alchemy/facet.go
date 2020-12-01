@@ -9,16 +9,16 @@ type Facet interface {
 	DisplayName() string
 	Aspect() Aspect
 	Set() ReadOnlySet
-	Count() Long
+	Count() uint64
 	ToSlice() []Item
 
 	GetBitForItem(item Item) (bool, error)
-	GetBitForIndex(index Long) (bool, error)
+	GetBitForIndex(index uint64) (bool, error)
 
 	SetBitForItem(item Item) error
-	SetBitForIndex(index Long) error
+	SetBitForIndex(index uint64) error
 	UnsetBitForItem(item Item) error
-	UnsetBitForIndex(index Long) error
+	UnsetBitForIndex(index uint64) error
 
 	And(rhs Facet) (Set, error)
 	AndSet(rhs ReadOnlySet) (Set, error)
@@ -26,11 +26,11 @@ type Facet interface {
 	OrSet(rhs ReadOnlySet) (Set, error)
 	Not() (Set, error)
 
-	AndCount(rhs Facet) (Long, error)
-	AndCountSet(rhs ReadOnlySet) (Long, error)
-	OrCount(rhs Facet) (Long, error)
-	OrCountSet(rhs ReadOnlySet) (Long, error)
-	NotCount() (Long, error)
+	AndCount(rhs Facet) (uint64, error)
+	AndCountSet(rhs ReadOnlySet) (uint64, error)
+	OrCount(rhs Facet) (uint64, error)
+	OrCountSet(rhs ReadOnlySet) (uint64, error)
+	NotCount() (uint64, error)
 }
 
 type bitFacet struct {
@@ -67,7 +67,7 @@ func (facet bitFacet) Set() ReadOnlySet {
 	return facet.set
 }
 
-func (facet *bitFacet) Count() Long {
+func (facet *bitFacet) Count() uint64 {
 	return facet.set.Count()
 }
 
@@ -84,7 +84,7 @@ func (facet bitFacet) GetBitForItem(item Item) (bool, error) {
 	return facet.GetBitForIndex(index)
 }
 
-func (facet bitFacet) GetBitForIndex(index Long) (bool, error) {
+func (facet bitFacet) GetBitForIndex(index uint64) (bool, error) {
 	if index >= facet.cauldron.Capacity() {
 		return false, errors.New("index greater than cauldron capacity")
 	}
@@ -100,7 +100,7 @@ func (facet *bitFacet) SetBitForItem(item Item) error {
 	return facet.SetBitForIndex(index)
 }
 
-func (facet *bitFacet) SetBitForIndex(index Long) error {
+func (facet *bitFacet) SetBitForIndex(index uint64) error {
 	if index >= facet.cauldron.Capacity() {
 		return errors.New("index greater than cauldron capacity")
 	}
@@ -116,7 +116,7 @@ func (facet *bitFacet) UnsetBitForItem(item Item) error {
 	return facet.UnsetBitForIndex(index)
 }
 
-func (facet *bitFacet) UnsetBitForIndex(index Long) error {
+func (facet *bitFacet) UnsetBitForIndex(index uint64) error {
 	if index >= facet.cauldron.Capacity() {
 		return errors.New("index greater than cauldron capacity")
 	}
@@ -143,22 +143,22 @@ func (facet bitFacet) Not() (Set, error) {
 	return facet.set.Not()
 }
 
-func (facet bitFacet) AndCount(rhs Facet) (Long, error) {
+func (facet bitFacet) AndCount(rhs Facet) (uint64, error) {
 	return facet.set.AndCount(rhs.Set())
 }
 
-func (facet bitFacet) AndCountSet(rhs ReadOnlySet) (Long, error) {
+func (facet bitFacet) AndCountSet(rhs ReadOnlySet) (uint64, error) {
 	return facet.set.AndCount(rhs)
 }
 
-func (facet bitFacet) OrCount(rhs Facet) (Long, error) {
+func (facet bitFacet) OrCount(rhs Facet) (uint64, error) {
 	return facet.set.OrCount(rhs.Set())
 }
 
-func (facet bitFacet) OrCountSet(rhs ReadOnlySet) (Long, error) {
+func (facet bitFacet) OrCountSet(rhs ReadOnlySet) (uint64, error) {
 	return facet.set.OrCount(rhs)
 }
 
-func (facet bitFacet) NotCount() (Long, error) {
+func (facet bitFacet) NotCount() (uint64, error) {
 	return facet.set.NotCount()
 }

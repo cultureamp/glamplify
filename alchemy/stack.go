@@ -7,14 +7,14 @@ import (
 )
 
 type node struct {
-	data Long
+	data uint64
 	next *node
 }
 
 type stack interface {
 	isEmpty() bool
-	push(index Long)
-	pop() (Long, error)
+	push(index uint64)
+	pop() (uint64, error)
 }
 
 type linkedListStack struct {
@@ -39,7 +39,7 @@ func (stk *linkedListStack) isEmpty() bool {
 	return stk.count == 0
 }
 
-func (stk *linkedListStack) push(index Long) {
+func (stk *linkedListStack) push(index uint64) {
 	stk.lock.Lock()
 	defer stk.lock.Unlock()
 
@@ -52,7 +52,7 @@ func (stk *linkedListStack) push(index Long) {
 	stk.count++
 }
 
-func (stk *linkedListStack) pop() (Long, error) {
+func (stk *linkedListStack) pop() (uint64, error) {
 	if stk.isEmpty() {
 		return 0, errors.New("stack is empty, nothing to pop")
 	}

@@ -10,12 +10,12 @@ const (
 	BitsPerLong       = 64
 	LongsPerBlock     = 16
 	BitsPerBlock      = LongsPerBlock * BitsPerLong
-	ZeroBitPattern    = Long(0)
-	AllOnesBitPattern = Long(18446744073709551615)
+	ZeroBitPattern    = uint64(0)
+	AllOnesBitPattern = uint64(18446744073709551615)
 )
 
 type bitBlock struct {
-	bits [LongsPerBlock]Long
+	bits [LongsPerBlock]uint64
 }
 
 func newBitBlock() *bitBlock {
@@ -23,14 +23,14 @@ func newBitBlock() *bitBlock {
 	}
 }
 
-func newBitBlockWithBits(bits [LongsPerBlock]Long) *bitBlock {
+func newBitBlockWithBits(bits [LongsPerBlock]uint64) *bitBlock {
 	return &bitBlock{
 		bits: bits,
 	}
 }
 
 func (bb bitBlock) and(rhs *bitBlock) *bitBlock {
-	var result [LongsPerBlock]Long
+	var result [LongsPerBlock]uint64
 
 	for i := 0; i < LongsPerBlock; i++ {
 		result[i] = bb.bits[i] & rhs.bits[i]
@@ -40,7 +40,7 @@ func (bb bitBlock) and(rhs *bitBlock) *bitBlock {
 }
 
 func (bb bitBlock) or(rhs *bitBlock) *bitBlock {
-	var result [LongsPerBlock]Long
+	var result [LongsPerBlock]uint64
 
 	for i := 0; i < LongsPerBlock; i++ {
 		result[i] = bb.bits[i] | rhs.bits[i]
@@ -59,7 +59,7 @@ func (bb bitBlock) not(len int) (*bitBlock, error) {
 		return nil, errors.New("length out of range for Not(len int)")
 	}
 
-	var result [LongsPerBlock]Long
+	var result [LongsPerBlock]uint64
 
 	numLongs := len / BitsPerLong
 	lastBits := len % BitsPerLong
@@ -80,8 +80,8 @@ func (bb bitBlock) not(len int) (*bitBlock, error) {
 	return newBitBlockWithBits(result), nil
 }
 
-func (bb bitBlock) andCount(rhs *bitBlock) Long {
-	var count Long = 0
+func (bb bitBlock) andCount(rhs *bitBlock) uint64 {
+	var count uint64 = 0
 
 	for i := 0; i < LongsPerBlock; i++ {
 		result := bb.bits[i] & rhs.bits[i]
@@ -91,8 +91,8 @@ func (bb bitBlock) andCount(rhs *bitBlock) Long {
 	return count
 }
 
-func (bb bitBlock) orCount(rhs *bitBlock) Long {
-	var count Long = 0
+func (bb bitBlock) orCount(rhs *bitBlock) uint64 {
+	var count uint64 = 0
 
 	for i := 0; i < LongsPerBlock; i++ {
 		result := bb.bits[i] | rhs.bits[i]
@@ -102,17 +102,17 @@ func (bb bitBlock) orCount(rhs *bitBlock) Long {
 	return count
 }
 
-func (bb bitBlock) notAllCount() Long {
+func (bb bitBlock) notAllCount() uint64 {
 	count, _ := bb.notCount(BitsPerBlock)
 	return count
 }
 
-func (bb bitBlock) notCount(len int) (Long, error) {
+func (bb bitBlock) notCount(len int) (uint64, error) {
 	if len > BitsPerBlock {
 		return ZeroBitPattern, errors.New("length out of range for NotCount(len int)")
 	}
 
-	var count Long = 0
+	var count uint64 = 0
 
 	numLongs := len / BitsPerLong
 	lastBits := len % BitsPerLong
@@ -134,17 +134,17 @@ func (bb bitBlock) notCount(len int) (Long, error) {
 	return count, nil
 }
 
-func (bb bitBlock) countAll() Long {
+func (bb bitBlock) countAll() uint64 {
 	count, _ := bb.count(BitsPerBlock)
 	return count
 }
 
-func (bb bitBlock) count(len int) (Long, error) {
+func (bb bitBlock) count(len int) (uint64, error) {
 	if len > BitsPerBlock {
 		return ZeroBitPattern, errors.New("length out of range for count(len int)")
 	}
 
-	var count Long = 0
+	var count uint64 = 0
 
 	numLongs := len / BitsPerLong
 	lastBits := len % BitsPerLong
@@ -174,8 +174,8 @@ func (bb bitBlock) getBit(index int) (bool, error) {
 	i := index / BitsPerLong
 	bits := bb.bits[i]
 	bit := index % BitsPerLong
-	shift := BitsPerLong - Long(1) - Long(bit)
-	mask := Long(1) << shift
+	shift := BitsPerLong - 1 - bit
+	mask := uint64(1) << shift
 
 	return (bits & mask) != 0, nil
 }
@@ -187,8 +187,8 @@ func (bb *bitBlock) setBit(index int) error {
 
 	i := index / BitsPerLong
 	bit := index % BitsPerLong
-	shift := BitsPerLong - Long(1) - Long(bit)
-	mask := Long(1) << shift
+	shift := BitsPerLong - 1 - bit
+	mask := uint64(1) << shift
 
 	bb.bits[i] |= mask
 	return nil
@@ -201,7 +201,7 @@ func (bb *bitBlock) unsetBit(index int) error {
 
 	i := index / BitsPerLong
 	bit := index % BitsPerLong
-	mask := Long(1) << (BitsPerLong - Long(1) - Long(bit))
+	mask := uint64(1) << (BitsPerLong - 1 - bit)
 
 	bb.bits[i] &= ^mask
 	return nil
@@ -263,16 +263,15 @@ func (bb *bitBlock) clear(len int) error {
 	return nil
 }
 
-func (bb bitBlock) getMask(bitIndex int) Long {
-	var shift Long
-	var l Long
+func (bb bitBlock) getMask(bitIndex int) uint64 {
+	var l uint64
 
-	shift = Long(BitsPerLong - bitIndex)
+	shift := BitsPerLong - bitIndex
 	l = AllOnesBitPattern
 	return l << shift
 }
 
-func (bb bitBlock) numberOfSetBits(x Long) Long {
-	return Long(bits.OnesCount64(uint64(x)))
+func (bb bitBlock) numberOfSetBits(x uint64) uint64 {
+	return uint64(bits.OnesCount64(x))
 }
 

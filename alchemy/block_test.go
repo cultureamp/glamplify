@@ -11,7 +11,7 @@ func Test_New_BitBlock(t *testing.T) {
 	assert.Assert(t, bb != nil, bb)
 	assert.Assert(t, bb.bits[0] == 0, bb.bits[0])
 
-	var bits [LongsPerBlock]Long
+	var bits [LongsPerBlock]uint64
 	bits[0] = AllOnesBitPattern
 
 	bb = newBitBlockWithBits(bits)
@@ -20,7 +20,7 @@ func Test_New_BitBlock(t *testing.T) {
 }
 
 func Test_BitBlock_GetBit(t *testing.T) {
-	var bits [LongsPerBlock]Long
+	var bits [LongsPerBlock]uint64
 	bits[0] = AllOnesBitPattern
 
 	bb := newBitBlockWithBits(bits)

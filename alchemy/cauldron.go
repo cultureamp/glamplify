@@ -6,7 +6,6 @@ import (
 	"github.com/go-errors/errors"
 )
 
-type Long uint64
 type Item string
 
 type Cauldron interface {
@@ -15,13 +14,13 @@ type Cauldron interface {
 	NewAspect(name string) (Aspect, error)
 	NewAspectWithDisplayName(name string, displayName string) (Aspect, error)
 
-	Capacity() Long
-	Count() Long
+	Capacity() uint64
+	Count() uint64
 
-	IndexFor(item Item) (Long, error)
-	ItemFor(index Long) (Item, error)
+	IndexFor(item Item) (uint64, error)
+	ItemFor(index uint64) (Item, error)
 
-	Upsert(item Item) Long
+	Upsert(item Item) uint64
 	TryRemove(item Item) bool
 
 	AllSet() ReadOnlySet
@@ -30,31 +29,31 @@ type Cauldron interface {
 }
 
 type bitCauldron struct {
-	count    Long
-	capacity Long
+	count    uint64
+	capacity uint64
 
 	freeSlots stack
 	allSet    Set
 
-	indexToItem map[Long]Item
-	itemToIndex map[Item]Long
+	indexToItem map[uint64]Item
+	itemToIndex map[Item]uint64
 
 	childAspects map[string]Aspect
 
 	lock *sync.RWMutex
 }
 
-func newBitCauldron() Cauldron {
+func newBitCauldron(sizeEstimate uint64) Cauldron {
 	cauldron := &bitCauldron{
 		count:    0,
 		capacity: 0,
 
 		freeSlots: newLinkedListStack(),
 
-		indexToItem: map[Long]Item{},
-		itemToIndex: map[Item]Long{},
+		indexToItem: make(map[uint64]Item, sizeEstimate),
+		itemToIndex: make(map[Item]uint64, sizeEstimate),
 
-		childAspects: map[string]Aspect{},
+		childAspects: make(map[string]Aspect, sizeEstimate),
 
 		lock: &sync.RWMutex{},
 	}
@@ -111,15 +110,15 @@ func (cauldron *bitCauldron) NewAspectWithDisplayName(name string, displayName s
 	return aspect, nil
 }
 
-func (cauldron bitCauldron) Capacity() Long {
+func (cauldron bitCauldron) Capacity() uint64 {
 	return cauldron.capacity
 }
 
-func (cauldron bitCauldron) Count() Long {
+func (cauldron bitCauldron) Count() uint64 {
 	return cauldron.count
 }
 
-func (cauldron bitCauldron) IndexFor(item Item) (Long, error) {
+func (cauldron bitCauldron) IndexFor(item Item) (uint64, error) {
 	cauldron.lock.RLock()
 	defer cauldron.lock.RUnlock()
 
@@ -131,7 +130,7 @@ func (cauldron bitCauldron) IndexFor(item Item) (Long, error) {
 	return index, nil
 }
 
-func (cauldron bitCauldron) ItemFor(index Long) (Item, error) {
+func (cauldron bitCauldron) ItemFor(index uint64) (Item, error) {
 	cauldron.lock.RLock()
 	defer cauldron.lock.RUnlock()
 
@@ -143,7 +142,7 @@ func (cauldron bitCauldron) ItemFor(index Long) (Item, error) {
 	return item, nil
 }
 
-func (cauldron *bitCauldron) Upsert(item Item) Long {
+func (cauldron *bitCauldron) Upsert(item Item) uint64 {
 
 	cauldron.lock.Lock()
 	defer cauldron.lock.Unlock()

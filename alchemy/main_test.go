@@ -25,7 +25,7 @@ func TestMain(m *testing.M) {
 }
 
 func setup() {
-	testCauldron = newBitCauldron()
+	testCauldron = newBitCauldron(TestSetSize)
 	for k := 0; k < TestSetSize; k++ {
 		testCauldron.Upsert(Item(uuid.New().String()))
 	}

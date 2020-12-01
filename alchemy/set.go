@@ -11,15 +11,15 @@ type ReadOnlySet interface {
 	Or(set ReadOnlySet) (Set, error)
 	Not() (Set, error)
 
-	AndCount(set ReadOnlySet) (Long, error)
-	OrCount(set ReadOnlySet) (Long, error)
-	NotCount() (Long, error)
+	AndCount(set ReadOnlySet) (uint64, error)
+	OrCount(set ReadOnlySet) (uint64, error)
+	NotCount() (uint64, error)
 
-	Count() Long
-	Size() Long
+	Count() uint64
+	Size() uint64
 	ToSlice() []Item
 
-	GetBit(index Long) (bool, error)
+	GetBit(index uint64) (bool, error)
 }
 
 type Set interface {
@@ -27,17 +27,17 @@ type Set interface {
 	Or(set ReadOnlySet) (Set, error)
 	Not() (Set, error)
 
-	AndCount(set ReadOnlySet) (Long, error)
-	OrCount(set ReadOnlySet) (Long, error)
-	NotCount() (Long, error)
+	AndCount(set ReadOnlySet) (uint64, error)
+	OrCount(set ReadOnlySet) (uint64, error)
+	NotCount() (uint64, error)
 
-	Count() Long
-	Size() Long
+	Count() uint64
+	Size() uint64
 	ToSlice() []Item
 
-	GetBit(index Long) (bool, error)
-	SetBit(index Long) error
-	UnsetBit(index Long) error
+	GetBit(index uint64) (bool, error)
+	SetBit(index uint64) error
+	UnsetBit(index uint64) error
 	Clear()
 	Fill()
 }
@@ -145,7 +145,7 @@ func (set bitSet) Not() (Set, error) {
 	//  make sure to And the result with cauldron.AllSet so we don't have dangling 1s
 	return result.And(set.cauldron.AllSet())
 }
-func (set bitSet) AndCount(rhsSet ReadOnlySet) (Long, error) {
+func (set bitSet) AndCount(rhsSet ReadOnlySet) (uint64, error) {
 	rhs, ok := rhsSet.(*bitSet)
 	if !ok {
 		return 0, errors.New("invalid set passed to And")
@@ -154,7 +154,7 @@ func (set bitSet) AndCount(rhsSet ReadOnlySet) (Long, error) {
 	set.lock.RLock()
 	defer set.lock.RUnlock()
 
-	var count Long = 0
+	var count uint64 = 0
 
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
@@ -173,7 +173,7 @@ func (set bitSet) AndCount(rhsSet ReadOnlySet) (Long, error) {
 	return count, nil
 }
 
-func (set bitSet) OrCount(rhsSet ReadOnlySet) (Long, error) {
+func (set bitSet) OrCount(rhsSet ReadOnlySet) (uint64, error) {
 	rhs, ok := rhsSet.(*bitSet)
 	if !ok {
 		return 0, errors.New("invalid set passed to Or")
@@ -182,7 +182,7 @@ func (set bitSet) OrCount(rhsSet ReadOnlySet) (Long, error) {
 	set.lock.RLock()
 	defer set.lock.RUnlock()
 
-	var count Long = 0
+	var count uint64 = 0
 
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
@@ -205,7 +205,7 @@ func (set bitSet) OrCount(rhsSet ReadOnlySet) (Long, error) {
 	return count, nil
 }
 
-func (set bitSet) NotCount() (Long, error) {
+func (set bitSet) NotCount() (uint64, error) {
 	set.lock.RLock()
 	defer set.lock.RUnlock()
 
@@ -236,11 +236,11 @@ func (set bitSet) NotCount() (Long, error) {
 	return cleanNot.Count(), nil
 }
 
-func (set bitSet) Count() Long {
+func (set bitSet) Count() uint64 {
 	set.lock.RLock()
 	defer set.lock.RUnlock()
 
-	var count Long = 0
+	var count uint64 = 0
 
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
@@ -254,7 +254,7 @@ func (set bitSet) Count() Long {
 	return count
 }
 
-func (set bitSet) Size() Long {
+func (set bitSet) Size() uint64 {
 	return set.cauldron.Capacity()
 }
 
@@ -272,7 +272,7 @@ func (set bitSet) ToSlice() []Item {
 			for j := 0; j < BitsPerBlock; j++ {
 				bit, err := block.getBit(j)
 				if err == nil && bit {
-					index := (Long(i)*BitsPerBlock) + Long(j)
+					index := (uint64(i)*BitsPerBlock) + uint64(j)
 					item, err := set.cauldron.ItemFor(index)
 					if err == nil {
 						items = append(items, item)
@@ -285,7 +285,7 @@ func (set bitSet) ToSlice() []Item {
 	return items
 }
 
-func (set bitSet) GetBit(index Long) (bool, error) {
+func (set bitSet) GetBit(index uint64) (bool, error) {
 	set.lock.RLock()
 	defer set.lock.RUnlock()
 
@@ -301,7 +301,7 @@ func (set bitSet) GetBit(index Long) (bool, error) {
 	return block.getBit(idx)
 }
 
-func (set *bitSet) SetBit(index Long) error {
+func (set *bitSet) SetBit(index uint64) error {
 	set.lock.Lock()
 	defer set.lock.Unlock()
 
@@ -318,7 +318,7 @@ func (set *bitSet) SetBit(index Long) error {
 	return block.setBit(idx)
 }
 
-func (set *bitSet) UnsetBit(index Long) error {
+func (set *bitSet) UnsetBit(index uint64) error {
 	set.lock.Lock()
 	defer set.lock.Unlock()
 

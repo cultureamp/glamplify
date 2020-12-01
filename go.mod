@@ -14,6 +14,7 @@ require (
 	github.com/bugsnag/bugsnag-go v1.5.3
 	github.com/bugsnag/panicwrap v1.2.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/dustin/go-humanize v1.0.0
 	github.com/getsentry/sentry-go v0.7.0
 	github.com/go-errors/errors v1.0.2
 	github.com/gofrs/uuid v3.3.0+incompatible // indirect

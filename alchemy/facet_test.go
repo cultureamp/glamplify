@@ -116,12 +116,12 @@ func Test_BitFacet_ToSlice(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		idx := Long(rand.Int63n(TestSetSize))
+		idx := uint64(rand.Int63n(TestSetSize))
 		melbourne.SetBitForIndex(idx)
 	}
 
 	slice := melbourne.ToSlice()
-	assert.Assert(t, Long(len(slice)) == melbourne.Count(), len(slice))
+	assert.Assert(t, uint64(len(slice)) == melbourne.Count(), len(slice))
 }
 
 func Test_BitFacet_And(t *testing.T) {
@@ -145,7 +145,7 @@ func Test_BitFacet_And(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		idx := Long(rand.Int63n(TestSetSize))
+		idx := uint64(rand.Int63n(TestSetSize))
 		melbourne.SetBitForIndex(idx)
 		oneYear.SetBitForIndex(idx)
 	}
@@ -187,7 +187,7 @@ func Test_BitFacet_AndCount(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		idx := Long(rand.Int63n(TestSetSize))
+		idx := uint64(rand.Int63n(TestSetSize))
 		melbourne.SetBitForIndex(idx)
 		oneYear.SetBitForIndex(idx)
 	}
@@ -226,7 +226,7 @@ func Test_BitFacet_Or(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		idx := Long(rand.Int63n(TestSetSize))
+		idx := uint64(rand.Int63n(TestSetSize))
 		melbourne.SetBitForIndex(idx)
 		oneYear.SetBitForIndex(idx)
 	}
@@ -262,7 +262,7 @@ func Test_BitFacet_OrCount(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		idx := Long(rand.Int63n(TestSetSize))
+		idx := uint64(rand.Int63n(TestSetSize))
 		melbourne.SetBitForIndex(idx)
 		oneYear.SetBitForIndex(idx)
 	}
@@ -295,7 +295,7 @@ func Test_BitFacet_Not(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetSize))
+		bitIdx := uint64(rand.Int63n(TestSetSize))
 		melbourne.SetBitForIndex(bitIdx)
 	}
 
@@ -324,7 +324,7 @@ func Test_BitFacet_NotCount(t *testing.T) {
 	rand := rand.New(s1)
 
 	for i := 0; i < TestNumberOfBits; i++ {
-		bitIdx := Long(rand.Int63n(TestSetSize))
+		bitIdx := uint64(rand.Int63n(TestSetSize))
 		melbourne.SetBitForIndex(bitIdx)
 	}
 

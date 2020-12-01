@@ -2,26 +2,27 @@ package alchemy
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"strconv"
 	"testing"
 	"time"
 
+	"github.com/dustin/go-humanize"
+	"github.com/google/uuid"
 	"gotest.tools/assert"
 )
 
 const (
 	TestRealWorldLoops = 1000			// 1,000
-	TestRealWorldSize = Long(10000000) 	// 10 million
+	TestRealWorldSize = uint64(10000000) 	// 10 million
 )
 
 func Test_BitCauldron_RealWorld(t *testing.T) {
-	caul := newBitCauldron()
+	caul := newBitCauldron(TestRealWorldSize)
 
 	start := time.Now()
 	items := make([]Item, 0, TestRealWorldSize)
-	for i := Long(0); i < TestRealWorldSize; i++ {
-		item := Item(strconv.FormatInt(int64(i), 10))
+	for i := uint64(0); i < TestRealWorldSize; i++ {
+		item := Item(strconv.FormatUint(i, 10))
 		caul.Upsert(item)
 		items = append(items, item)
 	}
@@ -38,7 +39,7 @@ func Test_BitCauldron_RealWorld(t *testing.T) {
 	act, _ := loc.NewFacet("Australian Capital Territory")
 
 	start = time.Now()
-	for i := Long(0); i < TestRealWorldSize-7; i = i + 7 {
+	for i := uint64(0); i < TestRealWorldSize-7; i = i + 7 {
 		vic.SetBitForIndex(i)
 		nsw.SetBitForIndex(i+1)
 		qld.SetBitForIndex(i+2)
@@ -48,19 +49,19 @@ func Test_BitCauldron_RealWorld(t *testing.T) {
 		act.SetBitForIndex(i+6)
 	}
 	stop = time.Now()
-	fmt.Printf("time to set up states for %d items = %f sec\n", TestRealWorldSize, stop.Sub(start).Seconds())
+	fmt.Printf("time to set up states for %s items = %f sec\n", humanize.Comma(int64(TestRealWorldSize)), stop.Sub(start).Seconds())
 
-	typ, _ := caul.NewAspect("Type")
-	mgr, _ := typ.NewFacet("Manager")
-	ic, _ := typ.NewFacet("IC")
+	role, _ := caul.NewAspect("Role")
+	mgr, _ := role.NewFacet("Manager")
+	ic, _ := role.NewFacet("IC")
 
 	start = time.Now()
-	for i := Long(0); i < TestRealWorldSize-2; i = i + 2 {
+	for i := uint64(0); i < TestRealWorldSize-2; i = i + 2 {
 		mgr.SetBitForIndex(i)
 		ic.SetBitForIndex(i+1)
 	}
 	stop = time.Now()
-	fmt.Printf("time to set up types for %d items = %f sec\n", TestRealWorldSize, stop.Sub(start).Seconds())
+	fmt.Printf("time to set up roles for %s items = %f sec\n", humanize.Comma(int64(TestRealWorldSize)), stop.Sub(start).Seconds())
 
 	dept, _ := caul.NewAspect("Department")
 	product, _ := dept.NewFacet("Product")
@@ -68,16 +69,16 @@ func Test_BitCauldron_RealWorld(t *testing.T) {
 	org, _ := dept.NewFacet("Org")
 
 	start = time.Now()
-	for i := Long(0); i < TestRealWorldSize-3; i = i + 3 {
+	for i := uint64(0); i < TestRealWorldSize-3; i = i + 3 {
 		product.SetBitForIndex(i)
 		customer.SetBitForIndex(i+1)
 		org.SetBitForIndex(i+2)
 	}
 	stop = time.Now()
-	fmt.Printf("time to set up departments for %d items = %f sec\n", TestRealWorldSize, stop.Sub(start).Seconds())
+	fmt.Printf("time to set up departments for %s items = %f sec\n", humanize.Comma(int64(TestRealWorldSize)), stop.Sub(start).Seconds())
 
 	var result Set
-	var count Long
+	var count uint64
 
 	start = time.Now()
 	for i := 0; i < TestRealWorldLoops; i++ {
@@ -87,16 +88,16 @@ func Test_BitCauldron_RealWorld(t *testing.T) {
 	}
 	stop = time.Now()
 	d := stop.Sub(start)
-	fmt.Printf("time to vic.Or(nsw).And(mgr).AndCount(product) = %d, %d times for %d items = %f sec (%f ms per op)\n", count, TestRealWorldLoops, TestRealWorldSize, d.Seconds(), float32(d.Milliseconds())/TestRealWorldLoops)
+	fmt.Printf("time to vic.Or(nsw).And(mgr).AndCount(product) = %s results called %s times for %s items = %f sec (%f ms per op)\n",  humanize.Comma(int64(count)),  humanize.Comma(TestRealWorldLoops), humanize.Comma(int64(TestRealWorldSize)), d.Seconds(), float32(d.Milliseconds())/TestRealWorldLoops)
 }
 
 func Test_New_BitCauldron(t *testing.T) {
-	caul := newBitCauldron()
+	caul := newBitCauldron(TestRealWorldSize)
 	assert.Assert(t, caul != nil, caul)
 }
 
 func Test_BitCauldron_NewAspect(t *testing.T) {
-	caul := newBitCauldron()
+	caul := newBitCauldron(TestRealWorldSize)
 
 	loc, err := caul.NewAspect("Location")
 	assert.Assert(t, err == nil, err)
@@ -110,7 +111,7 @@ func Test_BitCauldron_NewAspect(t *testing.T) {
 }
 
 func Test_BitCauldron_GetAspect(t *testing.T) {
-	caul := newBitCauldron()
+	caul := newBitCauldron(TestRealWorldSize)
 
 	loc1, err := caul.NewAspect("Location")
 	assert.Assert(t, err == nil, err)
@@ -126,7 +127,7 @@ func Test_BitCauldron_GetAspect(t *testing.T) {
 }
 
 func Test_BitCauldron_AllAspects(t *testing.T) {
-	caul := newBitCauldron()
+	caul := newBitCauldron(TestRealWorldSize)
 
 	loc, err := caul.NewAspect("Location")
 	assert.Assert(t, err == nil, err)
@@ -142,7 +143,7 @@ func Test_BitCauldron_AllAspects(t *testing.T) {
 }
 
 func Test_BitCauldron_TryRemove(t *testing.T) {
-	caul := newBitCauldron()
+	caul := newBitCauldron(TestRealWorldSize)
 
 	item := Item(uuid.New().String())
 	idx := caul.Upsert(item)
