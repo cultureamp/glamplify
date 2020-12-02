@@ -186,6 +186,10 @@ func (df SystemValues) timeNow(format string) string {
 
 func (df SystemValues) getLocation(caller int) string {
 	pc, file, line, ok := runtime.Caller(caller)
+	for ok && strings.Contains(file, "glamplify"){
+		caller++
+		pc, file, line, ok = runtime.Caller(caller)
+	}
 	if !ok {
 		return "unknown:0:unknown"
 	}

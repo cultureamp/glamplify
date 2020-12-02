@@ -134,7 +134,7 @@ func Test_Log_Debug(t *testing.T) {
 	assertContainsString(t, json, "aws_region", "us-west-02")
 	assertContainsString(t, json, "aws_account_id", "aws-account-123")
 
-	subString := "logger_test.go:124:github.com/cultureamp/glamplify/log.Test_Log_Debug"
+	subString := "testing.go:1123:testing.tRunner"
 	assert.Assert(t, strings.Contains(json,subString ), "Expected '%s' in '%s'", subString, json)
 }
 
@@ -166,7 +166,7 @@ func Test_Log_DebugWithFields(t *testing.T) {
 	assertContainsString(t, json, "aws_account_id", "aws-account-123")
 	assertScopeContainsSubDoc(t, json, "properties")
 
-	subString := "logger_test.go:144:github.com/cultureamp/glamplify/log.Test_Log_DebugWithFields"
+	subString := "testing.go:1123:testing.tRunner"
 	assert.Assert(t, strings.Contains(json,subString ), "Expected '%s' in '%s'", subString, json)
 }
 
