@@ -22,8 +22,8 @@ type Cauldron interface {
 	IndexFor(item Item) (uint64, error)
 	ItemFor(index uint64) (Item, error)
 
-	Upsert(item Item) uint64
-	TryRemove(item Item) bool
+	Upsert(item Item) (uint64, error)
+	TryRemove(item Item) (bool, error)
 
 	AllSet() ReadOnlySet
 
@@ -144,7 +144,7 @@ func (cauldron bitCauldron) ItemFor(index uint64) (Item, error) {
 	return item, nil
 }
 
-func (cauldron *bitCauldron) Upsert(item Item) uint64 {
+func (cauldron *bitCauldron) Upsert(item Item) (uint64, error) {
 
 	cauldron.lock.Lock()
 	defer cauldron.lock.Unlock()
@@ -152,7 +152,7 @@ func (cauldron *bitCauldron) Upsert(item Item) uint64 {
 	index, ok := cauldron.itemToIndex[item]
 	if ok {
 		// it already exists, so no-op just return it
-		return index
+		return index, nil
 	}
 
 	// if isEmpty is a quick test to see if we can re-use an index
@@ -171,20 +171,20 @@ func (cauldron *bitCauldron) Upsert(item Item) uint64 {
 		}
 	}
 
-	cauldron.allSet.SetBit(index)
+	err := cauldron.allSet.SetBit(index)
 	cauldron.itemToIndex[item] = index
 	cauldron.indexToItem[index] = item
 
 	cauldron.count++
-	return index
+	return index, err
 }
 
-func (cauldron *bitCauldron) TryRemove(item Item) bool {
+func (cauldron *bitCauldron) TryRemove(item Item) (bool, error) {
 
 	index, err := cauldron.IndexFor(item)
 	if err != nil {
 		// it does not exists, so no-op nothing to do
-		return false
+		return false, nil
 	}
 
 	// needs to outside the Lock() as it calls RLock itself
@@ -197,7 +197,7 @@ func (cauldron *bitCauldron) TryRemove(item Item) bool {
 	delete(cauldron.itemToIndex, item)
 	delete(cauldron.indexToItem, index)
 
-	cauldron.allSet.UnsetBit(index)
+	err = cauldron.allSet.UnsetBit(index)
 
 	// need to set all the bits in this index for all facets to ZERO
 	for _, aspect := range aspects{
@@ -209,7 +209,7 @@ func (cauldron *bitCauldron) TryRemove(item Item) bool {
 
 	cauldron.freeSlots.push(index)
 	cauldron.count--
-	return true
+	return true, err
 }
 
 func (cauldron bitCauldron) AllSet() ReadOnlySet {

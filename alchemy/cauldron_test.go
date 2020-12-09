@@ -146,7 +146,8 @@ func Test_BitCauldron_TryRemove(t *testing.T) {
 	caul := newBitCauldron(TestRealWorldSize)
 
 	item := Item(uuid.New().String())
-	idx := caul.Upsert(item)
+	idx, err := caul.Upsert(item)
+	assert.Assert(t, err == nil, err)
 	assert.Assert(t, idx == 0, idx)
 
 	loc, err := caul.NewAspect("Location")
@@ -161,7 +162,8 @@ func Test_BitCauldron_TryRemove(t *testing.T) {
 	melb.SetBitForIndex(idx)
 	syd.SetBitForIndex(idx)
 
-	ok := caul.TryRemove(item)
+	ok, err := caul.TryRemove(item)
+	assert.Assert(t, err == nil, err)
 	assert.Assert(t, ok, ok)
 
 	bit, err := melb.GetBitForIndex(idx)
@@ -173,7 +175,8 @@ func Test_BitCauldron_TryRemove(t *testing.T) {
 	assert.Assert(t, !bit, bit)
 
 	// remove again should fail
-	ok = caul.TryRemove(item)
+	ok, err = caul.TryRemove(item)
+	assert.Assert(t, err == nil, err)
 	assert.Assert(t, !ok, ok)
 }
 

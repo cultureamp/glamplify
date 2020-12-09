@@ -34,7 +34,8 @@ func Test_BitFacet_Getters(t *testing.T) {
 func Test_BitFacet_Set_Get_Unset_ByIndex(t *testing.T) {
 
 	item := Item(uuid.New().String())
-	idx := testCauldron.Upsert(item)
+	idx, err := testCauldron.Upsert(item)
+	assert.Assert(t, err == nil, err)
 
 	aspect := newBitAspect("Location", "Location", testCauldron)
 	facet := newBitFacet("Melbourne", "Melbourne", aspect, testCauldron)
