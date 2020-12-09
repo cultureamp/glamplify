@@ -6,6 +6,7 @@ import (
 	"os"
 
 	ddlambda "github.com/DataDog/datadog-lambda-go"
+	gcontext "github.com/cultureamp/glamplify/context"
 	"github.com/cultureamp/glamplify/helper"
 	"github.com/cultureamp/glamplify/log"
 	ddhttp "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
@@ -158,3 +159,20 @@ func (app Application) RecordLambdaMetric(metricName string, metricValue float64
 		)
 	}
 }
+
+// TraceHandler adds default tags to the current DataDog span and then creates a new child span using the operationName
+// This should be called at the top of every AWS Lambda handler(...)
+func (app Application) TraceHandler(ctx context.Context, operationName string) (ddtracer.Span, context.Context) {
+	span, ok := ddtracer.SpanFromContext(ctx)
+	if ok {
+		rsFields, ok := gcontext.GetRequestScopedFields(ctx)
+		if ok {
+			span.SetTag("app_xray_id", rsFields.TraceID)
+			span.SetTag("app_request_id", rsFields.RequestID)
+			span.SetTag("app_correlation_id", rsFields.CorrelationID)
+		}
+	}
+
+	return ddtracer.StartSpanFromContext(ctx, operationName)
+}
+
