@@ -18,11 +18,13 @@ type TracerConfig struct {
 	Version       string
 }
 
+// Tracer represents an XRAY trace
 type Tracer struct {
 	config TracerConfig
 	logger *xrayLogger
 }
 
+// NewTracer creates a new Tracer
 func NewTracer(ctx context.Context, configure ...func(*TracerConfig)) *Tracer {
 
 	conf := TracerConfig{
@@ -55,6 +57,7 @@ func NewTracer(ctx context.Context, configure ...func(*TracerConfig)) *Tracer {
 	}
 }
 
+// GetTraceID returns the current xray trace_id
 func (tracer Tracer) GetTraceID(ctx context.Context) string {
 	if xray.RequestWasTraced(ctx) {
 		return xray.TraceID(ctx)
@@ -63,15 +66,18 @@ func (tracer Tracer) GetTraceID(ctx context.Context) string {
 	return ""
 }
 
+// RoundTripper returns the current xray RoundTripper
 func (tracer Tracer) RoundTripper(rt http.RoundTripper) http.RoundTripper {
 	return xray.RoundTripper(rt)
 }
 
+// SegmentHandler returns the current xray segment http handler
 func (tracer Tracer) SegmentHandler(name string, h http.Handler) http.Handler {
 	sn := xray.NewFixedSegmentNamer(name)
 	return xray.Handler(sn, h)
 }
 
+// DynamicSegmentHandler returns the current xray dynamic segment http handler
 func (tracer Tracer) DynamicSegmentHandler(fallback string, wildcardHost string, h http.Handler) http.Handler {
 	sn := xray.NewDynamicSegmentNamer(fallback, wildcardHost)
 	return xray.Handler(sn, h)

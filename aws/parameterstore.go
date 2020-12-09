@@ -7,12 +7,14 @@ import (
 	"time"
 )
 
+// ParameterStore allows easy access to retrieve configuration
 type ParameterStore struct {
 	session *session.Session
 	ssm     *ssm.SSM
 	cache  *cache.Cache
 }
 
+// NewParameterStore creates a new ParameterStore
 func NewParameterStore(profile string) *ParameterStore {
 
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
@@ -30,6 +32,7 @@ func NewParameterStore(profile string) *ParameterStore {
 	}
 }
 
+// Get a secret from the parameter store for 'key'
 func (ps ParameterStore) Get(key string) (string, error) {
 
 	if x, found := ps.cache.Get(key); found {

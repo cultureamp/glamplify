@@ -13,16 +13,17 @@ import (
 
 const functioninvokeRPC = "Function.Invoke"
 
+// Input represents an AWS RPC call
 type Input = struct {
 	Port                  int
 	Payload               interface{}
 	ClientContext         *lc.ClientContext
 	Deadline              *messages.InvokeRequest_Timestamp
-	RequestId             string
-	XAmznTraceId          string
+	RequestID             string
+	XAmznTraceID          string
 	InvokedFunctionArn    string
-	CognitoIdentityId     string
-	CognitoIdentityPoolId string
+	CognitoIdentityID     string
+	CognitoIdentityPoolID string
 }
 
 //InvokeLambda a Go based lambda, passing the configured payload
@@ -83,12 +84,12 @@ func createInvokeRequest(input Input) (*messages.InvokeRequest, error) {
 
 	return &messages.InvokeRequest{
 		Payload:               payloadEncoded,
-		RequestId:             input.RequestId,
-		XAmznTraceId:          input.XAmznTraceId,
+		RequestId:             input.RequestID,
+		XAmznTraceId:          input.XAmznTraceID,
 		Deadline:              *Deadline,
 		InvokedFunctionArn:    input.InvokedFunctionArn,
-		CognitoIdentityId:     input.CognitoIdentityId,
-		CognitoIdentityPoolId: input.CognitoIdentityPoolId,
+		CognitoIdentityId:     input.CognitoIdentityID,
+		CognitoIdentityPoolId: input.CognitoIdentityPoolID,
 		ClientContext:         clientContextEncoded,
 	}, nil
 }

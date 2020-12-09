@@ -9,21 +9,25 @@ import (
 	"time"
 )
 
+// Transport represents the mechanism to POST a request to an endpoint
 type Transport interface {
 	Post(ctx context.Context, url string, contentType string, body io.Reader) (resp *http.Response, err error)
 }
 
+// HttpConfig represents http config values
 type HttpConfig struct {
 	ClientTimeout       time.Duration
 	DialerTimeout       time.Duration
 	TLSHandshakeTimeout time.Duration
 }
 
+// HttpTransport contains the HttpConfig and the network Client
 type HttpTransport struct {
 	conf    *HttpConfig
 	network *http.Client
 }
 
+// NewHttpTransport creates a new Transport
 func NewHttpTransport(configure ...func(*HttpConfig)) Transport {
 	// https://medium.com/@nate510/don-t-use-go-s-default-http-client-4804cb19f779
 
@@ -63,6 +67,7 @@ func NewHttpTransport(configure ...func(*HttpConfig)) Transport {
 	}
 }
 
+// Posts a request to the endpoint
 func (client HttpTransport) Post(ctx context.Context, url string, contentType string, body io.Reader) (resp *http.Response, err error) {
 	req, err := http.NewRequestWithContext(ctx, "POST", url, body)
 	if err != nil {

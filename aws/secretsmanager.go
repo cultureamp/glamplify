@@ -8,12 +8,14 @@ import (
 	"time"
 )
 
+// SecretsManager allows easy access to retrieve secrets
 type SecretsManager struct {
 	session        *session.Session
 	secretsManager *secretsmanager.SecretsManager
 	cache          *cache.Cache
 }
 
+// NewSecretsManager creates a new SecretsManager
 func NewSecretsManager(profile string) *SecretsManager {
 
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
@@ -31,6 +33,7 @@ func NewSecretsManager(profile string) *SecretsManager {
 	}
 }
 
+// Get a secret by 'key'
 func (sm SecretsManager) Get(key string) (string, error) {
 
 	if x, found := sm.cache.Get(key); found {
