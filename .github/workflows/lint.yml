@@ -1,4 +1,4 @@
-name: golint
+name: lint
 
 on:
   push:
@@ -19,3 +19,9 @@ jobs:
           go get -u golang.org/x/lint/golint
 
           golint --set_exit_status ./...
+
+      - name: GOLangCI-Lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.29.0
+
+          golangci-lint run --tests=false
