@@ -13,6 +13,7 @@ import (
 	"time"
 )
 
+//  NRWriter defines an interface for writing log messages to newrelic
 type NRWriter interface {
 	WriteFields(sev string, system log.Fields, fields ...log.Fields) string
 	IsEnabled(sev string) bool
@@ -72,6 +73,7 @@ func NewNRWriter(configure ...func(*NRFieldWriter)) NRWriter {
 	return writer
 }
 
+// WriteFields returns json representing the system and user Fields if the severity is set
 func (writer *NRFieldWriter) WriteFields(sev string, system log.Fields, fields ...log.Fields) string {
 	merged := log.Fields{}
 	properties := merged.Merge(fields...)
@@ -88,6 +90,7 @@ func (writer *NRFieldWriter) WriteFields(sev string, system log.Fields, fields .
 	return json
 }
 
+// IsEnabled returns true is the severity is set, false otherwise
 func (writer NRFieldWriter) IsEnabled(sev string) bool {
 	if writer.leveller.ShouldLogSeverity(writer.Level, sev) {
 		return true
@@ -95,6 +98,7 @@ func (writer NRFieldWriter) IsEnabled(sev string) bool {
 	return false
 }
 
+// WaitAll waits for all the writers to finish before returning
 func (writer *NRFieldWriter) WaitAll() {
 	writer.waitGroup.Wait()
 }

@@ -29,6 +29,7 @@ type FieldWriter struct {
 	level     int
 }
 
+// Writer defines an interface for writing log messages
 type Writer interface {
 	WriteFields(sev string, system Fields, fields ...Fields) string
 	IsEnabled(sev string) bool
@@ -62,6 +63,7 @@ func NewWriter(configure ...func(*WriterConfig)) *FieldWriter { // https://dave.
 	return writer
 }
 
+// WriteFields returns a json string for the given severity and system and user Fields
 func (writer *FieldWriter) WriteFields(sev string, system Fields, fields ...Fields) string {
 	merged := Fields{}
 	properties := merged.Merge(fields...)
@@ -76,6 +78,7 @@ func (writer *FieldWriter) WriteFields(sev string, system Fields, fields ...Fiel
 	return json
 }
 
+// IsEnabled returns true if the sev is enabled, false otherwise
 func (writer FieldWriter) IsEnabled(sev string) bool {
 	level := writer.levelMap.StringToLevel(sev)
 	if writer.levelMap.ShouldLogLevel(writer.level, level) {

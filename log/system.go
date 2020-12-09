@@ -24,10 +24,11 @@ type stackTracer interface {
 	StackTrace() perrors.StackTrace
 }
 
-// SystemValues
+// SystemValues represents values from the system environment
 type SystemValues struct {
 }
 
+// DurationAsISO8601 return a time.Duration as string in ISA8601 format
 func DurationAsISO8601(duration time.Duration) string {
 	return fmt.Sprintf("P%gS", duration.Seconds())
 }

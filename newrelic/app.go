@@ -18,7 +18,7 @@ const (
 // Labels are key value pairs used to roll up applications into specific categories
 type Labels map[string]string
 
-// config contains Application and Transaction behavior settings.
+// Config contains Application and Transaction behavior settings.
 // Use NewConfig to create a config with proper defaults.
 type Config struct {
 
@@ -147,7 +147,7 @@ func (app Application) RecordEvent(eventType string, fields log.Fields) error {
 	return err
 }
 
-// Adds a new NR transaction when used as middleware
+// Middleware adds a new NR transaction when used as middleware
 func (app *Application) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		txn := app.startTransaction(r.URL.Path, w, r)
