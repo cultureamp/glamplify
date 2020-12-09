@@ -14,13 +14,13 @@ import (
 )
 
 func Test_OPAClient_New(t *testing.T) {
-	client := NewClient("dummy", mockHttpClient{})
+	client := NewClient("dummy", mockHTTPClient{})
 	assert.Assert(t, client != nil, client)
 }
 
 func Test_OPAClient_Throw_Error(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHttpClient{throwError: true},  func(config *Config) {
+	client := NewClient("dummy", mockHTTPClient{throwError: true},  func(config *Config) {
 		config.Timeout = 100 * time.Millisecond
 	})
 
@@ -31,7 +31,7 @@ func Test_OPAClient_Throw_Error(t *testing.T) {
 
 func Test_OPAClient_Sleep(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHttpClient{sleep: true}, func(config *Config) {
+	client := NewClient("dummy", mockHTTPClient{sleep: true}, func(config *Config) {
 		config.Timeout = 100 * time.Millisecond
 	})
 
@@ -43,7 +43,7 @@ func Test_OPAClient_Sleep(t *testing.T) {
 
 func Test_OPAClient_Return_Empty(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHttpClient{returnEmpty: true}, func(config *Config) {
+	client := NewClient("dummy", mockHTTPClient{returnEmpty: true}, func(config *Config) {
 		config.Timeout = 100 * time.Millisecond
 	})
 
@@ -54,7 +54,7 @@ func Test_OPAClient_Return_Empty(t *testing.T) {
 
 func Test_OPAClient_Return_Bad_JSON(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHttpClient{returnBadJson: true},  func(config *Config) {
+	client := NewClient("dummy", mockHTTPClient{returnBadJSON: true},  func(config *Config) {
 		config.Timeout = 100 * time.Millisecond
 	})
 
@@ -65,7 +65,7 @@ func Test_OPAClient_Return_Bad_JSON(t *testing.T) {
 
 func Test_OPAClient_Return_Not_Allowed(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHttpClient{returnNotAllowed: true},  func(config *Config) {
+	client := NewClient("dummy", mockHTTPClient{returnNotAllowed: true},  func(config *Config) {
 		config.Timeout = 100 * time.Millisecond
 	})
 
@@ -77,7 +77,7 @@ func Test_OPAClient_Return_Not_Allowed(t *testing.T) {
 
 func Test_OPAClient_Return_Allowed(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHttpClient{},  func(config *Config) {
+	client := NewClient("dummy", mockHTTPClient{},  func(config *Config) {
 		config.Timeout = 100 * time.Millisecond
 	})
 
@@ -87,15 +87,15 @@ func Test_OPAClient_Return_Allowed(t *testing.T) {
 	assert.Assert(t, response.Allow == true, response)
 }
 
-type mockHttpClient struct {
+type mockHTTPClient struct {
 	throwError       bool
 	sleep            bool
 	returnEmpty      bool
-	returnBadJson    bool
+	returnBadJSON    bool
 	returnNotAllowed bool
 }
 
-func (client mockHttpClient) Post(ctx context.Context, url string, contentType string, body io.Reader) (resp *http.Response, err error) {
+func (client mockHTTPClient) Post(ctx context.Context, url string, contentType string, body io.Reader) (resp *http.Response, err error) {
 	if client.throwError {
 		return nil, errors.New("internal server error")
 	}
@@ -114,7 +114,7 @@ func (client mockHttpClient) Post(ctx context.Context, url string, contentType s
 		return response, nil
 	}
 
-	if client.returnBadJson {
+	if client.returnBadJSON {
 		response := &http.Response{
 			Body:       ioutil.NopCloser(strings.NewReader("{hello world}")), // r type is io.ReadCloser,
 			StatusCode: http.StatusOK,
