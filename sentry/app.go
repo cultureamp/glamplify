@@ -2,24 +2,33 @@ package sentry
 
 import (
 	"context"
-	"github.com/cultureamp/glamplify/log"
-	sentryhttp "github.com/getsentry/sentry-go/http"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/cultureamp/glamplify/helper"
+	"github.com/cultureamp/glamplify/log"
 	"github.com/getsentry/sentry-go"
+	sentryhttp "github.com/getsentry/sentry-go/http"
+)
+
+const (
+	// SentryDsn = "SENTRY_DSN"
+	SentryDsn = "SENTRY_DSN"
+	// SentryFlushTimeoutInMsEnv = "SENTRY_FLUSH_TIMEOUT_IN_MS"
+	SentryFlushTimeoutInMsEnv = "SENTRY_FLUSH_TIMEOUT_IN_MS"
 )
 
 type Config struct {
-	Enabled      bool
-	Logging      bool
-	DSN          string
-	ServerName   string
-	AppName      string
-	AppVersion   string
-	ReleaseStage string
+	Enabled          bool
+	Logging          bool
+	DSN              string
+	Transport        sentry.Transport
+	FlushTimeoutInMs int
+	ServerName       string
+	AppName          string
+	AppVersion       string
+	ReleaseStage     string
 }
 
 type Application struct {
@@ -33,12 +42,14 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 	}
 
 	conf := Config{
-		Enabled:      false,
-		Logging:      false,
-		DSN:          os.Getenv("SENTRY_DSN"),
-		AppName:      name,
-		AppVersion:   helper.GetEnvString(log.AppVerEnv, "1.0.0"),
-		ReleaseStage: helper.GetEnvString(log.AppFarmEnv, "production"),
+		Enabled:          false,
+		Logging:          false,
+		DSN:              os.Getenv(SentryDsn),
+		FlushTimeoutInMs: helper.GetEnvInt(SentryFlushTimeoutInMsEnv, 500),
+		Transport:        sentry.NewHTTPTransport(),
+		AppName:          name,
+		AppVersion:       helper.GetEnvString(log.AppVerEnv, "1.0.0"),
+		ReleaseStage:     helper.GetEnvString(log.AppFarmEnv, "production"),
 	}
 
 	host, err := os.Hostname()
@@ -57,6 +68,7 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 
 	cfg := sentry.ClientOptions{
 		Dsn:         conf.DSN,
+		Transport:   conf.Transport,
 		Release:     conf.AppName + "@" + conf.AppVersion,
 		Environment: conf.ReleaseStage,
 		ServerName:  conf.ServerName,
@@ -90,16 +102,41 @@ func (app Application) Shutdown() {
 // unintentionally dropping events.
 //
 // Do not call Flush indiscriminately after every call to CaptureEvent,
-// CaptureException or CaptureMessage. Instead, to have the SDK send events over
-// the network synchronously, configure it to use the HTTPSyncTransport in the
-// call to Init.
-func (app Application) Flush(timeout time.Duration) {
+// CaptureException or CaptureMessage.
+//
+// For Serverless Lambda either call this (with a small duration) at the end of
+// each request, or configure Sentry to send events over the network synchronously,
+// configure it to use the HTTPSyncTransport.
+func (app Application) Flush(timeout time.Duration) bool {
 	if app.conf.Enabled {
-		sentry.Flush(timeout)
+		return sentry.Flush(timeout)
 	}
+
+	return true
 }
 
-// Adds Sentry as a middleware
+// FlushDefault waits until the underlying Transport sends any buffered events to the
+// Sentry server, blocking for at most the given timeout. It returns false if
+// the timeout was reached. In that case, some events may not have been sent.
+//
+// FlushDefault should be called before terminating the program to avoid
+// unintentionally dropping events.
+//
+// Do not call FlushDefault indiscriminately after every call to CaptureEvent,
+// CaptureException or CaptureMessage.
+//
+// For Serverless Lambda either call this (with a small duration) at the end of
+// each request, or configure Sentry to send events over the network synchronously,
+// configure it to use the HTTPSyncTransport.
+func (app Application) FlushDefault() bool {
+	if app.conf.Enabled {
+		return sentry.Flush(time.Duration(app.conf.FlushTimeoutInMs) * time.Millisecond)
+	}
+
+	return true
+}
+
+// Middleware adds Sentry as a middleware
 func (app *Application) Middleware(next http.Handler) http.Handler {
 	if !app.conf.Enabled {
 		return next
@@ -110,6 +147,7 @@ func (app *Application) Middleware(next http.Handler) http.Handler {
 	return sentryHandler.Handle(next)
 }
 
+// WrapHTTPHandler wraps a http handler with Sentry
 func (app *Application) WrapHTTPHandler(pattern string, handler func(http.ResponseWriter, *http.Request)) (string, func(http.ResponseWriter, *http.Request)) {
 	if !app.conf.Enabled {
 		return pattern, handler
@@ -127,6 +165,7 @@ func (app *Application) wrapHTTPHandler(pattern string, handler http.Handler) (s
 	return pattern, sentryHandler.Handle(handler)
 }
 
+// Error records and sends an error with sentry
 func (app Application) Error(err error) *sentry.EventID {
 	if !app.conf.Enabled {
 		return nil
@@ -135,6 +174,7 @@ func (app Application) Error(err error) *sentry.EventID {
 	return sentry.CaptureException(err)
 }
 
+// Message records and sends a meesage with sentry
 func (app Application) Message(message string) *sentry.EventID {
 	if !app.conf.Enabled {
 		return nil
