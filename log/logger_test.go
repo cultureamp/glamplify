@@ -937,12 +937,6 @@ func assertContainsFloat(t *testing.T, log string, key string, val float32) {
 	assert.Assert(t, strings.Contains(log, find), "Expected '%s' in '%s'", find, log)
 }
 
-func assertContainsSubDoc(t *testing.T, log string, key string, val string) {
-	find := fmt.Sprintf("\"%s\":{\"%s\"", key, val)
-	assert.Assert(t, strings.Contains(log, find), "Expected '%s' in '%s'", find, log)
-
-}
-
 func assertScopeContainsString(t *testing.T, log string, key string, val string) {
 	// Check that the keys and values are in the log line
 	find := fmt.Sprintf("\"%s\":\"%s\"", key, val)

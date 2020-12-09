@@ -86,21 +86,25 @@ func Test_BitBlock_Set_Unset_Bit(t *testing.T) {
 func Test_BitBlock_Fill_Clear(t *testing.T) {
 	bb := newBitBlock()
 
-	bb.fillAll()
+	err := bb.fillAll()
+	assert.Assert(t, err == nil, err)
+
 	for i := 0; i < BitsPerBlock; i++ {
 		bit, err := bb.getBit(i)
 		assert.Assert(t, err == nil, err)
 		assert.Assert(t, bit, bit)
 	}
 
-	bb.clearAll()
+	err = bb.clearAll()
+	assert.Assert(t, err == nil, err)
+
 	for i := 0; i < BitsPerBlock; i++ {
 		bit, err := bb.getBit(i)
 		assert.Assert(t, err == nil, err)
 		assert.Assert(t, !bit, bit)
 	}
 
-	err := bb.fill(63)
+	err = bb.fill(63)
 	assert.Assert(t, err == nil, err)
 	bit, err := bb.getBit(62)
 	assert.Assert(t, err == nil, err)

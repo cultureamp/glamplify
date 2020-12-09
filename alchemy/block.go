@@ -207,8 +207,8 @@ func (bb *bitBlock) unsetBit(index int) error {
 	return nil
 }
 
-func (bb *bitBlock) fillAll() {
-	bb.fill(BitsPerBlock)
+func (bb *bitBlock) fillAll() error {
+	return bb.fill(BitsPerBlock)
 }
 
 func (bb *bitBlock) fill(len int) error {
@@ -238,8 +238,8 @@ func (bb *bitBlock) fill(len int) error {
 	return nil
 }
 
-func (bb *bitBlock) clearAll() {
-	bb.clear(BitsPerBlock)
+func (bb *bitBlock) clearAll() error {
+	return bb.clear(BitsPerBlock)
 }
 
 func (bb *bitBlock) clear(len int) error {
