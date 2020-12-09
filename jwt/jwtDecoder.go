@@ -9,22 +9,26 @@ import (
 	"os"
 )
 
+// Decoder represents how to decode a JWT
 type Decoder struct {
 	verifyKey *rsa.PublicKey
 }
 
+// NewDecoder creates a new Decoder
 func NewDecoder() (Decoder, error) {
 
 	pubKey := os.Getenv("AUTH_PUBLIC_KEY")
 	return NewDecoderFromBytes([]byte(pubKey))
 }
 
+// NewDecoderFromPath creates a new Decoder with the public key in 'pubKeyPath'
 func NewDecoderFromPath(pubKeyPath string) (Decoder, error) {
 
 	verifyBytes, _ := ioutil.ReadFile(pubKeyPath)
 	return NewDecoderFromBytes(verifyBytes)
 }
 
+// NewDecoderFromBytes creates a new Decoder given the public key as a []byte
 func NewDecoderFromBytes(verifyBytes []byte) (Decoder, error) {
 
 	verifyKey, err := jwtgo.ParseRSAPublicKeyFromPEM(verifyBytes)
@@ -33,6 +37,7 @@ func NewDecoderFromBytes(verifyBytes []byte) (Decoder, error) {
 	}, err
 }
 
+// Decode a jwt token and return the Payload
 func (jwt Decoder) Decode(tokenString string) (Payload, error) {
 	// sample token string in the form "header.payload.signature"
 	//eg. "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJuYmYiOjE0NDQ0Nzg0MDB9.u1riaD1rW97opCoAuRCTy4w58Br-Zk-bh7vLiRIsrpU"

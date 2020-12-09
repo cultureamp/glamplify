@@ -152,7 +152,7 @@ func (app Application) WrapLambdaHandler(handler interface{}) interface{} {
 	return handler
 }
 
-// RecordLambdaMetric
+// RecordLambdaMetric sends a distribution metric to DataDog
 func (app Application) RecordLambdaMetric(metricName string, metricValue float64, fields log.Fields) {
 	if app.conf.Enabled {
 		tags := fields.ToTags(true)

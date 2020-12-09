@@ -6,16 +6,19 @@ import (
 	"strings"
 )
 
+// Payload represents the jwt payload
 type Payload struct {
 	Customer      string // uuid
 	RealUser      string // uuid
 	EffectiveUser string // uid
 }
 
+// DecodeJwtToken interface defines how to decode a JWT token string
 type DecodeJwtToken interface {
 	Decode(tokenString string) (Payload, error)
 }
 
+// PayloadFromRequest returns a Payload given a http.Request and a DecodeJwtToken
 func PayloadFromRequest(r *http.Request, jwtDecoder DecodeJwtToken) (Payload, error) {
 	auth := r.Header.Get("Authorization") // "Authorization: Bearer xxxxx.yyyyy.zzzzz"
 	if len(auth) == 0 {

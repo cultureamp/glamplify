@@ -11,28 +11,28 @@ import (
 func Domain(url string) string {
 
 	// doesn't work with port so we have to do this...
-	host, _ := hostFromUrl(url)
+	host, _ := hostFromURL(url)
 	return d.Domain(host)
 }
 
 // DomainSuffix gets the domain suffix from url
 func DomainSuffix(url string) string {
 	// doesn't work with port so we have to do this...
-	host, _ := hostFromUrl(url)
+	host, _ := hostFromURL(url)
 	return d.DomainSuffix(host)
 }
 
 // HasSubdomain checks if url has subdomain
 func HasSubdomain(url string) bool {
 	// doesn't work with port so we have to do this...
-	host, _ := hostFromUrl(url)
+	host, _ := hostFromURL(url)
 	return d.HasSubdomain(host)
 }
 
 // Subdomain gets the subdomain from url
 func Subdomain(url string) string {
 	// doesn't work with port so we have to do this...
-	host, _ := hostFromUrl(url)
+	host, _ := hostFromURL(url)
 	return d.Subdomain(host)
 }
 
@@ -41,7 +41,7 @@ func Protocol(url string) string {
 	return d.Protocol(url)
 }
 
-// username gets the username from credentials of url
+// Username gets the username from credentials of url
 func Username(url string) string {
 	return d.Username(url)
 }
@@ -51,7 +51,7 @@ func Password(url string) string {
 	return d.Password(url)
 }
 
-func hostFromUrl(url string) (string, error) {
+func hostFromURL(url string) (string, error) {
 	u, err := urlnet.Parse(url)
 	if err != nil {
 		return url, err

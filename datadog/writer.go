@@ -24,10 +24,10 @@ type DDWriter interface {
 type DDFieldWriter struct {
 	// PUBLIC
 
-	// ApiKey for Data Dog API key.
+	// APIKey for Data Dog API key.
 	//
 	// https://app.datadoghq.com/account/settings#api
-	ApiKey string
+	APIKey string
 
 	// Endpoint URL: https://http-intake.logs.datadoghq.com/v1/input  (default)
 	Endpoint string
@@ -53,7 +53,7 @@ type DDFieldWriter struct {
 // NewDataDogWriter creates a new FieldWriter. The optional configure func lets you set values on the underlying  writer.
 func NewDataDogWriter(configure ...func(*DDFieldWriter)) DDWriter { // https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
 	writer := &DDFieldWriter{
-		ApiKey:    os.Getenv(DDApiKey),
+		APIKey:    os.Getenv(DDApiKey),
 		Endpoint:  helper.GetEnvString(DDLogEndpoint, "https://http-intake.logs.datadoghq.com/v1/input"),
 		Timeout:   time.Second * time.Duration(helper.GetEnvInt(DDTimeout, 5)),
 		OmitEmpty: helper.GetEnvBool(log.OmitEmpty, false),
@@ -109,7 +109,7 @@ func post(writer *DDFieldWriter, jsonStr string) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("DD-API-KEY", writer.ApiKey)
+	req.Header.Set("DD-API-KEY", writer.APIKey)
 
 	var client = &http.Client{
 		Timeout: writer.Timeout,
