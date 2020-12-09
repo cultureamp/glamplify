@@ -68,7 +68,7 @@ func (writer *FieldWriter) WriteFields(sev string, system Fields, fields ...Fiel
 	if len(properties) > 0 {
 		system[Properties] = properties
 	}
-	json := system.ToSnakeCase().ToJson(writer.omitempty)
+	json := system.ToSnakeCase().ToJSON(writer.omitempty)
 
 	if writer.IsEnabled(sev) {
 		writer.write(sev, json)

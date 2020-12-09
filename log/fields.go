@@ -13,6 +13,7 @@ import (
 // Fields type, used to pass to Debug, Print and Error.
 type Fields map[string]interface{}
 
+// NewDurationFields add TimeTaken and TimeTakenMS fields given a time.Duration
 func NewDurationFields(duration time.Duration) Fields {
 	return Fields{
 		TimeTaken: DurationAsISO8601(duration),
@@ -20,6 +21,7 @@ func NewDurationFields(duration time.Duration) Fields {
 	}
 }
 
+// Merge combines multiple Fields
 func (fields Fields) Merge(other ...Fields) Fields {
 	merged := Fields{}
 
@@ -36,6 +38,7 @@ func (fields Fields) Merge(other ...Fields) Fields {
 	return merged
 }
 
+// ToSnakeCase converts all fields to snake case
 func (fields Fields) ToSnakeCase() Fields {
 	snaked := Fields{}
 
@@ -53,7 +56,8 @@ func (fields Fields) ToSnakeCase() Fields {
 	return snaked
 }
 
-func (fields Fields) ToJson(omitempty bool) string {
+// ToJSON converts Fields to JSON
+func (fields Fields) ToJSON(omitempty bool) string {
 	filtered := fields.filterNonSerializableValues().omitEmpty(omitempty)
 	bytes, err := json.Marshal(filtered)
 	if err != nil {
@@ -65,6 +69,7 @@ func (fields Fields) ToJson(omitempty bool) string {
 	return string(bytes)
 }
 
+// ToTags converts Fields to a []string of tags
 func (fields Fields) ToTags(omitempty bool) []string {
 	var tags []string
 	for k, v := range fields {

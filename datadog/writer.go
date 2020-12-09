@@ -78,7 +78,7 @@ func (writer *DDFieldWriter) WriteFields(sev string, system log.Fields, fields .
 		system[log.Properties] = properties
 	}
 
-	json := system.ToSnakeCase().ToJson(writer.OmitEmpty)
+	json := system.ToSnakeCase().ToJSON(writer.OmitEmpty)
 	if writer.IsEnabled(sev) {
 		writer.waitGroup.Add(1)
 		go post(writer, json)
