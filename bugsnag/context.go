@@ -13,14 +13,14 @@ const (
 	bugsnagContextKey key = iota
 )
 
-// BugsnagFromRequest retrieves the current Application associated with the request, error is set appropriately
-func BugsnagFromRequest(w http.ResponseWriter, r *http.Request) (*Application, error) {
+// FromRequest retrieves the current Application associated with the request, error is set appropriately
+func FromRequest(w http.ResponseWriter, r *http.Request) (*Application, error) {
 	ctx := r.Context()
-	return BugsnagFromContext(ctx)
+	return FromContext(ctx)
 }
 
-// BugsnagFromContext gets the current Application from the given context
-func BugsnagFromContext(ctx context.Context) (*Application, error) {
+// FromContext gets the current Application from the given context
+func FromContext(ctx context.Context) (*Application, error) {
 
 	notify, ok := ctx.Value(bugsnagContextKey).(*Application)
 	if ok && notify != nil {

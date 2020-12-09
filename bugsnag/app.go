@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// Config for a bugsnag application
 type Config struct {
 	Enabled         bool
 	Logging         bool
@@ -20,6 +21,7 @@ type Config struct {
 	ProjectPackages []string
 }
 
+// Application for bugsnag
 type Application struct {
 	conf Config
 }
@@ -29,9 +31,10 @@ const (
 )
 
 var (
-	internal, _ = NewApplication(context.Background(), helper.GetEnvString("APP_NAME", "default"), func(conf *Config) { conf.Enabled = true })
+	bugsnapApp, _ = NewApplication(context.Background(), helper.GetEnvString("APP_NAME", "default"), func(conf *Config) { conf.Enabled = true })
 )
 
+// NewApplication creates a new bugsnag Application
 func NewApplication(ctx context.Context, name string, configure ...func(*Config)) (*Application, error) {
 
 	if len(name) == 0 {
@@ -75,7 +78,7 @@ func (app Application) Shutdown() {
 	time.Sleep(waitFORBugsnag)
 }
 
-// Adds a Bugsnag when used as middleware
+// Middleware adds a Bugsnag when used as middleware
 func (app *Application) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r = app.addToHTTPContext(r)
@@ -83,6 +86,7 @@ func (app *Application) Middleware(next http.Handler) http.Handler {
 	})
 }
 
+// WrapHTTPHandler wraps a HTTP handler with bugsnag
 func (app *Application) WrapHTTPHandler(pattern string, handler func(http.ResponseWriter, *http.Request)) (string, func(http.ResponseWriter, *http.Request)) {
 	p, h := app.wrapHTTPHandler(pattern, http.HandlerFunc(handler))
 	return p, func(w http.ResponseWriter, r *http.Request) {
@@ -95,10 +99,12 @@ func (app *Application) wrapHTTPHandler(pattern string, handler http.Handler) (s
 	return pattern, bugsnag.Handler(handler)
 }
 
+// Error logs an error with bugsnag
 func Error(err error, fields log.Fields) error {
-	return internal.Error(err, fields)
+	return bugsnapApp.Error(err, fields)
 }
 
+// Error logs an error with bugsnag
 func (app Application) Error(err error, fields log.Fields) error {
 	if !app.conf.Enabled {
 		return nil
@@ -110,10 +116,12 @@ func (app Application) Error(err error, fields log.Fields) error {
 	return app.ErrorWithContext(ctx, err, fields)
 }
 
+// ErrorWithContext logs and error with context to bugsnag
 func ErrorWithContext(ctx context.Context, err error, fields log.Fields) error {
-	return internal.ErrorWithContext(ctx, err, fields)
+	return bugsnapApp.ErrorWithContext(ctx, err, fields)
 }
 
+// ErrorWithContext logs and error with context to bugsnag
 func (app Application) ErrorWithContext(ctx context.Context, err error, fields log.Fields) error {
 	if !app.conf.Enabled {
 		return nil

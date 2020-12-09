@@ -93,7 +93,7 @@ func (tracer Tracer) AddMetadata(ctx context.Context,  key string, value interfa
 	return xray.AddMetadata(ctx, key, value)
 }
 
-// Added a new XRAY segment when used as a middleware
+// Middleware adds a new XRAY segment when used as a middleware
 func (tracer Tracer) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sn := xray.NewFixedSegmentNamer(r.URL.Path)

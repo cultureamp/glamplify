@@ -63,7 +63,7 @@ func rootRequest(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	t, _ := ctx.Value("t").(*testing.T)
 
-	notifier, err := bugsnag.BugsnagFromContext(ctx)
+	notifier, err := bugsnag.FromContext(ctx)
 	assert.Assert(t, err == nil, err)
 
 	err = notifier.ErrorWithContext(ctx, errors.New("NPE"), log.Fields{

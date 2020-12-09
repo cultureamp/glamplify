@@ -14,21 +14,21 @@ type Transport interface {
 	Post(ctx context.Context, url string, contentType string, body io.Reader) (resp *http.Response, err error)
 }
 
-// HttpConfig represents http config values
-type HttpConfig struct {
+// HTTPConfig represents http config values
+type HTTPConfig struct {
 	ClientTimeout       time.Duration
 	DialerTimeout       time.Duration
 	TLSHandshakeTimeout time.Duration
 }
 
-// HttpTransport contains the HttpConfig and the network Client
-type HttpTransport struct {
-	conf    *HttpConfig
+// HTTPTransport contains the HTTPConfig and the network Client
+type HTTPTransport struct {
+	conf    *HTTPConfig
 	network *http.Client
 }
 
-// NewHttpTransport creates a new Transport
-func NewHttpTransport(configure ...func(*HttpConfig)) Transport {
+// NewHTTPTransport creates a new Transport
+func NewHTTPTransport(configure ...func(*HTTPConfig)) Transport {
 	// https://medium.com/@nate510/don-t-use-go-s-default-http-client-4804cb19f779
 
 	c := helper.GetEnvInt(ClientTimeoutEnv, 10000) // 10 secs
@@ -40,7 +40,7 @@ func NewHttpTransport(configure ...func(*HttpConfig)) Transport {
 	t := helper.GetEnvInt(TLSTimeoutEnv, 5000) // 5 secs
 	tlsTimeout := time.Duration(t) * time.Millisecond
 
-	conf := &HttpConfig{
+	conf := &HTTPConfig{
 		ClientTimeout:       clientTimeout,
 		DialerTimeout:       dialerTimeout,
 		TLSHandshakeTimeout: tlsTimeout,
@@ -61,14 +61,14 @@ func NewHttpTransport(configure ...func(*HttpConfig)) Transport {
 		Transport: netTransport,
 	}
 
-	return &HttpTransport{
+	return &HTTPTransport{
 		conf:    conf,
 		network: netClient,
 	}
 }
 
-// Posts a request to the endpoint
-func (client HttpTransport) Post(ctx context.Context, url string, contentType string, body io.Reader) (resp *http.Response, err error) {
+// Post a request to the endpoint
+func (client HTTPTransport) Post(ctx context.Context, url string, contentType string, body io.Reader) (resp *http.Response, err error) {
 	req, err := http.NewRequestWithContext(ctx, "POST", url, body)
 	if err != nil {
 		return nil, err

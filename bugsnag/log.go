@@ -19,6 +19,7 @@ func newBugsnagLogger(ctx context.Context) *bugsnagLogger {
 	}
 }
 
+// Printf logs a message
 func (l bugsnagLogger) Printf(format string, v ...interface{}) {
 	msg := fmt.Sprintf(format, v...)
 	fields := log.Fields{

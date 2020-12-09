@@ -8,12 +8,12 @@ import (
 )
 
 func Test_HttpClient_New(t *testing.T) {
-	client := NewHttpTransport()
+	client := NewHTTPTransport()
 	assert.Assert(t, client != nil, client)
 }
 
 func Test_HttpClient_New_With_Config(t *testing.T) {
-	client := NewHttpTransport(func(config *HttpConfig) {
+	client := NewHTTPTransport(func(config *HTTPConfig) {
 		assert.Assert(t, config.ClientTimeout == 10 * time.Second, config.ClientTimeout)
 		config.ClientTimeout = 1 * time.Second
 		assert.Assert(t, config.DialerTimeout == 5 * time.Second, config.DialerTimeout)
