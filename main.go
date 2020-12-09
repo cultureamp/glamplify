@@ -73,8 +73,14 @@ func rootRequestHandler(w http.ResponseWriter, r *http.Request) {
 
 	// get JWT payload from http header
 	decoder, err := jwt.NewDecoder() // assumes AUTH_PUBLIC_KEY set, check other New methods for overloads
+	if err != nil {
+		// handle error
+	}
 	payload, err := jwt.PayloadFromRequest(r, decoder)
-
+	if err != nil {
+		// handle error
+	}
+	
 	// Create the logging config for this request
 	requestScopedFields := gcontext.RequestScopedFields{
 		TraceID:             r.Header.Get(gcontext.TraceIDHeader),
