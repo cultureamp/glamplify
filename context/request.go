@@ -13,6 +13,8 @@ const (
 	RequestIDHeader = "X-Request-ID"
 	// CorrelationIDHeader = "X-Correlation-ID"
 	CorrelationIDHeader = "X-Correlation-ID"
+	// ErrorUUID = "00000000-0000-0000-0000-000000000000"
+	ErrorUUID = "00000000-0000-0000-0000-000000000000"
 )
 
 // GetRequestScopedFieldsFromRequest gets the RequestScopedFields from the request context

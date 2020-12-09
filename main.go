@@ -16,13 +16,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const (
-	errorUUID = "00000000-0000-0000-0000-000000000000"
-	traceIDHeader = awsxray.TraceIDHeaderKey // "x-amzn-trace-id"
-	requestIDHeader = "X-Request-ID"
-	correlationIDHeader = "X-Correlation-ID"
-)
-
 func main() {
 	ctx := context.Background()
 
@@ -113,9 +106,9 @@ func getTraceID(ctx context.Context,  r *http.Request) string {
 		return awsxray.TraceID(ctx)
 	}
 
-	traceID := r.Header.Get(traceIDHeader)
+	traceID := r.Header.Get(gcontext.TraceIDHeader)
 	if traceID == "" {
-		return errorUUID
+		return gcontext.ErrorUUID
 	}
 
 	return traceID
@@ -124,7 +117,7 @@ func getTraceID(ctx context.Context,  r *http.Request) string {
 func getRequestID( r *http.Request) string {
 
 	// Did the client pass us a request_id?
-	requestID := r.Header.Get(requestIDHeader)
+	requestID := r.Header.Get(gcontext.RequestIDHeader)
 	if requestID == "" {
 		// If client has set then we honour that value, otherwise we set it to a UUID
 		requestID = uuid.New().String()
