@@ -89,7 +89,7 @@ func rootRequest(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	t, _ := ctx.Value("t").(*testing.T)
 
-	sentry, err := sentry.SentryFromContext(ctx)
+	sentry, err := sentry.FromContext(ctx)
 	assert.Assert(t, err == nil, err)
 	assert.Assert(t, sentry != nil, sentry)
 

@@ -13,14 +13,14 @@ const (
 	sentryContextKey key = iota
 )
 
-// SentryFromRequest retrieves the current Application associated with the request, error is set appropriately
-func SentryFromRequest(w http.ResponseWriter, r *http.Request) (*Application, error) {
+// FromRequest retrieves the current Application associated with the request, error is set appropriately
+func FromRequest(w http.ResponseWriter, r *http.Request) (*Application, error) {
 	ctx := r.Context()
-	return SentryFromContext(ctx)
+	return FromContext(ctx)
 }
 
-// SentryFromContext gets the current Application from the given context
-func SentryFromContext(ctx context.Context) (*Application, error) {
+// FromContext gets the current Application from the given context
+func FromContext(ctx context.Context) (*Application, error) {
 
 	notify, ok := ctx.Value(sentryContextKey).(*Application)
 	if ok && notify != nil {

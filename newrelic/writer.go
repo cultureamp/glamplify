@@ -14,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-//  NRWriter defines an interface for writing log messages to newrelic
+// NRWriter defines an interface for writing log messages to newrelic
 type NRWriter interface {
 	WriteFields(sev string, system log.Fields, fields ...log.Fields) string
 	IsEnabled(sev string) bool
