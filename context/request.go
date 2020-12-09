@@ -29,11 +29,13 @@ func AddRequestScopedFieldsRequest(r *http.Request, requestScopeFields RequestSc
 // WrapRequest returns the same *http.Request if RequestScopedFields is already present in the context.
 // If missing, then it checks http.Request Headers for TraceID, RequestID, and CorrelationID.
 // Then this method also tries to decode the JWT payload and adds CustomerAggregateID and UserAggregateID if successful.
-func WrapRequest(r *http.Request) *http.Request {
+func WrapRequest(r *http.Request) (*http.Request, error) {
 
-	jwt, err := jwt.NewDecoder() // reads AUTH_PUBLIC_KEY environment var - use PayloadFromRequest() if you want a custom decoder
+	// reads AUTH_PUBLIC_KEY environment var - use PayloadFromRequest() if you want a custom decoder
+	// then use WrapRequestWithDecoder
+	jwt, err := jwt.NewDecoder()
 	if err != nil {
-		// TODO - how to log this error? Does it really matter?
+		return r, err
 	}
 	return WrapRequestWithDecoder(r, jwt)
 }
@@ -41,10 +43,10 @@ func WrapRequest(r *http.Request) *http.Request {
 // WrapRequestWithDecoder returns the same *http.Request if RequestScopedFields is already present in the context.
 // If missing, then it checks http.Request Headers for TraceID, RequestID, and CorrelationID.
 // Then this method also tries to decode the JWT payload and adds CustomerAggregateID and UserAggregateID if successful.
-func WrapRequestWithDecoder(r *http.Request, jwtDecoder jwt.DecodeJwtToken) *http.Request {
+func WrapRequestWithDecoder(r *http.Request, jwtDecoder jwt.DecodeJwtToken) (*http.Request, error) {
 	rsFields, ok := GetRequestScopedFieldsFromRequest(r)
 	if ok {
-		return r
+		return r, nil
 	}
 
 	// need to create new RequestScopedFields
@@ -62,6 +64,6 @@ func WrapRequestWithDecoder(r *http.Request, jwtDecoder jwt.DecodeJwtToken) *htt
 	}
 
 	ctx = rsFields.AddToCtx(ctx)
-	return r.WithContext(ctx)
+	return r.WithContext(ctx), err
 }
 
