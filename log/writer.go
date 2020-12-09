@@ -20,7 +20,7 @@ type WriterConfig struct {
 
 // FieldWriter wraps the standard library writer and add structured types as quoted key value pairs
 type FieldWriter struct {
-	mutex    sync.Mutex
+	mutex    *sync.Mutex
 	levelMap *Leveller
 
 	output    io.Writer
@@ -51,6 +51,7 @@ func NewWriter(configure ...func(*WriterConfig)) *FieldWriter { // https://dave.
 		config(&conf)
 	}
 
+	writer.mutex = &sync.Mutex{}
 	writer.mutex.Lock()
 	defer writer.mutex.Unlock()
 
@@ -81,10 +82,8 @@ func (writer *FieldWriter) WriteFields(sev string, system Fields, fields ...Fiel
 // IsEnabled returns true if the sev is enabled, false otherwise
 func (writer FieldWriter) IsEnabled(sev string) bool {
 	level := writer.levelMap.StringToLevel(sev)
-	if writer.levelMap.ShouldLogLevel(writer.level, level) {
-		return true
-	}
-	return false
+
+	return writer.levelMap.ShouldLogLevel(writer.level, level)
 }
 
 func (writer *FieldWriter) write(sev string, json string) {

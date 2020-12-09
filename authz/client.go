@@ -91,16 +91,18 @@ func (client Client) parseResponseCacheControl(ctx context.Context, response *ht
 }
 
 func (client Client) evaluateBooleanPolicy(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (*http.Response, *EvaluationResponse, error) {
-	postBody, err := client.createRequestPostBody(ctx, policy, identity, input)
+	postBody, err := client.createRequestPostBody(policy, identity, input)
+	if err != nil {
+		return nil, nil, err
+	}
 
-	httpctx, _ := context.WithTimeout(context.Background(), client.config.Timeout)
-
-	response, err := client.http.Post(httpctx, client.authzAPIEndpoint, "application/json", bytes.NewBuffer([]byte(postBody)))
+	httpCtx, _ := context.WithTimeout(context.Background(), client.config.Timeout)
+	response, err := client.http.Post(httpCtx, client.authzAPIEndpoint, "application/json", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
 		return response, nil, err
 	}
 
-	policyResponse, err := client.readResponse(ctx, response)
+	policyResponse, err := client.readResponse(response)
 	if err != nil {
 		return response, nil, err
 	}
@@ -108,7 +110,7 @@ func (client Client) evaluateBooleanPolicy(ctx context.Context, policy string, i
 	return response, &policyResponse.Result[0], nil
 }
 
-func (client Client) createRequestPostBody(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (string, error) {
+func (client Client) createRequestPostBody(policy string, identity IdentityRequest, input InputRequest) (string, error) {
 	data := PolicyEvalRequest{}
 	policyRequest := PolicyRequest{
 		Policy: policy,
@@ -127,15 +129,17 @@ func (client Client) createRequestPostBody(ctx context.Context, policy string, i
 	return postBody, nil
 }
 
-func (client Client) readResponse(ctx context.Context, response *http.Response) (*PolicyResponse, error) {
+func (client Client) readResponse(response *http.Response) (*PolicyResponse, error) {
 
 	if response == nil {
 		return nil, errors.New("response is nil")
 	}
+
 	bodyBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
+
 	p := newPolicyEvalRequestParser()
 	policyResponse, err := p.ParsePolicyEvalRequest(string(bodyBytes))
 	if err != nil {

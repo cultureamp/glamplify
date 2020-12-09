@@ -21,8 +21,9 @@ func GetRequestScopedFields(ctx context.Context) (RequestScopedFields, bool) {
 // WrapCtx initializes a context with default RequestScopedFields
 func WrapCtx(ctx context.Context) context.Context {
 
-	rsFields, ok := GetRequestScopedFields(ctx)
+	_, ok := GetRequestScopedFields(ctx)
 	if ok {
+		// rs fields already in the context, nothing to do
 		return ctx
 	}
 
@@ -34,7 +35,7 @@ func WrapCtx(ctx context.Context) context.Context {
 	requestID := uuid.New().String()
 	correlationID := uuid.New().String()
 
-	rsFields = RequestScopedFields{
+	rsFields := RequestScopedFields{
 		TraceID: traceID,
 		RequestID: requestID,
 		CorrelationID: correlationID,

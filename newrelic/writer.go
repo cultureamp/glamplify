@@ -47,7 +47,7 @@ type NRFieldWriter struct {
 	// PRIVATE
 
 	// Allows us to WaitAll if clients want to make sure all pending writes have been sent
-	waitGroup sync.WaitGroup
+	waitGroup *sync.WaitGroup
 	// converts to and from string <-> int
 	leveller *log.Leveller
 }
@@ -63,7 +63,7 @@ func NewNRWriter(configure ...func(*NRFieldWriter)) NRWriter {
 		Timeout:   time.Second * time.Duration(helper.GetEnvInt("NEW_RELIC_TIMEOUT", 5)),
 		OmitEmpty: helper.GetEnvBool(log.OmitEmpty, false),
 		Level:     helper.GetEnvString(log.Level, log.DebugSev),
-		waitGroup: sync.WaitGroup{},
+		waitGroup: &sync.WaitGroup{},
 		leveller:  log.NewLevelMap(),
 	}
 
@@ -93,10 +93,7 @@ func (writer *NRFieldWriter) WriteFields(sev string, system log.Fields, fields .
 
 // IsEnabled returns true is the severity is set, false otherwise
 func (writer NRFieldWriter) IsEnabled(sev string) bool {
-	if writer.leveller.ShouldLogSeverity(writer.Level, sev) {
-		return true
-	}
-	return false
+	return writer.leveller.ShouldLogSeverity(writer.Level, sev)
 }
 
 // WaitAll waits for all the writers to finish before returning
@@ -129,7 +126,8 @@ func post(writer *NRFieldWriter, jsonStr string) error {
 	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
 		return nil
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+
+	body, _ := ioutil.ReadAll(resp.Body)
 	str := string(body)
 	return errors.New(fmt.Sprintf("bad server response: %d. body: %v", resp.StatusCode, str))
 }

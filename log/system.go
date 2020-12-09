@@ -103,7 +103,7 @@ func (df SystemValues) getStackTracer(ews stackTracer) string {
 		buf.WriteString(s)
 	}
 
-	return string(buf.Bytes())
+	return buf.String()
 }
 
 func (df SystemValues) getCurrentStack(skip int) string {
@@ -117,7 +117,7 @@ func (df SystemValues) getCurrentStack(skip int) string {
 		buf.WriteString(frame.String())
 	}
 
-	return string(buf.Bytes())
+	return buf.String()
 }
 
 func (df SystemValues) getEnvFields(fields Fields, properties Fields) Fields {

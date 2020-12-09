@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/cultureamp/glamplify/log"
 	newrelic "github.com/newrelic/go-agent"
 )
 
@@ -36,14 +35,13 @@ func TxnFromContext(ctx context.Context) (*Transaction, error) {
 
 	// 2. So likely a serverless/lambda call, so try and get the CA lambdaHandler so we can get the txnName & app
 	// It should be there as we added it before calling "Invoke".
-	txnName := log.Unknown
 	handler, err := handlerFromContext(ctx)
 	if err != nil || handler == nil {
 		return nil, err
 	}
 
 	// 3. So likely a serverless/lambda call, so get the NR txn from the ctx
-	txnName = handler.functionName
+	txnName := handler.functionName
 	impl := newrelic.FromContext(ctx)
 	if impl != nil {
 		// A bit yuck - we need to create a CA txn here after the fact because NR created one invisibly to us...

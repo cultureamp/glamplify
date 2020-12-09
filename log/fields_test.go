@@ -109,12 +109,21 @@ func TestFields_ToTags(t *testing.T) {
 
 	tags := fields.ToTags(false)
 	assert.Assert(t, len(tags) == 6, tags)
-	assert.Assert(t, tags[0] == "key_string:abc", tags)
-	assert.Assert(t, tags[1] == "key_int:1", tags)
-	assert.Assert(t, tags[2] == "key_float:3.14", tags)
-	assert.Assert(t, tags[3] == "sub_key_string:xyz", tags)
-	assert.Assert(t, tags[4] == "sub_key_int:5", tags)
-	assert.Assert(t, tags[5] == "sub_key_float:6.28", tags)
+	assert.Assert(t, tagContains(tags,"key_string:abc"), tags)
+	assert.Assert(t, tagContains(tags,"key_int:1"), tags)
+	assert.Assert(t, tagContains(tags,"key_float:3.14"), tags)
+	assert.Assert(t, tagContains(tags,"sub_key_string:xyz"), tags)
+	assert.Assert(t, tagContains(tags,"sub_key_int:5"), tags)
+	assert.Assert(t, tagContains(tags,"sub_key_float:6.28"), tags)
+}
+
+func tagContains(tags []string, tag string) bool {
+	for _, t := range tags {
+		if t == tag {
+			return true
+		}
+	}
+	return false
 }
 
 func Benchmark_FieldsToJSON(b *testing.B) {

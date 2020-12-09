@@ -57,8 +57,5 @@ func (sev Leveller) ShouldLogSeverity(level string, severity string) bool {
 
 // ShouldLogLevel given the current level and a severity returns true if should be logged, false otherwise
 func (sev Leveller) ShouldLogLevel(level int, severity int) bool {
-	if severity >= level {
-		return true
-	}
-	return false
+	return severity >= level
 }
