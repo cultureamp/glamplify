@@ -20,6 +20,7 @@ func newAgentLogger(ctx context.Context) *agentLogger {
 	}
 }
 
+//Log prints out msg
 func (log agentLogger) Log(msg string) {
-
+	log.logger.Event("datadog_agent").Info(msg)
 }

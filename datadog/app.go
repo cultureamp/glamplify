@@ -16,7 +16,7 @@ import (
 // Tags are key value pairs used to roll up applications into specific categories
 type Tags map[string]string
 
-// config contains Application and Transaction behavior settings.
+// Config contains Application and Transaction behavior settings.
 // Use NewConfig to create a config with proper defaults.
 type Config struct {
 
@@ -27,7 +27,7 @@ type Config struct {
 	Name    string
 
 	Logging            bool
-	ApiKey             string
+	APIKey             string
 	AppName            string
 	AppEnv             string
 	AppVersion         string
@@ -62,7 +62,7 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 		Enabled:            false,
 		Name:               name,
 		Logging:            false,
-		ApiKey:             os.Getenv(DDApiKey),
+		APIKey:             os.Getenv(DDApiKey),
 		AppName:            helper.GetEnvString(DDService, os.Getenv(log.AppNameEnv)),
 		AppEnv:             helper.GetEnvString(DDEnv, os.Getenv(log.AppFarmEnv)),
 		AppVersion:         helper.GetEnvString(DDVersion, os.Getenv(log.AppVerEnv)),
@@ -116,6 +116,7 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 	return app
 }
 
+// WrapHandler wraps an http.Handler with tracing using the given service and resource.
 func (app Application) WrapHandler(resource string, handler http.HandlerFunc) http.Handler {
 	if !app.conf.Enabled {
 		return handler
@@ -132,10 +133,12 @@ func (app Application) Shutdown() {
 	}
 }
 
+// WrapLambdaHandler is used to instrument your lambda functions.
+// It returns a modified handler that can be passed directly to the lambda. Start function.
 func (app Application) WrapLambdaHandler(handler interface{}) interface{} {
 	if app.conf.Enabled {
 		c := &ddlambda.Config{
-			APIKey:                app.conf.ApiKey,
+			APIKey:                app.conf.APIKey,
 			DebugLogging:          app.conf.Logging,
 			Site:                  app.conf.MetricSite,
 			EnhancedMetrics:       true,
@@ -149,6 +152,7 @@ func (app Application) WrapLambdaHandler(handler interface{}) interface{} {
 	return handler
 }
 
+// RecordLambdaMetric
 func (app Application) RecordLambdaMetric(metricName string, metricValue float64, fields log.Fields) {
 	if app.conf.Enabled {
 		tags := fields.ToTags(true)

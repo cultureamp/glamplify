@@ -13,6 +13,7 @@ import (
 	"github.com/cultureamp/glamplify/log"
 )
 
+// DDWriter interface represents a log writer for data dog
 type DDWriter interface {
 	WriteFields(sev string, system log.Fields, fields ...log.Fields) string
 	IsEnabled(sev string) bool
@@ -85,6 +86,7 @@ func (writer *DDFieldWriter) WriteFields(sev string, system log.Fields, fields .
 	return json
 }
 
+// IsEnabled returns true if the sev is enabled, false otherwise
 func (writer DDFieldWriter) IsEnabled(sev string) bool {
 	if writer.leveller.ShouldLogSeverity(writer.Level, sev) {
 		return true
@@ -92,6 +94,7 @@ func (writer DDFieldWriter) IsEnabled(sev string) bool {
 	return false
 }
 
+// WaitAll waits until all the writers have finished
 func (writer *DDFieldWriter) WaitAll() {
 	writer.waitGroup.Wait()
 }
