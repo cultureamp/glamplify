@@ -24,4 +24,4 @@ jobs:
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.29.0
 
-          golangci-lint run --tests=false --exclude=EXC0001
+          golangci-lint run --verbose --tests=false --disable-all -E golint govet staticcheck gosec stylecheck
