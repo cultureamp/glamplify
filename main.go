@@ -80,7 +80,7 @@ func rootRequestHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// handle error
 	}
-	
+
 	// Create the logging config for this request
 	requestScopedFields := gcontext.RequestScopedFields{
 		TraceID:             r.Header.Get(gcontext.TraceIDHeader),

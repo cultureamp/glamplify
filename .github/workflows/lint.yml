@@ -14,14 +14,8 @@ jobs:
           stable: 'true'
           go-version: '1.15.5'
 
-#      - name: GOLint
-#        run: |
-#          go get -u golang.org/x/lint/golint
-#          golint --set_exit_status ./...
-
       - name: GOLangCI-Lint
         run: |
+#         https://golangci-lint.run/usage/configuration/  https://golangci-lint.run/usage/linters/
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.29.0
-#         https://golangci-lint.run/usage/configuration/
-#         https://golangci-lint.run/usage/linters/
           golangci-lint run --tests=false --disable-all --enable=deadcode --enable=gosimple --enable=govet --enable=ineffassign
