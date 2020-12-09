@@ -107,38 +107,6 @@ func (bb bitBlock) orCount(rhs *bitBlock) uint64 {
 	return count
 }
 
-func (bb bitBlock) notAllCount() uint64 {
-	count, _ := bb.notCount(BitsPerBlock)
-	return count
-}
-
-func (bb bitBlock) notCount(len int) (uint64, error) {
-	if len > BitsPerBlock {
-		return ZeroBitPattern, errors.New("length out of range for NotCount(len int)")
-	}
-
-	var count uint64 = 0
-
-	numLongs := len / BitsPerLong
-	lastBits := len % BitsPerLong
-
-	for i := 0; i < numLongs; i++ {
-		result := ^bb.bits[i]
-		count += bb.numberOfSetBits(result)
-	}
-
-	// create a mask And apply the last one
-	if lastBits > 0 {
-		lastLong := numLongs
-		mask := bb.getMask(lastBits)
-		notBits := ^(bb.bits[lastLong])
-		notBits &= mask
-		count += bb.numberOfSetBits(notBits)
-	}
-
-	return count, nil
-}
-
 func (bb bitBlock) countAll() uint64 {
 	count, _ := bb.count(BitsPerBlock)
 	return count

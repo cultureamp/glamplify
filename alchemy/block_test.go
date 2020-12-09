@@ -256,55 +256,6 @@ func Test_BitBlock_Or_OrCount(t *testing.T) {
 	assert.Assert(t, bit, bit)
 }
 
-func Test_BitBlock_Not_NotCount(t *testing.T) {
-	bb := newBitBlock()
-
-	bb.setBit(0)
-	bb.setBit(1)
-	bb.setBit(2)
-	bb.setBit(1021)
-	bb.setBit(1022)
-	bb.setBit(1023)
-
-	count := bb.notAllCount()
-	assert.Assert(t, count == 1018, count)
-
-	result := bb.notAll()
-	bit, err := result.getBit(0)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
-	bit, err = result.getBit(1)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
-	bit, err = result.getBit(2)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
-	bit, err = result.getBit(1021)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
-	bit, err = result.getBit(1022)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
-	bit, err = result.getBit(1023)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
-
-	result, err = bb.not(510)
-	assert.Assert(t, err == nil, err)
-	count = result.countAll()
-	assert.Assert(t, count==507, count)
-
-	count, err = bb.notCount(510)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count==507, count)
-
-	result, err = bb.not(1025)
-	assert.Assert(t, err != nil, err)
-
-	count, err = bb.notCount(1026)
-	assert.Assert(t, err != nil, err)
-}
-
 func Test_BitBlock_Count(t *testing.T) {
 	bb := newBitBlock()
 
@@ -430,20 +381,5 @@ func Benchmark_BitBlock_Not(b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
 		set.notAll()
-	}
-}
-
-func Benchmark_BitBlock_NotCount(b *testing.B) {
-	set := newBitBlock()
-
-	set.setBit(0)
-	set.setBit(1)
-	set.setBit(2)
-	set.setBit(1021)
-	set.setBit(1022)
-	set.setBit(1023)
-
-	for n := 0; n < b.N; n++ {
-		set.notAllCount()
 	}
 }
