@@ -6,8 +6,10 @@ import (
 	"github.com/go-errors/errors"
 )
 
+// Item type used to represent a record, suggest ID or UUID as a string
 type Item string
 
+// Cauldron interface represents the container of all aspect, facets, and items
 type Cauldron interface {
 	Aspect(name string) (Aspect, error)
 	Aspects() ([]Aspect, error)

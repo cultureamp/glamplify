@@ -7,10 +7,15 @@ import (
 )
 
 const (
+	// BitsPerLong = 64
 	BitsPerLong       = 64
+	// LongsPerBlock = 16
 	LongsPerBlock     = 16
+	// BitsPerBlock = LongsPerBlock * BitsPerLong
 	BitsPerBlock      = LongsPerBlock * BitsPerLong
+	// ZeroBitPattern = uint64(0)
 	ZeroBitPattern    = uint64(0)
+	// AllOnesBitPattern = uint64(18446744073709551615)
 	AllOnesBitPattern = uint64(18446744073709551615)
 )
 
@@ -233,7 +238,6 @@ func (bb *bitBlock) fill(len int) error {
 	for i := lastLong; i < LongsPerBlock; i++ {
 		bb.bits[i] = ZeroBitPattern
 	}
-
 
 	return nil
 }

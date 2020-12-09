@@ -13,11 +13,13 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Config contains the authz client configuration values
 type Config struct {
 	Timeout       time.Duration
 	CacheDuration time.Duration
 }
 
+// Client represents the authz client
 type Client struct {
 	config           Config
 	authzAPIEndpoint string
@@ -25,6 +27,7 @@ type Client struct {
 	cache            *cache.Cache
 }
 
+// NewClient creates a new authz Client
 func NewClient(authzAPIEndpoint string, http Transport, configure ...func(*Config)) *Client {
 
 	c := helper.GetEnvInt(CacheDurationEnv, 60)
@@ -50,6 +53,7 @@ func NewClient(authzAPIEndpoint string, http Transport, configure ...func(*Confi
 	}
 }
 
+// EvaluateBooleanPolicy calls authz-api asking it to evaluate the policy, and then returns the result
 func (client Client) EvaluateBooleanPolicy(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (*EvaluationResponse, error) {
 
 	if item, found := client.cache.Get(policy); found {
@@ -64,7 +68,7 @@ func (client Client) EvaluateBooleanPolicy(ctx context.Context, policy string, i
 		return nil, err // if there is a compile error, etc. assume the kill switch is OFF
 	}
 
-	controlDirective, err := client.ParseResponseCacheControl(ctx, response)
+	controlDirective, err := client.parseResponseCacheControl(ctx, response)
 	if err == nil && controlDirective.MaxAge > 0 {
 		cacheExpiry := time.Duration(controlDirective.MaxAge) * time.Second
 		client.cache.Set(policy, result, cacheExpiry)
@@ -73,7 +77,7 @@ func (client Client) EvaluateBooleanPolicy(ctx context.Context, policy string, i
 	return result, nil
 }
 
-func (client Client) ParseResponseCacheControl(ctx context.Context, response *http.Response) (*cachecontrol.ResponseCacheDirectives, error) {
+func (client Client) parseResponseCacheControl(ctx context.Context, response *http.Response) (*cachecontrol.ResponseCacheDirectives, error) {
 	if response == nil || response.Header == nil {
 		return nil, nil
 	}

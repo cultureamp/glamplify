@@ -6,6 +6,7 @@ import (
 	"github.com/go-errors/errors"
 )
 
+// Aspect interface represents a grouping of facets
 type Aspect interface {
 	Name() string
 	DisplayName() string

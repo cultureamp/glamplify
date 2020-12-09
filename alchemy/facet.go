@@ -4,6 +4,7 @@ import (
 	"github.com/go-errors/errors"
 )
 
+// Facet interface represents a demographic value, all the items of this "name"
 type Facet interface {
 	Name() string
 	DisplayName() string

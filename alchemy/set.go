@@ -6,6 +6,7 @@ import (
 	"github.com/go-errors/errors"
 )
 
+// ReadOnlySet interface represents a set of bits that can not be modified
 type ReadOnlySet interface {
 	And(set ReadOnlySet) (Set, error)
 	Or(set ReadOnlySet) (Set, error)
@@ -22,6 +23,7 @@ type ReadOnlySet interface {
 	GetBit(index uint64) (bool, error)
 }
 
+// Set interface represents a set of bits that can be modified
 type Set interface {
 	And(set ReadOnlySet) (Set, error)
 	Or(set ReadOnlySet) (Set, error)
