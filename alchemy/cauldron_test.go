@@ -17,7 +17,7 @@ const (
 )
 
 func Test_BitCauldron_RealWorld(t *testing.T) {
-	caul := newBitCauldron(TestRealWorldSize)
+	caul := NewBitCauldron(TestRealWorldSize)
 
 	start := time.Now()
 	items := make([]Item, 0, TestRealWorldSize)
@@ -92,12 +92,12 @@ func Test_BitCauldron_RealWorld(t *testing.T) {
 }
 
 func Test_New_BitCauldron(t *testing.T) {
-	caul := newBitCauldron(TestRealWorldSize)
+	caul := NewBitCauldron(TestRealWorldSize)
 	assert.Assert(t, caul != nil, caul)
 }
 
 func Test_BitCauldron_NewAspect(t *testing.T) {
-	caul := newBitCauldron(TestRealWorldSize)
+	caul := NewBitCauldron(TestRealWorldSize)
 
 	loc, err := caul.NewAspect("Location")
 	assert.Assert(t, err == nil, err)
@@ -111,7 +111,7 @@ func Test_BitCauldron_NewAspect(t *testing.T) {
 }
 
 func Test_BitCauldron_GetAspect(t *testing.T) {
-	caul := newBitCauldron(TestRealWorldSize)
+	caul := NewBitCauldron(TestRealWorldSize)
 
 	loc1, err := caul.NewAspect("Location")
 	assert.Assert(t, err == nil, err)
@@ -127,7 +127,7 @@ func Test_BitCauldron_GetAspect(t *testing.T) {
 }
 
 func Test_BitCauldron_AllAspects(t *testing.T) {
-	caul := newBitCauldron(TestRealWorldSize)
+	caul := NewBitCauldron(TestRealWorldSize)
 
 	loc, err := caul.NewAspect("Location")
 	assert.Assert(t, err == nil, err)
@@ -143,7 +143,7 @@ func Test_BitCauldron_AllAspects(t *testing.T) {
 }
 
 func Test_BitCauldron_TryRemove(t *testing.T) {
-	caul := newBitCauldron(TestRealWorldSize)
+	caul := NewBitCauldron(TestRealWorldSize)
 
 	item := Item(uuid.New().String())
 	idx, err := caul.Upsert(item)

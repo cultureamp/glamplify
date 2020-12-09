@@ -45,7 +45,7 @@ type bitCauldron struct {
 	lock *sync.RWMutex
 }
 
-func newBitCauldron(sizeEstimate uint64) Cauldron {
+func NewBitCauldron(sizeEstimate uint64) Cauldron {
 	cauldron := &bitCauldron{
 		count:    0,
 		capacity: 0,
