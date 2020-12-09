@@ -36,10 +36,12 @@ func (txn Transaction) AddAttributes(fields log.Fields) error {
 	return nil
 }
 
+// ReportError reports and error
 func (txn Transaction) ReportError(err error) error {
 	return txn.impl.NoticeError(err)
 }
 
+// ReportErrorDetails report error details
 func (txn Transaction) ReportErrorDetails(msg string, class string, fields log.Fields) error {
 	return txn.impl.NoticeError(newrelic.Error{
 		Message:    msg,

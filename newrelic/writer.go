@@ -2,15 +2,16 @@ package newrelic
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
-	"github.com/cultureamp/glamplify/helper"
-	"github.com/cultureamp/glamplify/log"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/cultureamp/glamplify/helper"
+	"github.com/cultureamp/glamplify/log"
+	"github.com/pkg/errors"
 )
 
 //  NRWriter defines an interface for writing log messages to newrelic

@@ -19,6 +19,7 @@ const (
 	SentryFlushTimeoutInMsEnv = "SENTRY_FLUSH_TIMEOUT_IN_MS"
 )
 
+// Config represents Sentry configuration values
 type Config struct {
 	Enabled          bool
 	Logging          bool
@@ -31,10 +32,12 @@ type Config struct {
 	ReleaseStage     string
 }
 
+// Application represents a sentry app
 type Application struct {
 	conf Config
 }
 
+// NewApplication creates a new sentry Application
 func NewApplication(ctx context.Context, name string, configure ...func(*Config)) (*Application, error) {
 
 	if len(name) == 0 {
