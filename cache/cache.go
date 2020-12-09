@@ -6,15 +6,18 @@ import (
 	"time"
 )
 
+// Config for the cache
 type Config struct {
 	CacheDuration time.Duration
 }
 
+// Cache represents a simple cache
 type Cache struct {
 	conf Config
 	cache *cachego.Cache
 }
 
+// New creates a new Cache
 func New(configure ...func(*Config)) *Cache {
 
 	c := helper.GetEnvInt(CacheDurationEnv, 60)
@@ -36,10 +39,12 @@ func New(configure ...func(*Config)) *Cache {
 	}
 }
 
+// Get an item from the cache
 func (c Cache) Get(key string) (interface{}, bool) {
 	return c.cache.Get(key)
 }
 
+// Set an item within the cache
 func (c *Cache) Set(key string, val interface{}, duration time.Duration) {
 	c.cache.Set(key, val, duration)
 }

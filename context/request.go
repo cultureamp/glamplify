@@ -7,15 +7,20 @@ import (
 )
 
 const (
-	TraceIDHeader = xray.TraceIDHeaderKey // "x-amzn-trace-id"
+	// TraceIDHeader = xray.TraceIDHeaderKey eg. "x-amzn-trace-id"
+	TraceIDHeader = xray.TraceIDHeaderKey
+	// RequestIDHeader = "X-Request-ID"
 	RequestIDHeader = "X-Request-ID"
+	// CorrelationIDHeader = "X-Correlation-ID"
 	CorrelationIDHeader = "X-Correlation-ID"
 )
 
+// GetRequestScopedFieldsFromRequest gets the RequestScopedFields from the request context
 func GetRequestScopedFieldsFromRequest(r *http.Request) (RequestScopedFields, bool) {
 	return GetRequestScopedFields(r.Context())
 }
 
+// AddRequestScopedFieldsRequest adds a RequestScopedFields to the request context
 func AddRequestScopedFieldsRequest(r *http.Request, requestScopeFields RequestScopedFields) *http.Request {
 	ctx := AddRequestFields(r.Context(), requestScopeFields)
 	return r.WithContext(ctx)

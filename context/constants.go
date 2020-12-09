@@ -1,8 +1,9 @@
 package context
 
+// EventCtxKey type
 type EventCtxKey int
 
 const (
-	// CONTEXT KEYS
+	// RequestFieldsCtx EventCtxKey = iota
 	RequestFieldsCtx EventCtxKey = iota
 )
