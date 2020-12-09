@@ -8,7 +8,7 @@ import (
 	"github.com/cultureamp/glamplify/helper"
 )
 
-// Logger
+// Logger contains context to be able to write log messages
 type Logger struct {
 	rsFields  gcontext.RequestScopedFields
 	fields    Fields
@@ -26,7 +26,7 @@ func New(rsFields gcontext.RequestScopedFields, fields ...Fields) *Logger {
 	return newLogger(rsFields, internalWriter, fields...)
 }
 
-// Useful for CLI applications that want to write to stderr or file etc.
+// NewWitCustomWriter Useful for CLI applications that want to write to stderr or file etc.
 func NewWitCustomWriter(rsFields gcontext.RequestScopedFields, writer Writer, fields ...Fields) *Logger {
 	return newLogger(rsFields, writer, fields...)
 }
@@ -51,7 +51,7 @@ func NewFromRequest(r *http.Request, fields ...Fields) *Logger {
 	return NewFromCtx(r.Context(), fields...)
 }
 
-// NewFromRequest creates a new logger from a http.Request, which should contain RequestScopedFields.
+// NewFromRequestWithCustomWriter creates a new logger from a http.Request, which should contain RequestScopedFields.
 // If the context does not contain then, then this method will NOT add them in.
 func NewFromRequestWithCustomWriter(r *http.Request, writer Writer, fields ...Fields) *Logger {
 	return NewFromCtxWithCustomerWriter(r.Context(), writer, fields...)

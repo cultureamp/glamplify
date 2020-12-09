@@ -6,14 +6,21 @@ type Leveller struct {
 }
 
 const (
+	// DebugLevel = iota
 	DebugLevel = iota
+	// InfoLevel = iota + 1
 	InfoLevel
+	// WarnLevel = iota + 2
 	WarnLevel
+	// ErrorLevel = iota + 3
 	ErrorLevel
+	// FatalLevel = iota + 4
 	FatalLevel
+	// AuditLevel = iota + 5
 	AuditLevel
 )
 
+// NewLevelMap creates a Leveller map
 func NewLevelMap() *Leveller {
 
 	table := map[string]int{
@@ -30,6 +37,7 @@ func NewLevelMap() *Leveller {
 	}
 }
 
+// StringToLevel given a string severity returns the int value
 func (sev Leveller) StringToLevel(severity string) int {
 	level, ok := sev.stol[severity]
 	if ok {
@@ -39,6 +47,7 @@ func (sev Leveller) StringToLevel(severity string) int {
 	return DebugLevel
 }
 
+// ShouldLogSeverity given the current level and a severity returns true if should be logged, false otherwise
 func (sev Leveller) ShouldLogSeverity(level string, severity string) bool {
 	l := sev.StringToLevel(level)
 	s := sev.StringToLevel(severity)
@@ -46,6 +55,7 @@ func (sev Leveller) ShouldLogSeverity(level string, severity string) bool {
 	return sev.ShouldLogLevel(l, s)
 }
 
+// ShouldLogLevel given the current level and a severity returns true if should be logged, false otherwise
 func (sev Leveller) ShouldLogLevel(level int, severity int) bool {
 	if severity >= level {
 		return true

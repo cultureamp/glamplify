@@ -68,6 +68,7 @@ const (
 	TotalItemsRequested = "total_items_requested"
 
 	// Severity Values
+
 	// DebugSev = "DEBUG"
 	DebugSev = "DEBUG"
 	// InfoSev  = "INFO"
@@ -82,6 +83,7 @@ const (
 	AuditSev = "AUDIT"
 
 	// ENVIRONMENT VARIABLES
+
 	// Level            = "LOG_LEVEL"
 	Level = "LOG_LEVEL"
 	// OmitEmpty        = "LOG_OMITEMPTY"
