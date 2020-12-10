@@ -100,10 +100,6 @@ jobs:
 
   tag-master:
     needs: [go-build]
-    on:
-      pull_request:
-        branches:
-          - master
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
