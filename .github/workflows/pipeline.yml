@@ -103,3 +103,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
+          DEFAULT_BUMP: patch
+          RELEASE_BRANCHS: master
