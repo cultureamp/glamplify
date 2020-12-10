@@ -25,8 +25,7 @@ func NewDecoder() (Decoder, error) {
 // NewDecoderFromPath creates a new Decoder with the public key in 'pubKeyPath'
 func NewDecoderFromPath(pubKeyPath string) (Decoder, error) {
 
-	pubKeyPath = filepath.Clean(pubKeyPath)
-	verifyBytes, _ := ioutil.ReadFile(pubKeyPath)
+	verifyBytes, _ := ioutil.ReadFile(filepath.Clean(pubKeyPath))
 	return NewDecoderFromBytes(verifyBytes)
 }
 

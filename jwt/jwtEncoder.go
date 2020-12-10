@@ -32,8 +32,7 @@ func NewEncoder() (Encoder, error) {
 // NewEncoderFromPath creates a new Encoder given the private key at 'pemKeyPath'
 func NewEncoderFromPath(pemKeyPath string) (Encoder, error) {
 
-	pemKeyPath = filepath.Clean(pemKeyPath)
-	pemBytes, _ := ioutil.ReadFile(pemKeyPath)
+	pemBytes, _ := ioutil.ReadFile(filepath.Clean(pemKeyPath))
 	return NewEncoderFromBytes(pemBytes)
 }
 
