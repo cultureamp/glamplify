@@ -18,4 +18,4 @@ jobs:
         # https://golangci-lint.run/usage/configuration/  https://golangci-lint.run/usage/linters/
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.29.0
-          golangci-lint run --tests=false --disable-all --enable=deadcode --enable=gosimple --enable=govet --enable=ineffassign --enable=staticcheck --enable=structcheck --enable=unused --enable=varcheck --enable=bodyclose --enable=depguard --enable=dogsled --enable=dupl --enable=errorlint --enable=exhaustive --enable=exhaustivestruct --enable=exportloopref --enable=funlen
+          golangci-lint run --tests=false --disable-all -E=deadcode -E=gosimple -E=govet -E=ineffassign -E=staticcheck -E=structcheck -E=unused -E=varcheck -E=bodyclose -E=depguard -E=dogsled -E=dupl -E=errorlint -E=exhaustive -E=exhaustivestruct -E=exportloopref -E=funlen -E=gochecknoinits -E=gocognit -E=goconst
