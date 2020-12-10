@@ -71,23 +71,7 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 		config(&conf)
 	}
 
-	cfg := newrelic.NewConfig(name, conf.License)
-	cfg.Enabled = conf.Enabled // useful to turn on/off in test/dev vs production accounts
-	cfg.License = conf.License
-	cfg.CustomInsightsEvents.Enabled = true // otherwise custom events won't fire
-	cfg.ErrorCollector.Enabled = true
-	cfg.ErrorCollector.CaptureEvents = true
-	cfg.HighSecurity = false // HighSecurity blocks sending custom events
-	cfg.Labels = conf.Labels // camp, environment, data classification, etc
-	cfg.RuntimeSampler.Enabled = true
-	cfg.ServerlessMode.Enabled = conf.ServerlessMode
-	cfg.TransactionTracer.Enabled = true
-	cfg.Utilization.DetectAWS = true
-	cfg.Utilization.DetectDocker = true
-
-	// for now we turn off DistributedTracing because it is too expensive
-	cfg.DistributedTracer.Enabled = false
-
+	cfg := createConfig(name, conf)
 	if conf.Logging {
 		//cfg.Logger = newrelic.NewDebugLogger(os.Stdout) <- this writes JSON to Stdout :(
 		// So we have our own implementation that wraps our standard logger
@@ -226,4 +210,25 @@ func (app Application) logError(msg string, err error) {
 			"error": err,
 		})
 	}
+}
+
+func createConfig(name string, conf Config) newrelic.Config {
+	cfg := newrelic.NewConfig(name, conf.License)
+	cfg.Enabled = conf.Enabled // useful to turn on/off in test/dev vs production accounts
+	cfg.License = conf.License
+	cfg.CustomInsightsEvents.Enabled = true // otherwise custom events won't fire
+	cfg.ErrorCollector.Enabled = true
+	cfg.ErrorCollector.CaptureEvents = true
+	cfg.HighSecurity = false // HighSecurity blocks sending custom events
+	cfg.Labels = conf.Labels // camp, environment, data classification, etc
+	cfg.RuntimeSampler.Enabled = true
+	cfg.ServerlessMode.Enabled = conf.ServerlessMode
+	cfg.TransactionTracer.Enabled = true
+	cfg.Utilization.DetectAWS = true
+	cfg.Utilization.DetectDocker = true
+
+	// for now we turn off DistributedTracing because it is too expensive
+	cfg.DistributedTracer.Enabled = false
+
+	return cfg
 }

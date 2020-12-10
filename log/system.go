@@ -2,6 +2,7 @@ package log
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"runtime"
@@ -78,14 +79,14 @@ func (df SystemValues) getErrorValues(err error, fields Fields) Fields {
 
 func (df SystemValues) getErrorStackTrace(err error) string {
 	// is it the standard google error type?
-	se, ok := err.(*gerrors.Error)
-	if ok {
+	var se *gerrors.Error
+	if errors.As(err, &se) {
 		return string(se.Stack())
 	}
 
 	// does it support a Stack interface?
-	ews, ok := err.(stackTracer)
-	if ok {
+	var ews stackTracer
+	if errors.As(err, &ews) {
 		return df.getStackTracer(ews)
 	}
 
