@@ -27,8 +27,6 @@ func main() {
 		conf.Version = os.Getenv("APP_VERSION")
 	})
 
-
-
 	/* DataDog */
 	datadogApp := datadog.NewApplication(ctx, "GlamplifyUnitTests", func(conf *datadog.Config) {
 		conf.Enabled = true

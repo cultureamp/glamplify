@@ -38,7 +38,7 @@ func main() {
 
 	xrayTracer := aws.NewTracer(ctx, func(conf *aws.TracerConfig) {
 		conf.Environment = "production" // or "development"
-		conf.AWSService = "ECS"         // or "EC2" or "LAMBDA"
+		conf.AWSService = "ECS"         // or "EC2" 
 		conf.EnableLogging = true
 		conf.Version = os.Getenv("APP_VERSION")
 	})
@@ -221,276 +221,138 @@ Use `Error` when you have encountered a GO error. This will NOT stop the program
 
 Use `Fatal` when you have encountered a GO error that is not recoverable. This will stop the program by calling panic(). All fatal messages will be forwarded to 3rd party systems for monitoring and further analysis.
 
-### Monitor
+use 'Audit' when you want to publish this log to our external customer facing API where they can retrieve information about what is happening in their account. 
 
-Make sure you have the environment variable NEW_RELIC_LICENSE_KEY set to the correct 40 character license key.
-Alternatively, you can read it from another environment variable and pass it into the monitor.Config struct.
+### Lambda
 
-#### Adding Attributes to a Web Request Transaction
-```Go
-package main
+```go
 
 import (
-    "context"
-
-    "github.com/aws/aws-xray-sdk-go/xray"
-    "github.com/cultureamp/glamplify/aws"
-    gcontext "github.com/cultureamp/glamplify/context"
-    "github.com/cultureamp/glamplify/jwt"
+    aws "github.com/aws/aws-lambda-go/events"
+	gaws "github.com/cultureamp/glamplify/aws"
+    "github.com/cultureamp/glamplify/datadog"
     "github.com/cultureamp/glamplify/log"
-    "github.com/cultureamp/glamplify/newrelic"
-    "net/http"
+    "github.com/cultureamp/glamplify/sentry"
 )
 
 func main() {
-    ctx := context.Background()
-    app, err := newrelic.NewApplication(ctx, "GlamplifyDemo", func(conf *newrelic.Config) {
-        conf.Enabled = true             // default = "false"
-        conf.Logging = true             // default = "false"
-        conf.ServerlessMode = false     // default = "false"
-     })
-
-    _, handler := app.WrapHTTPHandler("/", requestHandler)
-    h := http.HandlerFunc(handler)
-
-    if err = http.ListenAndServe(":8080", h); err != nil {
-        panic(err)
-    }
-
-    app.Shutdown()
-}
-
-func requestHandler(w http.ResponseWriter, r *http.Request) {
-    r = gcontext.WrapRequest(r) // Reads and Sets TraceID, RequestID, CorrelationID, User and Customer
-    logger := log.NewFromRequest(r)
-
-    // Do things
-
-    txn, err := newrelic.TxnFromRequest(w, r)
-    if err != nil {
-        logger.Error("monitor_transaction_failed", err)
-        txn.AddAttributes(log.Fields{
-            "aString": "hello world",
-            "aInt":    123,
-        })
-    }
-
-    // Do more things
-
-    if err != nil {
-        logger.Error("program_error", err)
-        txn.AddAttributes(log.Fields{
-            "aString2": "goodbye",
-            "aInt2":    456,
-        })
-    }
-}
-```
-
-#### Custom Events to a Web Request Transaction
-```Go
-package main
-
-import (
-     "context"
-"net/http"
-
-    "github.com/aws/aws-xray-sdk-go/xray"
-    "github.com/cultureamp/glamplify/aws"
-    gcontext "github.com/cultureamp/glamplify/context"
-    "github.com/cultureamp/glamplify/jwt"
-    "github.com/cultureamp/glamplify/log"
-    "github.com/cultureamp/glamplify/newrelic"
-)
-
-func main() {
-    ctx := context.Background()
-    app, err := newrelic.NewApplication(ctx, "GlamplifyDemo", func(conf *newrelic.Config) {
-        conf.Enabled = true             // default = "false"
-        conf.Logging = true             // default = "false"
-        conf.ServerlessMode = false     // default = "false"
+    xray = gaws.NewTracer(ctx, func(config *gaws.TracerConfig) {
+        config.EnableLogging = false
+        config.Version = "1.0.0"
+        config.Environment = "production"
+        config.AWSService = "ECS"
     })
 
-    _, handler := app.WrapHTTPHandler("/", requestHandler)
-    h := http.HandlerFunc(handler)
-
-    if err = http.ListenAndServe(":8080", h); err != nil {
-        panic(err)
-    }
-
-    app.Shutdown()
-}
-
-func requestHandler(w http.ResponseWriter, r *http.Request) {
-    r = gcontext.WrapRequest(r) // Reads and Sets TraceID, RequestID, CorrelationID, User and Customer
-    logger := log.NewFromRequest(r)
- 
-    // Do things
-    app, err := newrelic.AppFromRequest(w, r)
-    if err != nil {
-        logger.Error("monitor_failed", err)
-    }
-
-    err = app.RecordEvent("mycustomEvent", log.Fields{
-        "aString": "hello world",
-        "aInt":    123,
+    // https://docs.sentry.io/platforms/go/serverless/ 
+    //Sentry doesn't write to CloudWatch like other tools (eg. DataDog) 
+    //So we have fo make sure we flush any pending data to Sentry before the lambda is completed and AWS close the network on us 
+    //This is really yuk, but we either have to sentry.Flush() at the end of every handler, or use a HttpSyncTransport 
+    //I'm not sure which is best... :(
+    sentry, err := sentry.NewApplication(ctx, settings.App, func(config *sentry.Config) {
+        config.Enabled = true
+        config.Logging = false
+        config.DSN = os.Getenv("SENTRY_DSN")
+        config.Transport =  &sentrygo.HTTPSyncTransport{Timeout: 100 * time.Millisecond}
     })
-    if err != nil {
-        logger.Error("monitor_record_failed", err)
-    }
-    // Do more things
-}
-```
-
-#### Adding Attributes to a Lambda (Serverless)
-```Go
-package main
-
-import (
-    "context"
-    "github.com/aws/aws-xray-sdk-go/xray"
-    "github.com/cultureamp/glamplify/aws"
-    gcontext "github.com/cultureamp/glamplify/context"
-    "github.com/cultureamp/glamplify/jwt"
-    "github.com/cultureamp/glamplify/log"
-    "github.com/cultureamp/glamplify/newrelic"
-    "net/http"
-)
-
-func main() {
-    ctx := context.Background()
-    app, _ := newrelic.NewApplication(ctx, "GlamplifyDemo", func(conf *newrelic.Config) {
-        conf.Enabled = true             // default = "false"
-        conf.Logging = true             // default = "false"
-        conf.ServerlessMode = true      // default = "false"
-     })
-
-    newrelic.Start(handler, app)
+    
+    datadog = datadog.NewApplication(ctx, settings.App, func(conf *datadog.Config) {
+        conf.Enabled = true
+        conf.Logging = false
+        conf.APIKey =  os.Getenv("DD_API_KEY")
+        conf.WithRuntimeMetrics = true
+        conf.Tags = datadog.Tags{"app": "myapp-api"}
+        conf.ServerlessMode = true
+    })
+    
+    lambda.Start(datadogApp.WrapLambdaHandler(handler))
 }
 
-func handler(ctx context.Context) {
-    ctx = gcontext.WrapCtx(ctx) // reads and sets TraceID and CorrelationID
+func handler(ctx context.Context, request aws.ALBTargetGroupRequest) (aws.ALBTargetGroupResponse, error) {
+    // https://docs.sentry.io/platforms/go/serverless/
+    // Make sure we catch any panics and report them to Sentry...
+    defer sentrygo.Recover()
+    
+    ctx = getLoggingCtx(ctx, request)
+    span, ctx := datadogApp.TraceHandler(ctx, request.Path)
+    defer span.Finish()
+    
     logger := log.NewFromCtx(ctx)
-
-    // Do things
-
-    txn, err := newrelic.TxnFromContext(ctx)
-    if err != nil {
-        logger.Error("monitor_transaction_failed", err)
-        txn.AddAttributes(log.Fields{
-            "aString": "hello world",
-            "aInt":    123,
-        })
+    logger.Event("myapp-api").Fields(log.Fields{
+        "path":        request.Path,
+        "http_method": request.HTTPMethod,
+    }).Debug("Starting request...")
+    
+    var response aws.ALBTargetGroupResponse
+    var err error
+    
+    start := time.Now()
+    switch request.HTTPMethod {
+    case "GET":
+        response, err = handleGet(ctx, request)
+    default:
+        response, err = unhandled(ctx, request)
     }
+    duration := time.Since(start)
 
-    // Do more things
+    // Returning nil Headers and/or MultiValueHeaders causing the ALB to reject the response
+    // So patch the response with default values if any mandatory fields are missing
+    response = patch(response)
 
-    if err != nil {
-        logger.Error("program_failed", err)
-        txn.AddAttributes(log.Fields{
-            "aString2": "goodbye",
-            "aInt2":    456,
-        })
+    logger.Event("authz_api").Fields(log.Fields{
+        "status":             response.StatusCode,
+        "status_description": response.StatusDescription,
+        "is_base64_encoded":  response.IsBase64Encoded,
+        "body":               response.Body,
+    }).Fields(log.NewDurationFields(duration)).Debug("Finished request")
+    
+    return response, nil
+}
+
+func patch(response aws.ALBTargetGroupResponse) aws.ALBTargetGroupResponse {
+    // https://serverless-training.com/articles/api-gateway-vs-application-load-balancer-technical-details/
+    
+    // Returning nil Headers and/or MultiValueHeaders causing the ALB to reject the response
+    // So make sure they are set if nil to empty maps...
+    if response.Headers == nil {
+        response.Headers = map[string]string{}
     }
+    if response.MultiValueHeaders == nil {
+        response.MultiValueHeaders = map[string][]string{}
+    }
+    
+    // https://forums.aws.amazon.com/thread.jspa?threadID=94483
+    response.IsBase64Encoded = false
+    response.StatusDescription = http.StatusText(response.StatusCode)
+    response.Headers["Content-Type"] = "application/json; charset=utf-8"
+    if response.Body == "" {
+        response.Body = "{}"
+    }
+    
+    return response
+}
+
+func getLoggingCtx(ctx context.Context, r awsevents.ALBTargetGroupRequest) context.Context {
+    
+    // If XRAY is enabled, get the trace_id
+    traceID := getTraceID(ctx, r)
+    
+    // Get the customer RequestID or set to UUID if empty
+    requestID := getRequestID(r)
+    
+    // Set to UUID for internal usage
+    correlationID := getCorrelationID(r)
+    
+    rsFields := gcontext.RequestScopedFields{
+    	TraceID: traceID, 
+    	RequestID: requestID, 
+    	CorrelationID: correlationID,
+    }
+    
+    return gcontext.AddRequestFields(ctx, rsFields)
 }
 ```
 
-#### Custom Events to a Lambda (Serverless)
-```Go
-package main
 
-import (
-    "context"
-    "github.com/aws/aws-xray-sdk-go/xray"
-    "github.com/cultureamp/glamplify/aws"
-    gcontext "github.com/cultureamp/glamplify/context"
-    "github.com/cultureamp/glamplify/jwt"
-    "github.com/cultureamp/glamplify/log"
-    "github.com/cultureamp/glamplify/newrelic"
-    "net/http"
-)
 
-func main() {
-    ctx := context.Background()
-    app, _ := newrelic.NewApplication("GlamplifyDemo", func(conf *newrelic.Config) {
-        conf.Enabled = true             // default = "false"
-        conf.Logging = true             // default = "false"
-        conf.ServerlessMode = true      // default = "false"
-    })
 
-    newrelic.Start(handler, app)
-}
-
-func handler(ctx context.Context) {
-    ctx = gcontext.WrapCtx(ctx)  // reads and sets TraceID and CorrelationID
-    logger := log.NewFromCtx(ctx)
-
-    // Do things
-
-    app, err := newrelic.AppFromContext(ctx)
-    if err != nil {
-        logger.Error("monitor_transaction_failed", err)
-        err = app.RecordEvent("mycustomEvent", log.Fields{
-            "aString": "hello world",
-            "aInt":    123,
-        })
-    }
-    // Do more things
-}
-```
-
-## Busnag
-
-Make sure you have the environment variable BUGSNAG_LICENSE_KEY set to the correct license key.
-Alternatively, you can read it from another environment variable and pass it into the notify.Config struct.
-
-```Go
-package main
-
-import (
-    "context"
-"errors"
-    "net/http"
-
-    gcontext "github.com/cultureamp/glamplify/context"
-    "github.com/cultureamp/glamplify/jwt"
-    "github.com/cultureamp/glamplify/log"
-    "github.com/cultureamp/glamplify/bugsnag"
-)
-
-func main() {
-    ctx := context.Background()
-    notifier, err := bugsnag.NewApplication(ctx, "GlamplifyDemo", func(conf *bugsnag.Config) {
-        conf.Enabled = true             // default = "false"
-        conf.Logging = true             // default = "false"
-     })
-
-    _, handler := notifier.WrapHTTPHandler("/", requestHandler)
-    h := http.HandlerFunc(handler)
-
-    if err = http.ListenAndServe(":8080", h); err != nil {
-        panic(err)
-    }
-
-    notifier.Shutdown()
-}
-
-func requestHandler(w http.ResponseWriter, r *http.Request) {
-    r = gcontext.WrapRequest(r)  // Reads and Sets TraceID, RequestID, CorrelationID, User and Customer
-    logger := log.NewFromRequest(r)
-
-    b, be := bugsnag.BugsnagFromRequest(w, r)
-    if be != nil {
-        logger.Error("notification_error", be)
-    }
-
-    // Do things
-
-    // Pretend we got an error
-    err := errors.New("NPE")
-    b.ErrorWithContext(r.Context(), err, log.Fields {
-        "key": "value",
-    })
-}
-```
 
