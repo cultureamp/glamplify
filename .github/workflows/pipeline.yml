@@ -32,3 +32,18 @@ jobs:
       - name: GOTest
         run: |
           go test ./...
+
+  cover:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          stable: 'true'
+          go-version: '1.15.5'
+
+      - name: GOTest
+        run: |
+          go test -covermode=count -coverprofile=count.out
+          go tool cover -func=count.out

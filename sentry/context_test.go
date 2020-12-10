@@ -2,15 +2,16 @@ package sentry_test
 
 import (
 	"context"
-	"github.com/cultureamp/glamplify/bugsnag"
-	"gotest.tools/assert"
 	"testing"
+
+	"github.com/cultureamp/glamplify/sentry"
+	"gotest.tools/assert"
 )
 
 func TestContext_Fail(t *testing.T) {
 
 	ctx := context.Background()
-	txn, err := bugsnag.FromContext(ctx)
+	txn, err := sentry.FromContext(ctx)
 
 	assert.Assert(t, txn == nil, txn)
 	assert.Assert(t, err != nil, err)
