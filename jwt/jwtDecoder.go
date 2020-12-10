@@ -7,6 +7,7 @@ import (
 	jwtgo "github.com/dgrijalva/jwt-go"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 // Decoder represents how to decode a JWT
@@ -24,6 +25,7 @@ func NewDecoder() (Decoder, error) {
 // NewDecoderFromPath creates a new Decoder with the public key in 'pubKeyPath'
 func NewDecoderFromPath(pubKeyPath string) (Decoder, error) {
 
+	pubKeyPath = filepath.Clean(pubKeyPath)
 	verifyBytes, _ := ioutil.ReadFile(pubKeyPath)
 	return NewDecoderFromBytes(verifyBytes)
 }

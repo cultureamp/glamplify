@@ -5,6 +5,7 @@ import (
 	jwtgo "github.com/dgrijalva/jwt-go"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -31,6 +32,7 @@ func NewEncoder() (Encoder, error) {
 // NewEncoderFromPath creates a new Encoder given the private key at 'pemKeyPath'
 func NewEncoderFromPath(pemKeyPath string) (Encoder, error) {
 
+	pemKeyPath = filepath.Clean(pemKeyPath)
 	pemBytes, _ := ioutil.ReadFile(pemKeyPath)
 	return NewEncoderFromBytes(pemBytes)
 }

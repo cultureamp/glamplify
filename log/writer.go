@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -121,7 +122,10 @@ func (writer *FieldWriter) write(sev string, json string) {
 		// Note: Making this faster is a good thing (while we are a sync writer - async writer is a different story)
 		// So we don't use the stdlib writer.Print(), but rather have our own optimized version
 		// Which does less, but is 3-10x faster
-		writer.output.Write([]byte(json))
+		_, err := writer.output.Write([]byte(json))
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
