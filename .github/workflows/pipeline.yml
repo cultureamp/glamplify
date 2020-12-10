@@ -38,7 +38,7 @@ jobs:
           go test ./...
 
   go-cover:
-    needs: [test]
+    needs: [go-test]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
