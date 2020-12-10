@@ -84,3 +84,15 @@ jobs:
       - name: GOBuild
         run: |
           GOARCH=amd64 GOOS=linux go build -ldflags="-s -w" -o main
+
+      - name: Create tag
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            github.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "refs/tags/tagname",
+              sha: context.sha
+            })
