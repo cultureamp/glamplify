@@ -41,3 +41,17 @@ func Test_Context_TraceID_AddGet_Empty(t *testing.T) {
 	assert.Assert(t, rsFields.CustomerAggregateID == "", rsFields)
 	assert.Assert(t, rsFields.UserAggregateID == "", rsFields)
 }
+
+func Test_Context_Wrap(t *testing.T) {
+
+	ctx := context.Background()
+	ctx = gcontext.WrapCtx(ctx)
+
+	rsFields, ok := gcontext.GetRequestScopedFields(ctx)
+	assert.Assert(t, ok, ok)
+	assert.Assert(t, rsFields.TraceID == "", rsFields)
+	assert.Assert(t, rsFields.RequestID != "", rsFields)
+	assert.Assert(t, rsFields.CorrelationID != "", rsFields)
+	assert.Assert(t, rsFields.CustomerAggregateID == "", rsFields)
+	assert.Assert(t, rsFields.UserAggregateID == "", rsFields)
+}
