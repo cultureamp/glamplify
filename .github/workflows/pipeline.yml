@@ -85,7 +85,8 @@ jobs:
         run: |
           GOARCH=amd64 GOOS=linux go build -ldflags="-s -w" -o main
 
-      - name: Create tag
+      - name: Create tag std
+        if: false # disable for now
         uses: actions/github-script@v3
         with:
           github-token: ${{ github.token }}
@@ -96,3 +97,9 @@ jobs:
               ref: "refs/tags/tagname",
               sha: context.sha
             })
+
+      - name: Create tag an
+        uses: anothrNick/github-tag-action@1.26.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
