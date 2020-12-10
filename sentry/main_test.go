@@ -1,4 +1,4 @@
-package main
+package sentry
 
 import (
 	"fmt"
@@ -7,12 +7,12 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	// call flag.Parse() here if TestMain uses flags
 	runExitCode := m.Run()
 
 	// runExitCode 0 means we've passed,
 	// and CoverMode will be non empty if run with -cover
 	if runExitCode == 0 && testing.CoverMode() != "" {
+
 		coverageResult := testing.Coverage()
 
 		// If we are less than 80% then fail the build

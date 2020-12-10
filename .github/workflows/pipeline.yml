@@ -49,7 +49,7 @@ jobs:
           stable: 'true'
           go-version: '1.15.5'
 
-      - name: GOTest
+      - name: GOCover
         run: |
-          go test -covermode=count -coverprofile=count.out
+          go test ./... -covermode=count -coverprofile=count.out
           go tool cover -func=count.out

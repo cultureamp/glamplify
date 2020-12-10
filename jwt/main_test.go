@@ -1,27 +1,13 @@
-package alchemy
+package jwt
 
 import (
 	"fmt"
 	"os"
 	"testing"
-
-	"github.com/google/uuid"
-)
-
-const (
-	TestNumberOfBits = 10000
-	TestSetSize = 1000000  // 1 million
-)
-
-
-var (
-	testCauldron Cauldron
 )
 
 func TestMain(m *testing.M) {
-	setup()
 	runExitCode := m.Run()
-	teardown()
 
 	// runExitCode 0 means we've passed,
 	// and CoverMode will be non empty if run with -cover
@@ -35,17 +21,6 @@ func TestMain(m *testing.M) {
 			runExitCode = -1
 		}
 	}
-
 	os.Exit(runExitCode)
 }
 
-func setup() {
-	testCauldron = NewBitCauldron(TestSetSize)
-	for k := 0; k < TestSetSize; k++ {
-		testCauldron.Upsert(Item(uuid.New().String()))
-	}
-}
-
-func teardown() {
-	// Do something here.
-}
