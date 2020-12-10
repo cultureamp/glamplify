@@ -45,5 +45,5 @@ jobs:
 
       - name: GOTest
         run: |
-          go test -covermode=count -coverprofile=count.out
+          go test -covermode=count -coverprofile=count.out ./...
           go tool cover -func=count.out
