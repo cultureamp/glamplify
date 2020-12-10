@@ -98,3 +98,18 @@ func rootRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 
+func Test_Sentry_WrapHandler(t *testing.T) {
+	ctx := context.Background()
+	sentry, _ := sentry.NewApplication(ctx, "GlamplifyUnitTests", func (conf *sentry.Config) {
+		conf.Enabled = true
+		conf.Logging = true
+		conf.AppVersion = "1.0.0"
+		conf.DSN = "https://177fbd4b35304a80aeaef835f938de69@o19604.ingest.sentry.io/5447011"
+	})
+
+	pattern, handler := sentry.WrapHTTPHandler("/", rootRequest)
+	assert.Assert(t, handler != nil, handler)
+	assert.Assert(t, pattern == "/", pattern)
+}
+
+

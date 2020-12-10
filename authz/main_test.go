@@ -15,9 +15,9 @@ func TestMain(m *testing.M) {
 
 		coverageResult := testing.Coverage()
 
-		// If we are less than 80% then fail the build
-		if coverageResult < 0.8 {
-			fmt.Printf("Tests passed but coverage failed: MUST BE >= 80%%, was %.2f\n", coverageResult*100)
+		// If we are less than 75% then fail the build
+		if coverageResult < 0.75 {
+			fmt.Printf("Tests passed but coverage failed: MUST BE >= 75%%, was %.2f\n", coverageResult*100)
 			runExitCode = -1
 		}
 	}
