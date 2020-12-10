@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  lint:
+  go-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -20,7 +20,7 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.33.0
           golangci-lint run --tests=false --disable-all --enable=deadcode --enable=gosimple --enable=govet --enable=ineffassign --enable=staticcheck --enable=structcheck --enable=unused --enable=varcheck --enable=bodyclose --enable=depguard --enable=dogsled --enable=dupl --enable=errorlint --enable=exportloopref --enable=funlen --enable=gochecknoinits --enable=gocognit --enable=goconst
 
-  test:
+  go-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -33,7 +33,7 @@ jobs:
         run: |
           go test ./...
 
-  cover:
+  go-cover:
     needs: [test]
     runs-on: ubuntu-latest
     steps:
