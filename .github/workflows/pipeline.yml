@@ -98,10 +98,20 @@ jobs:
               sha: context.sha
             })
 
+  tag-master:
+    needs: [go-build]
+    on:
+      pull_request:
+        branches:
+          - master
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: Create tag an
         uses: anothrNick/github-tag-action@1.26.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
           DEFAULT_BUMP: patch
-          RELEASE_BRANCHS: master
+          RELEASE_BRANCHES: master
