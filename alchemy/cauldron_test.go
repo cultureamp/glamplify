@@ -8,7 +8,7 @@ import (
 
 	"github.com/dustin/go-humanize"
 	"github.com/google/uuid"
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -93,53 +93,53 @@ func Test_BitCauldron_RealWorld(t *testing.T) {
 
 func Test_New_BitCauldron(t *testing.T) {
 	caul := NewBitCauldron(TestRealWorldSize)
-	assert.Assert(t, caul != nil, caul)
+	assert.NotNil(t, caul)
 }
 
 func Test_BitCauldron_NewAspect(t *testing.T) {
 	caul := NewBitCauldron(TestRealWorldSize)
 
 	loc, err := caul.NewAspect("Location")
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, loc.Name() == "Location", loc.Name())
-	assert.Assert(t, loc.DisplayName() == "Location", loc.DisplayName())
+	assert.Nil(t, err)
+	assert.Equal(t, "Location", loc.Name())
+	assert.Equal(t, "Location", loc.DisplayName())
 
 	tenure, err := caul.NewAspectWithDisplayName("Ten", "Tenure")
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, tenure.Name() == "Ten", tenure.Name())
-	assert.Assert(t, tenure.DisplayName() == "Tenure", tenure.DisplayName())
+	assert.Nil(t, err)
+	assert.Equal(t,  "Ten", tenure.Name())
+	assert.Equal(t,  "Tenure", tenure.DisplayName())
 }
 
 func Test_BitCauldron_GetAspect(t *testing.T) {
 	caul := NewBitCauldron(TestRealWorldSize)
 
 	loc1, err := caul.NewAspect("Location")
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 
 	loc2, err := caul.Aspect("Location")
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, loc1 == loc2, loc2)
+	assert.Nil(t, err)
+	assert.Equal(t, loc2, loc1)
 
 	// doesn't exist
 	tenure, err := caul.Aspect("Tenure")
-	assert.Assert(t, err != nil, err)
-	assert.Assert(t, tenure == nil, err)
+	assert.NotNil(t, err)
+	assert.Nil(t, tenure)
 }
 
 func Test_BitCauldron_AllAspects(t *testing.T) {
 	caul := NewBitCauldron(TestRealWorldSize)
 
 	loc, err := caul.NewAspect("Location")
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 
 	tenure, err := caul.NewAspectWithDisplayName("Ten", "Tenure")
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 
 	aspects, err := caul.Aspects()
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, len(aspects) == 2, len(aspects))
-	assert.Assert(t, aspectsContains(aspects, loc))
-	assert.Assert(t, aspectsContains(aspects, tenure))
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(aspects))
+	assert.True(t, aspectsContains(aspects, loc))
+	assert.True(t, aspectsContains(aspects, tenure))
 }
 
 func Test_BitCauldron_TryRemove(t *testing.T) {
@@ -147,37 +147,37 @@ func Test_BitCauldron_TryRemove(t *testing.T) {
 
 	item := Item(uuid.New().String())
 	idx, err := caul.Upsert(item)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, idx == 0, idx)
+	assert.Nil(t, err)
+	assert.Equal(t, uint64(0), idx)
 
 	loc, err := caul.NewAspect("Location")
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 
 	melb, err := loc.NewFacet("Melbourne")
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 
 	syd, err := loc.NewFacet("Sydney")
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 
 	melb.SetBitForIndex(idx)
 	syd.SetBitForIndex(idx)
 
 	ok, err := caul.TryRemove(item)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, ok, ok)
+	assert.Nil(t, err)
+	assert.True(t, ok)
 
 	bit, err := melb.GetBitForIndex(idx)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 
 	bit, err = syd.GetBitForIndex(idx)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 
 	// remove again should fail
 	ok, err = caul.TryRemove(item)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !ok, ok)
+	assert.Nil(t, err)
+	assert.False(t, ok)
 }
 
 func aspectsContains(s []Aspect, e Aspect) bool {

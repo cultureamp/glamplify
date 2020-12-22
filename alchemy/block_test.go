@@ -3,20 +3,20 @@ package alchemy
 import (
 	"testing"
 
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_New_BitBlock(t *testing.T) {
 	bb := newBitBlock()
-	assert.Assert(t, bb != nil, bb)
-	assert.Assert(t, bb.bits[0] == 0, bb.bits[0])
+	assert.NotNil(t, bb)
+	assert.Equal(t, uint64(0), bb.bits[0])
 
 	var bits [LongsPerBlock]uint64
 	bits[0] = AllOnesBitPattern
 
 	bb = newBitBlockWithBits(bits)
-	assert.Assert(t, bb != nil, bb)
-	assert.Assert(t, bb.bits[0] == AllOnesBitPattern, bb.bits[0])
+	assert.NotNil(t, bb)
+	assert.Equal(t, AllOnesBitPattern, bb.bits[0])
 }
 
 func Test_BitBlock_GetBit(t *testing.T) {
@@ -28,132 +28,132 @@ func Test_BitBlock_GetBit(t *testing.T) {
 	// first 64 bits should all be 1s
 	for i := 0; i < BitsPerLong; i++ {
 		bit, err := bb.getBit(i)
-		assert.Assert(t, err == nil, err)
-		assert.Assert(t, bit, bit)
+		assert.Nil(t, err)
+		assert.True(t, bit)
 	}
 
 	// next 64 bits should all be 0s
 	for i := BitsPerLong; i < (BitsPerLong+BitsPerLong); i++ {
 		bit, err := bb.getBit(i)
-		assert.Assert(t, err == nil, err)
-		assert.Assert(t, !bit, bit)
+		assert.Nil(t, err)
+		assert.False(t, bit)
 	}
 
 	// out of range
 	bit, err := bb.getBit(BitsPerBlock)
-	assert.Assert(t, err != nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.NotNil(t, err)
+	assert.False(t, bit)
 }
 
 func Test_BitBlock_Set_Unset_Bit(t *testing.T) {
 	bb := newBitBlock()
 
 	bit, err := bb.getBit(0)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 
 	err = bb.unsetBit(0)
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 	bit, err = bb.getBit(0)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 
 	err = bb.setBit(0)
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 	bit, err = bb.getBit(0)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 
 	err = bb.setBit(1023)
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 	bit, err = bb.getBit(1023)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 
 	err = bb.unsetBit(0)
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 	bit, err = bb.getBit(0)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 
 	// out of range
 	err = bb.setBit(1024)
-	assert.Assert(t, err != nil, err)
+	assert.NotNil(t, err)
 	err = bb.unsetBit(1024)
-	assert.Assert(t, err != nil, err)
+	assert.NotNil(t, err)
 }
 
 func Test_BitBlock_Fill_Clear(t *testing.T) {
 	bb := newBitBlock()
 
 	err := bb.fillAll()
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err, err)
 
 	for i := 0; i < BitsPerBlock; i++ {
 		bit, err := bb.getBit(i)
-		assert.Assert(t, err == nil, err)
-		assert.Assert(t, bit, bit)
+		assert.Nil(t, err)
+		assert.True(t, bit)
 	}
 
 	err = bb.clearAll()
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err, err)
 
 	for i := 0; i < BitsPerBlock; i++ {
 		bit, err := bb.getBit(i)
-		assert.Assert(t, err == nil, err)
-		assert.Assert(t, !bit, bit)
+		assert.Nil(t, err)
+		assert.False(t, bit)
 	}
 
 	err = bb.fill(63)
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 	bit, err := bb.getBit(62)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = bb.getBit(63)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 
 	err = bb.fill(65)
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 	bit, err = bb.getBit(64)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = bb.getBit(65)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 
 	err = bb.fill(1021)
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 	bit, err = bb.getBit(1020)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = bb.getBit(1021)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 	bit, err = bb.getBit(1022)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 	bit, err = bb.getBit(1023)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 
 	err = bb.clear(35)
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 	bit, err = bb.getBit(34)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 	bit, err = bb.getBit(35)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = bb.getBit(36)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 
 	// out of range
 	err = bb.fill(1025)
-	assert.Assert(t, err != nil, err)
+	assert.NotNil(t, err)
 	err = bb.clear(1025)
-	assert.Assert(t, err != nil, err)
+	assert.NotNil(t, err)
 }
 
 func Test_BitBlock_And_AndCount(t *testing.T) {
@@ -176,28 +176,28 @@ func Test_BitBlock_And_AndCount(t *testing.T) {
 
 	result := lhs.and(rhs)
 	count := result.countAll()
-	assert.Assert(t, count==6, count)
+	assert.Equal(t, uint64(6), count)
 	count = lhs.andCount(rhs)
-	assert.Assert(t, count==6, count)
+	assert.Equal(t, uint64(6), count)
 
 	bit, err := result.getBit(0)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = result.getBit(1)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = result.getBit(2)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = result.getBit(1021)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = result.getBit(1022)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = result.getBit(1023)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 }
 
 func Test_BitBlock_Or_OrCount(t *testing.T) {
@@ -220,47 +220,47 @@ func Test_BitBlock_Or_OrCount(t *testing.T) {
 
 	result := lhs.or(rhs)
 	count := result.countAll()
-	assert.Assert(t, count==10, count)
+	assert.Equal(t, uint64(10), count)
 	count = lhs.orCount(rhs)
-	assert.Assert(t, count==10, count)
+	assert.Equal(t, uint64(10), count)
 
 	bit, err := result.getBit(0)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = result.getBit(1)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = result.getBit(2)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = result.getBit(3)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = result.getBit(4)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = result.getBit(1019)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = result.getBit(1020)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = result.getBit(1021)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = result.getBit(1022)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 	bit, err = result.getBit(1023)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 }
 
 func Test_BitBlock_Count(t *testing.T) {
 	bb := newBitBlock()
 
 	count := bb.countAll()
-	assert.Assert(t, count==0, count)
+	assert.Equal(t, uint64(0), count)
 
 	bb.setBit(0)
 	bb.setBit(1)
@@ -270,11 +270,11 @@ func Test_BitBlock_Count(t *testing.T) {
 	bb.setBit(1023)
 
 	count, err := bb.count(10)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count==3, count)
+	assert.Nil(t, err)
+	assert.Equal(t, uint64(3), count)
 
 	count, err = bb.count(1025)
-	assert.Assert(t, err != nil, err)
+	assert.NotNil(t, err)
 }
 
 func Benchmark_BitBlock_And(b *testing.B) {
