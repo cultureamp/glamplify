@@ -15,42 +15,42 @@ func (segment *Segment) Fields(fields ...Fields) *Segment {
 }
 
 // Debug logs a debug message for this segment
-func (segment *Segment) Debug(message string) {
+func (segment *Segment) Debug(message string) string {
 
 	segment.fields[Message] = message
 
-	segment.logger.Debug(
+	return segment.logger.Debug(
 		segment.event,
 		segment.fields,
 		)
 }
 
 // Info logs an info message for this segment
-func (segment *Segment) Info(message string) {
+func (segment *Segment) Info(message string) string {
 
 	segment.fields[Message] = message
 
-	segment.logger.Info(
+	return segment.logger.Info(
 		segment.event,
 		segment.fields,
 	)
 }
 
 // Warn logs a warn message for this segment
-func (segment *Segment) Warn(message string) {
+func (segment *Segment) Warn(message string) string {
 
 	segment.fields[Message] = message
 
-	segment.logger.Warn(
+	return segment.logger.Warn(
 		segment.event,
 		segment.fields,
 	)
 }
 
 // Error logs a error message for this segment
-func (segment *Segment) Error(err error) {
+func (segment *Segment) Error(err error) string {
 
-	segment.logger.Error(
+	return segment.logger.Error(
 		segment.event,
 		err,
 		segment.fields,
@@ -58,7 +58,7 @@ func (segment *Segment) Error(err error) {
 }
 
 // Fatal logs a fatal message for this segment
-func (segment *Segment) Fatal(err error) {
+func (segment *Segment) Fatal(err error)  {
 
 	segment.logger.Fatal(
 		segment.event,
@@ -68,11 +68,11 @@ func (segment *Segment) Fatal(err error) {
 }
 
 // Audit logs an audit message for this segment
-func (segment *Segment) Audit(message string) {
+func (segment *Segment) Audit(message string) string {
 
 	segment.fields[Message] = message
 
-	segment.logger.Audit(
+	return segment.logger.Audit(
 		segment.event,
 		segment.fields,
 	)

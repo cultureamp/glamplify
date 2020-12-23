@@ -56,7 +56,7 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 	}
 
 	host, err := os.Hostname()
-	if err != nil {
+	if err == nil {
 		conf.ServerName = host
 	}
 
@@ -83,11 +83,7 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 	}
 
 	err = sentry.Init(cfg)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Application{conf: conf}, nil
+	return &Application{conf: conf}, err
 }
 
 // Shutdown flushes any remaining data to the SAAS endpoint

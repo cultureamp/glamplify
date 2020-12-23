@@ -13,7 +13,30 @@ import (
 	"net/http/httptest"
 )
 
-func TestSentry_Error_Success(t *testing.T) {
+func Test_Sentry_New(t *testing.T) {
+	ctx := context.Background()
+
+	app, err := sentry.NewApplication(ctx, "GlamplifyUnitTests", func (conf *sentry.Config) {
+		conf.Enabled = true
+		conf.Logging = true
+		conf.AppVersion = "1.0.0"
+		conf.DSN = "https://177fbd4b35304a80aeaef835f938de69@o19604.ingest.app.io/5447011"
+	})
+	assert.Nil(t, err)
+	assert.NotNil(t, app)
+
+
+	app, err = sentry.NewApplication(ctx, "GlamplifyUnitTests", func (conf *sentry.Config) {
+		conf.Enabled = false
+		conf.Logging = false
+		conf.AppVersion = "1.0.0"
+		conf.DSN = "https://177fbd4b35304a80aeaef835f938de69@o19604.ingest.app.io/5447011"
+	})
+	assert.Nil(t, err)
+	assert.NotNil(t, app)
+}
+
+func Test_Sentry_Error_Success(t *testing.T) {
 
 	ctx := context.Background()
 	sentry, err := sentry.NewApplication(ctx, "GlamplifyUnitTests", func (conf *sentry.Config) {
@@ -30,7 +53,7 @@ func TestSentry_Error_Success(t *testing.T) {
 	sentry.Shutdown()
 }
 
-func TestSentry_Context_Success(t *testing.T) {
+func Test_Sentry_Context_Success(t *testing.T) {
 
 	ctx := context.Background()
 	sentry, err := sentry.NewApplication(ctx, "GlamplifyUnitTests", func (conf *sentry.Config) {
@@ -57,7 +80,7 @@ func TestSentry_Context_Success(t *testing.T) {
 	sentry.Shutdown()
 }
 
-func TestSentry_Sync_Transport(t *testing.T) {
+func Test_Sentry_Sync_Transport(t *testing.T) {
 
 	ctx := context.Background()
 	sentry, err := sentry.NewApplication(ctx, "GlamplifyUnitTests", func (conf *sentry.Config) {
@@ -85,18 +108,6 @@ func TestSentry_Sync_Transport(t *testing.T) {
 	sentry.Flush(50 * time.Millisecond)
 }
 
-func rootRequest(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	t, _ := ctx.Value("t").(*testing.T)
-
-	sentry, err := sentry.FromContext(ctx)
-	assert.Nil(t, err)
-	assert.NotNil(t, sentry)
-
-	id := sentry.Message("glamplify http handler test message")
-	assert.NotEmpty(t, id)
-}
-
 func Test_Sentry_WrapHandler(t *testing.T) {
 	ctx := context.Background()
 	sentry, _ := sentry.NewApplication(ctx, "GlamplifyUnitTests", func (conf *sentry.Config) {
@@ -111,4 +122,14 @@ func Test_Sentry_WrapHandler(t *testing.T) {
 	assert.Equal(t, "/", pattern)
 }
 
+func rootRequest(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	t, _ := ctx.Value("t").(*testing.T)
 
+	sentry, err := sentry.FromContext(ctx)
+	assert.Nil(t, err)
+	assert.NotNil(t, sentry)
+
+	id := sentry.Message("glamplify http handler test message")
+	assert.NotEmpty(t, id)
+}

@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	lc "github.com/aws/aws-lambda-go/lambdacontext"
 	"testing"
 
 	aws "github.com/aws/aws-lambda-go/events"
@@ -24,6 +25,16 @@ func Test_Invoke_Handler(t *testing.T) {
 		Payload:            request,
 		RequestID:          "0",
 		InvokedFunctionArn: "arn:aws:lambda:us-east-1:123497558138:function:golang-layer:alias",
+		ClientContext:      &lc.ClientContext{
+			Client: lc.ClientApplication{
+				InstallationID: "0",
+				AppTitle:       "app",
+				AppVersionCode: "1.0.0",
+				AppPackageName: "test",
+			},
+			Env:    nil,
+			Custom: nil,
+		},
 	})
 
 	assert.NotNil(t, err)

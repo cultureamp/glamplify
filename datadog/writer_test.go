@@ -3,7 +3,6 @@ package datadog
 import (
 	"context"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -34,11 +33,17 @@ func Test_DataDog_Writer(t *testing.T) {
 
 	logger := log.NewFromCtxWithCustomerWriter(ctx, writer)
 
-	json := logger.Info("hello Data Dog")
+	json := logger.Event("data_dog").Fields(log.Fields{
+		"string_key": "a string",
+		"int_key": 123,
+	}).Info("hello from Data Dog")
 	writer.WaitAll()
 
 	assert.NotEmpty(t, json)
-	assert.True(t, strings.Contains(json, "hello"))
+	assert.Contains(t, json, "\"event\":\"data_dog\"")
+	assert.Contains(t, json, "\"string_key\":\"a string\"")
+	assert.Contains(t, json, "\"int_key\":123")
+	assert.Contains(t, json, "hello from Data Dog")
 }
 
 func Test_DataDog_Writer_IsEnabled(t *testing.T) {

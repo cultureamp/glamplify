@@ -13,6 +13,13 @@ import (
 	"github.com/cultureamp/glamplify/log"
 )
 
+const (
+	dataDogApiKeyHeader = "DD-API-KEY"
+	contentTypeHeader = "Content-Type"
+	applicationJsonType = "application/json"
+)
+
+
 // DDWriter interface represents a log writer for data dog
 type DDWriter interface {
 	WriteFields(sev string, system log.Fields, fields ...log.Fields) string
@@ -105,8 +112,9 @@ func post(writer *DDFieldWriter, jsonStr string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("DD-API-KEY", writer.APIKey)
+
+	req.Header.Set(contentTypeHeader, applicationJsonType)
+	req.Header.Set(dataDogApiKeyHeader, writer.APIKey)
 
 	var client = &http.Client{
 		Timeout: writer.Timeout,
