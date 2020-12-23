@@ -1,29 +1,30 @@
 package alchemy
 
 import (
-	"gotest.tools/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_New_Stack(t *testing.T) {
 	s := newLinkedListStack()
-	assert.Assert(t, s != nil, s)
+	assert.NotNil(t, s)
 }
 
 func Test_LinkedListStack(t *testing.T) {
 	s := newLinkedListStack()
-	assert.Assert(t, s.isEmpty(), s.isEmpty())
+	assert.True(t, s.isEmpty())
 
 	s.push(1)
-	assert.Assert(t, !s.isEmpty(), s.isEmpty())
+	assert.False(t, s.isEmpty())
 
 	id, err := s.pop()
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, id == 1, id)
-	assert.Assert(t, s.isEmpty(), s.isEmpty())
+	assert.Nil(t, err)
+	assert.Equal(t, uint64(1), id)
+	assert.True(t, s.isEmpty())
 
 	_, err = s.pop()
-	assert.Assert(t, err != nil, err)
+	assert.NotNil(t, err)
 
 	// push and pop a number of elements
 	for i := 0; i < TestNumberOfBits; i++ {
@@ -31,12 +32,12 @@ func Test_LinkedListStack(t *testing.T) {
 	}
 	for i := TestNumberOfBits - 1; i >= 0; i-- {
 		id, err := s.pop()
-		assert.Assert(t, err == nil, err)
-		assert.Assert(t, id == uint64(i), id)
+		assert.Nil(t, err)
+		assert.Equal(t, uint64(i), id)
 	}
 
 	_, err = s.pop()
-	assert.Assert(t, err != nil, err)
+	assert.NotNil(t, err)
 }
 
 func Benchmark_LinkedListStack(b *testing.B) {

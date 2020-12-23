@@ -73,7 +73,7 @@ func (client HTTPTransport) Post(ctx context.Context, url string, contentType st
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", contentType)
 
+	req.Header.Set("Content-Type", contentType)
 	return client.network.Do(req)
 }

@@ -5,17 +5,17 @@ import (
 	"testing"
 
 	"github.com/aws/aws-xray-sdk-go/xraylog"
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_New_TraceLogger(t *testing.T) {
 	ctx := context.Background()
 
 	log := newXrayLogger(ctx)
-	assert.Assert(t, log != nil, log)
+	assert.NotNil(t, log)
 }
 
-func Test_TraceLogger_Log(t *testing.T) {
+func Test_TraceLogger_RealWorld_Log(t *testing.T) {
 	ctx := context.Background()
 
 	log := newXrayLogger(ctx)

@@ -2,10 +2,9 @@ package log
 
 import (
 	"bytes"
-	"fmt"
-	"gotest.tools/assert"
-	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_WriteFields(t *testing.T) {
@@ -25,10 +24,10 @@ func Test_WriteFields(t *testing.T) {
 	})
 
 	msg := memBuffer.String()
-	assertStringContains(t, msg, "system", "system_value")
-	assertStringContains(t, msg, "system_empty", "")
-	assertStringContains(t, msg, "properties", "properties_value")
-	assertStringContains(t, msg, "properties_empty", "")
+	assert.Contains(t, msg, "\"system\":\"system_value\"")
+	assert.Contains(t, msg, "\"system_empty\":\"\"")
+	assert.Contains(t, msg, "\"properties\":\"properties_value\"")
+	assert.Contains(t, msg, "\"properties_empty\":\"\"")
 }
 
 func Test_WriteFields_OmitEmpty(t *testing.T) {
@@ -49,10 +48,10 @@ func Test_WriteFields_OmitEmpty(t *testing.T) {
 		})
 
 	msg := memBuffer.String()
-	assertStringContains(t, msg, "system", "system_value")
-	assertKeyMissing(t, msg, "system_empty")
-	assertStringContains(t, msg, "properties", "properties_value")
-	assertKeyMissing(t, msg, "properties_empty")
+	assert.Contains(t, msg, "\"system\":\"system_value\"")
+	assert.NotContains(t, msg, "system_empty")
+	assert.Contains(t, msg, "\"properties\":\"properties_value\"")
+	assert.NotContains(t, msg, "properties_empty")
 }
 
 func Test_WriteFields_IsEnabled(t *testing.T) {
@@ -61,28 +60,15 @@ func Test_WriteFields_IsEnabled(t *testing.T) {
 	})
 
 	ok := writer.IsEnabled(DebugSev)
-	assert.Assert(t, !ok, ok)
+	assert.False(t, ok)
 	ok = writer.IsEnabled(InfoSev)
-	assert.Assert(t, ok, ok)
+	assert.True(t, ok)
 	ok = writer.IsEnabled(WarnSev)
-	assert.Assert(t, ok, ok)
+	assert.True(t, ok)
 	ok = writer.IsEnabled(ErrorSev)
-	assert.Assert(t, ok, ok)
+	assert.True(t, ok)
 	ok = writer.IsEnabled(FatalSev)
-	assert.Assert(t, ok, ok)
+	assert.True(t, ok)
 	ok = writer.IsEnabled(AuditSev)
-	assert.Assert(t, ok, ok)
+	assert.True(t, ok)
 }
-
-func assertStringContains(t *testing.T, log string, key string, val string) {
-	// Check that the keys and values are in the log line
-	find := fmt.Sprintf("\"%s\":\"%s\"", key, val)
-	assert.Assert(t, strings.Contains(log, find), "Expected '%s' in '%s'", find, log)
-}
-
-func assertKeyMissing(t *testing.T, log string, key string) {
-	// Check that the keys and values are in the log line
-	find := fmt.Sprintf("\"%s\"", key)
-	assert.Assert(t, !strings.Contains(log, find), "Expected '%s' in '%s'", find, log)
-}
-

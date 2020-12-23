@@ -11,7 +11,6 @@ import (
 	lc "github.com/aws/aws-lambda-go/lambdacontext"
 )
 
-const functioninvokeRPC = "Function.Invoke"
 
 // Input represents an AWS RPC call
 type Input = struct {
@@ -27,7 +26,6 @@ type Input = struct {
 }
 
 //InvokeLambda a Go based lambda, passing the configured payload
-//note that 'payload' can be anything that can be encoded by encoding/json
 func InvokeLambda(input Input) ([]byte, error) {
 	request, err := createInvokeRequest(input)
 
@@ -44,7 +42,7 @@ func InvokeLambda(input Input) ([]byte, error) {
 	// 3. Issue an RPC request for the Function.Invoke method
 	var response messages.InvokeResponse
 
-	if err = client.Call(functioninvokeRPC, request, &response); err != nil {
+	if err = client.Call(functionInvokeRPC, request, &response); err != nil {
 		return nil, err
 	}
 

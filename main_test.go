@@ -1,10 +1,14 @@
-package jwt
+package main
 
 import (
 	"fmt"
 	"os"
 	"testing"
 )
+
+func Test_Main(t *testing.T) {
+	main()
+}
 
 func TestMain(m *testing.M) {
 	runExitCode := m.Run()
@@ -15,9 +19,9 @@ func TestMain(m *testing.M) {
 
 		coverageResult := testing.Coverage()
 
-		// If we are less than 75% then fail the build
-		if coverageResult < 0.75 {
-			fmt.Printf("Tests passed but coverage failed: MUST BE >= 75%%, was %.2f\n", coverageResult*100)
+		// If we are less than 85% then fail the build
+		if coverageResult < 0.80 {
+			fmt.Printf("Tests passed but coverage failed: MUST BE >= 85%%, was %.2f\n", coverageResult*100)
 			runExitCode = -1
 		}
 	}

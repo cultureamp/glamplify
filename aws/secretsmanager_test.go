@@ -1,24 +1,50 @@
 package aws
 
 import (
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"gotest.tools/assert"
 	"testing"
+	"time"
+
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/stretchr/testify/assert"
 )
 
-func Test_GetSecretParam_MissingKey(t *testing.T) {
+func Test_GetSecretParam_MissingKey_NoCache(t *testing.T) {
 
-	sm := NewSecretsManager("default")
-	assert.Assert(t, sm != nil, sm)
+	sm := NewSecretsManager(func(config *SecretsManagerConfig) {
+		config.Profile = "default"
+		config.CacheErrorsAsEmpty = false
+	})
+	assert.NotNil(t, sm)
 
 	// Missing Key
 	val, err := sm.Get("/this/should/not/exist/secret_key")
-	assert.Assert(t, val == "", val)
+	assert.NotNil(t, err)
+	assert.Empty(t, val)
 
-	aerr, ok := err.(awserr.Error)
-	assert.Assert(t, ok, ok)
-	assert.Assert(t, aerr.Message() != "", aerr.Message())
+	_, ok := err.(awserr.Error)
+	assert.True(t, ok)
 }
 
-// TODO - what is a good key to use for unit tests?
+func Test_GetSecretParam_MissingKey_WithCache(t *testing.T) {
+
+	sm := NewSecretsManager(func(config *SecretsManagerConfig) {
+		config.Profile = "default"
+		config.CacheErrorsAsEmpty = true
+		config.CacheDuration = 1 * time.Minute
+	})
+	assert.NotNil(t, sm)
+
+	// Missing Key
+	val, err := sm.Get("/this/should/not/exist/secret_key")
+	assert.NotNil(t, err)
+	assert.Empty(t, val)
+
+	val, err = sm.Get("/this/should/not/exist/secret_key")
+	assert.Nil(t, err)
+	assert.Empty(t, val)
+}
+
+
+
+// TODO - what is a good key & env to use for unit tests?
 

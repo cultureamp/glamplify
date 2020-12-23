@@ -2,9 +2,10 @@ package context_test
 
 import (
 	"context"
-	gcontext "github.com/cultureamp/glamplify/context"
-	"gotest.tools/assert"
 	"testing"
+
+	gcontext "github.com/cultureamp/glamplify/context"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Context_AddGet(t *testing.T) {
@@ -19,12 +20,12 @@ func Test_Context_AddGet(t *testing.T) {
 	})
 
 	rsFields, ok := gcontext.GetRequestScopedFields(ctx)
-	assert.Assert(t, ok, ok)
-	assert.Assert(t, rsFields.TraceID == "trace1", rsFields)
-	assert.Assert(t, rsFields.RequestID == "request1", rsFields)
-	assert.Assert(t, rsFields.CorrelationID == "correlation1", rsFields)
-	assert.Assert(t, rsFields.CustomerAggregateID == "cust1", rsFields)
-	assert.Assert(t, rsFields.UserAggregateID == "user1", rsFields)
+	assert.True(t, ok)
+	assert.Equal(t, "trace1", rsFields.TraceID)
+	assert.Equal(t, "request1", rsFields.RequestID)
+	assert.Equal(t, "correlation1", rsFields.CorrelationID)
+	assert.Equal(t, "cust1", rsFields.CustomerAggregateID)
+	assert.Equal(t, "user1", rsFields.UserAggregateID)
 }
 
 func Test_Context_TraceID_AddGet_Empty(t *testing.T) {
@@ -34,12 +35,12 @@ func Test_Context_TraceID_AddGet_Empty(t *testing.T) {
 	})
 
 	rsFields, ok := gcontext.GetRequestScopedFields(ctx)
-	assert.Assert(t, ok, ok)
-	assert.Assert(t, rsFields.TraceID == "", rsFields)
-	assert.Assert(t, rsFields.RequestID == "", rsFields)
-	assert.Assert(t, rsFields.CorrelationID == "", rsFields)
-	assert.Assert(t, rsFields.CustomerAggregateID == "", rsFields)
-	assert.Assert(t, rsFields.UserAggregateID == "", rsFields)
+	assert.True(t, ok)
+	assert.Empty(t, rsFields.TraceID)
+	assert.Empty(t, rsFields.RequestID)
+	assert.Empty(t, rsFields.CorrelationID)
+	assert.Empty(t, rsFields.CustomerAggregateID)
+	assert.Empty(t, rsFields.UserAggregateID)
 }
 
 func Test_Context_Wrap(t *testing.T) {
@@ -48,10 +49,10 @@ func Test_Context_Wrap(t *testing.T) {
 	ctx = gcontext.WrapCtx(ctx)
 
 	rsFields, ok := gcontext.GetRequestScopedFields(ctx)
-	assert.Assert(t, ok, ok)
-	assert.Assert(t, rsFields.TraceID == "", rsFields)
-	assert.Assert(t, rsFields.RequestID != "", rsFields)
-	assert.Assert(t, rsFields.CorrelationID != "", rsFields)
-	assert.Assert(t, rsFields.CustomerAggregateID == "", rsFields)
-	assert.Assert(t, rsFields.UserAggregateID == "", rsFields)
+	assert.True(t, ok)
+	assert.Empty(t, rsFields.TraceID)
+	assert.NotEmpty(t, rsFields.RequestID)
+	assert.NotEmpty(t, rsFields.CorrelationID)
+	assert.Empty(t, rsFields.CustomerAggregateID)
+	assert.Empty(t, rsFields.UserAggregateID)
 }

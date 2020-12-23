@@ -10,12 +10,13 @@ import (
 	"testing"
 	"time"
 
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func Test_OPAClient_New(t *testing.T) {
 	client := NewClient("dummy", mockHTTPClient{})
-	assert.Assert(t, client != nil, client)
+	assert.NotNil(t, client)
 }
 
 func Test_OPAClient_Throw_Error(t *testing.T) {
@@ -25,8 +26,8 @@ func Test_OPAClient_Throw_Error(t *testing.T) {
 	})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
-	assert.Assert(t, err != nil, err)
-	assert.Assert(t, response == nil, response)
+	assert.NotNil(t, err)
+	assert.Nil(t, response)
 }
 
 func Test_OPAClient_Sleep(t *testing.T) {
@@ -36,9 +37,9 @@ func Test_OPAClient_Sleep(t *testing.T) {
 	})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
-	assert.Assert(t, err != nil, err)
-	assert.Assert(t, err.Error() == "context deadline exceeded")
-	assert.Assert(t, response == nil, response)
+	assert.NotNil(t, err)
+	assert.Equal(t, "context deadline exceeded", err.Error())
+	assert.Nil(t, response)
 }
 
 func Test_OPAClient_Return_Empty(t *testing.T) {
@@ -48,8 +49,8 @@ func Test_OPAClient_Return_Empty(t *testing.T) {
 	})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
-	assert.Assert(t, err != nil, err)
-	assert.Assert(t, response == nil, response)
+	assert.NotNil(t, err)
+	assert.Nil(t, response)
 }
 
 func Test_OPAClient_Return_Bad_JSON(t *testing.T) {
@@ -59,8 +60,8 @@ func Test_OPAClient_Return_Bad_JSON(t *testing.T) {
 	})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
-	assert.Assert(t, err != nil, err)
-	assert.Assert(t, response == nil, response)
+	assert.NotNil(t, err)
+	assert.Nil(t, response)
 }
 
 func Test_OPAClient_Return_Not_Allowed(t *testing.T) {
@@ -70,9 +71,9 @@ func Test_OPAClient_Return_Not_Allowed(t *testing.T) {
 	})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, response != nil, response)
-	assert.Assert(t, response.Allow == false, response)
+	assert.Nil(t, err)
+	assert.NotNil(t, response)
+	assert.False(t, response.Allow)
 }
 
 func Test_OPAClient_Return_Allowed(t *testing.T) {
@@ -82,12 +83,13 @@ func Test_OPAClient_Return_Allowed(t *testing.T) {
 	})
 
 	response, err := client.EvaluateBooleanPolicy(ctx, "test.policy.name", IdentityRequest{}, InputRequest{})
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, response != nil, response)
-	assert.Assert(t, response.Allow == true, response)
+	assert.Nil(t, err)
+	assert.NotNil(t, response)
+	assert.True(t, response.Allow)
 }
 
 type mockHTTPClient struct {
+	mock.Mock
 	throwError       bool
 	sleep            bool
 	returnEmpty      bool

@@ -6,68 +6,68 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_New_BitFacet(t *testing.T) {
 	aspect := newBitAspect("Location", "Location", testCauldron)
 	facet := newBitFacet("Melbourne", "Melbourne", aspect, testCauldron)
-	assert.Assert(t, facet != nil, facet)
+	assert.NotNil(t, facet)
 }
 
 func Test_BitFacet_Getters(t *testing.T) {
 	aspect := newBitAspect("Location", "Location", testCauldron)
 	facet := newBitFacet("Melbourne", "Melbourne", aspect, testCauldron)
 
-	assert.Assert(t, facet.Name() == "Melbourne", facet.Name())
-	assert.Assert(t, facet.DisplayName() == "Melbourne", facet.DisplayName())
+	assert.Equal(t, "Melbourne", facet.Name())
+	assert.Equal(t, "Melbourne", facet.DisplayName())
 
 	a := facet.Aspect()
-	assert.Assert(t, a != nil, a)
-	assert.Assert(t, a.Name() == aspect.Name(), a.Name())
+	assert.NotNil(t, a)
+	assert.Equal(t, aspect.Name(), a.Name())
 
 	s := facet.Set()
-	assert.Assert(t, s != nil, s)
-	assert.Assert(t, s.Count() == 0, s.Count())
+	assert.NotNil(t, s)
+	assert.Equal(t, uint64(0), s.Count())
 }
 
 func Test_BitFacet_Set_Get_Unset_ByIndex(t *testing.T) {
 
 	item := Item(uuid.New().String())
 	idx, err := testCauldron.Upsert(item)
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 
 	aspect := newBitAspect("Location", "Location", testCauldron)
 	facet := newBitFacet("Melbourne", "Melbourne", aspect, testCauldron)
 
 	bit, err := facet.GetBitForIndex(idx)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 
 	err = facet.SetBitForIndex(idx)
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 
 	bit, err = facet.GetBitForIndex(idx)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 
 	err = facet.UnsetBitForIndex(idx)
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 
 	bit, err = facet.GetBitForIndex(idx)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 
 	// out of bounds
 	bit, err = facet.GetBitForIndex(TestSetSize+1)
-	assert.Assert(t, err != nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.NotNil(t, err)
+	assert.False(t, bit)
 
 	err = facet.SetBitForIndex(TestSetSize+1)
-	assert.Assert(t, err != nil, err)
+	assert.NotNil(t, err)
 
 	err = facet.UnsetBitForIndex(TestSetSize+1)
-	assert.Assert(t, err != nil, err)
+	assert.NotNil(t, err)
 }
 
 func Test_BitFacet_Set_Get_Unset_ByItem(t *testing.T) {
@@ -79,33 +79,33 @@ func Test_BitFacet_Set_Get_Unset_ByItem(t *testing.T) {
 	facet := newBitFacet("Melbourne", "Melbourne", aspect, testCauldron)
 
 	bit, err := facet.GetBitForItem(item)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 
 	err = facet.SetBitForItem(item)
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 
 	bit, err = facet.GetBitForItem(item)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, bit, bit)
+	assert.Nil(t, err)
+	assert.True(t, bit)
 
 	err = facet.UnsetBitForItem(item)
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 
 	bit, err = facet.GetBitForItem(item)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 
 	item = Item(uuid.New().String())
 	bit, err = facet.GetBitForItem(item)
-	assert.Assert(t, err != nil, err)
-	assert.Assert(t, !bit, bit)
+	assert.NotNil(t, err)
+	assert.False(t, bit)
 
 	err = facet.SetBitForItem(item)
-	assert.Assert(t, err != nil, err)
+	assert.NotNil(t, err)
 
 	err = facet.UnsetBitForItem(item)
-	assert.Assert(t, err != nil, err)
+	assert.NotNil(t, err)
 }
 
 func Test_BitFacet_ToSlice(t *testing.T) {
@@ -122,7 +122,7 @@ func Test_BitFacet_ToSlice(t *testing.T) {
 	}
 
 	slice := melbourne.ToSlice()
-	assert.Assert(t, uint64(len(slice)) == melbourne.Count(), len(slice))
+	assert.Equal(t, melbourne.Count(), uint64(len(slice)))
 }
 
 func Test_BitFacet_And(t *testing.T) {
@@ -135,9 +135,9 @@ func Test_BitFacet_And(t *testing.T) {
 
 	// And two empty sets
 	result, err := melbourne.And(oneYear)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == 0, result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, uint64(0), result.Count())
 
 	// One empty, the other with values
 	empty := newBitSet(testCauldron)
@@ -152,20 +152,20 @@ func Test_BitFacet_And(t *testing.T) {
 	}
 
 	result, err = melbourne.AndSet(empty)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == 0, result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, uint64(0), result.Count())
 
 	result, err = oneYear.AndSet(empty)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == 0, result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, uint64(0), result.Count())
 
 	result, err = melbourne.And(oneYear)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == melbourne.Count(), result.Count())
-	assert.Assert(t, result.Count() == oneYear.Count(), result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, melbourne.Count(), result.Count())
+	assert.Equal(t, oneYear.Count(),result.Count())
 }
 
 func Test_BitFacet_AndCount(t *testing.T) {
@@ -178,8 +178,8 @@ func Test_BitFacet_AndCount(t *testing.T) {
 
 	// And two empty sets
 	count, err := melbourne.AndCount(oneYear)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == 0, count)
+	assert.Nil(t, err)
+	assert.Equal(t, uint64(0), count)
 
 	// One empty, the other with values
 	empty := newBitSet(testCauldron)
@@ -194,17 +194,17 @@ func Test_BitFacet_AndCount(t *testing.T) {
 	}
 
 	count, err = melbourne.AndCountSet(empty)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t,count == 0, count)
+	assert.Nil(t, err)
+	assert.Equal(t, uint64(0), count)
 
 	count, err = oneYear.AndCountSet(empty)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == 0, count)
+	assert.Nil(t, err)
+	assert.Equal(t, uint64(0), count)
 
 	count, err = melbourne.AndCount(oneYear)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == melbourne.Count(), count)
-	assert.Assert(t, count == oneYear.Count(), count)
+	assert.Nil(t, err)
+	assert.Equal(t, count, melbourne.Count())
+	assert.Equal(t, count, oneYear.Count())
 }
 
 func Test_BitFacet_Or(t *testing.T) {
@@ -216,9 +216,9 @@ func Test_BitFacet_Or(t *testing.T) {
 
 	// Or two empty sets
 	result, err := oneYear.Or(melbourne)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == 0, result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, uint64(0), result.Count())
 
 	// One empty, the other with values
 	empty := newBitSet(testCauldron)
@@ -233,15 +233,15 @@ func Test_BitFacet_Or(t *testing.T) {
 	}
 
 	result, err = melbourne.OrSet(empty)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == melbourne.Count(), result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, result.Count(), melbourne.Count())
 
 	result, err = melbourne.Or(oneYear)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == melbourne.Count(), result.Count())
-	assert.Assert(t, result.Count() == oneYear.Count(), result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, melbourne.Count(), result.Count())
+	assert.Equal(t, oneYear.Count(), result.Count())
 }
 
 func Test_BitFacet_OrCount(t *testing.T) {
@@ -253,8 +253,8 @@ func Test_BitFacet_OrCount(t *testing.T) {
 
 	// Or two empty sets
 	count, err := oneYear.OrCount(melbourne)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == 0, count)
+	assert.Nil(t, err)
+	assert.Equal(t, uint64(0), count)
 
 	// One empty, the other with values
 	empty := newBitSet(testCauldron)
@@ -269,13 +269,13 @@ func Test_BitFacet_OrCount(t *testing.T) {
 	}
 
 	count, err = melbourne.OrCountSet(empty)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == melbourne.Count(), count)
+	assert.Nil(t, err)
+	assert.Equal(t, count, melbourne.Count())
 
 	count, err = melbourne.OrCount(oneYear)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == melbourne.Count(), count)
-	assert.Assert(t, count == oneYear.Count(), count)
+	assert.Nil(t, err)
+	assert.Equal(t, count, melbourne.Count())
+	assert.Equal(t, count, oneYear.Count())
 }
 
 func Test_BitFacet_Not(t *testing.T) {
@@ -287,9 +287,9 @@ func Test_BitFacet_Not(t *testing.T) {
 
 	// Not empty set
 	result, err := melbourne.Not()
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == cauldronCount, result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, cauldronCount, result.Count())
 
 	// Add some values
 	s1 := rand.NewSource(time.Now().UnixNano())
@@ -303,9 +303,9 @@ func Test_BitFacet_Not(t *testing.T) {
 	countBeforeNot := melbourne.Count()
 
 	result, err = melbourne.Not()
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == (cauldronCount-countBeforeNot), result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, cauldronCount-countBeforeNot, result.Count())
 }
 
 func Test_BitFacet_NotCount(t *testing.T) {
@@ -317,8 +317,8 @@ func Test_BitFacet_NotCount(t *testing.T) {
 
 	// Not empty set
 	count, err := melbourne.NotCount()
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == cauldronCount, count)
+	assert.Nil(t, err)
+	assert.Equal(t, cauldronCount, count)
 
 	// Add some values
 	s1 := rand.NewSource(time.Now().UnixNano())
@@ -332,6 +332,6 @@ func Test_BitFacet_NotCount(t *testing.T) {
 	countBeforeNot := melbourne.Count()
 
 	count, err = melbourne.NotCount()
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == (cauldronCount-countBeforeNot), count)
+	assert.Nil(t, err)
+	assert.Equal(t, cauldronCount-countBeforeNot, count)
 }

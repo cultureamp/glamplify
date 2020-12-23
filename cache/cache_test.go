@@ -1,36 +1,36 @@
 package cache
 
 import (
-	"gotest.tools/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_SetGet(t *testing.T) {
 
-	c := New()
-	assert.Assert(t, c != nil, c)
+	cache := New()
+	assert.NotNil(t, cache)
 
 	val := "a value"
-	c.Set("k1", val, 1*time.Second)
+	cache.Set("k1", val, 1*time.Second)
 
-	x, found := c.Get("k1")
-	assert.Assert(t, found, found)
-
+	x, found := cache.Get("k1")
+	assert.True(t, found)
 	v := x.(string)
-	assert.Assert(t, v == "a value", v)
+	assert.Equal(t, "a value", v)
 }
 
 func Test_SetGet_Expiry(t *testing.T) {
 
-	c := New()
-	assert.Assert(t, c != nil, c)
+	cache := New()
+	assert.NotNil(t, cache)
 
 	val := "a value"
-	c.Set("k1", val, 1*time.Second)
+	cache.Set("k1", val, 1*time.Second)
 
 	time.Sleep(2*time.Second)
 
-	_, found := c.Get("k1")
-	assert.Assert(t, !found, found)
+	_, found := cache.Get("k1")
+	assert.False(t, found)
 }

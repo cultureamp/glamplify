@@ -8,23 +8,56 @@ import (
 
 	aws "github.com/aws/aws-lambda-go/events"
 	"github.com/cultureamp/glamplify/datadog"
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
 )
 
-func Test_DataDog_Application(t *testing.T) {
+func Test_DataDog_NewApplication(t *testing.T) {
 	ctx := context.Background()
+
+	// not enabled
 	app := datadog.NewApplication(ctx, "Glamplify-Unit-Tests", func(conf *datadog.Config) {
+		conf.Enabled = false
+		conf.Logging = false
+		conf.ServerlessMode = false
+	})
+	assert.NotNil(t, app)
+	app.Shutdown()
+
+	// serverless
+	app = datadog.NewApplication(ctx, "Glamplify-Unit-Tests", func(conf *datadog.Config) {
+		conf.Enabled = true
+		conf.Logging = true
+		conf.ServerlessMode = true
+	})
+	assert.NotNil(t, app)
+	app.Shutdown()
+
+	// EC2/Fargate
+	app = datadog.NewApplication(ctx, "Glamplify-Unit-Tests", func(conf *datadog.Config) {
 		conf.Enabled = true
 		conf.Logging = true
 		conf.ServerlessMode = false
+		conf.WithRuntimeMetrics = true
+		conf.Tags = datadog.Tags{"tagkey": "tagvalue"}
 	})
-
-	assert.Assert(t, app != nil, "application was nil")
-
+	assert.NotNil(t, app)
 	app.Shutdown()
+
 }
 
-func Test_DataDog_WrapHandler(t *testing.T) {
+func Test_DataDog_WrapHandler_NotEnabled(t *testing.T) {
+	ctx := context.Background()
+	app := datadog.NewApplication(ctx, "Glamplify-Unit-Tests", func(conf *datadog.Config) {
+		conf.Enabled = false
+		conf.ServerlessMode = false
+	})
+
+	handler := app.WrapHandler("/", dataDogServeHTTP)
+	assert.NotNil(t, handler)
+	// assert that handler == dataDogServeHTTP
+}
+
+func Test_DataDog_WrapHandler_Enabled(t *testing.T) {
 	ctx := context.Background()
 	app := datadog.NewApplication(ctx, "Glamplify-Unit-Tests", func(conf *datadog.Config) {
 		conf.Enabled = true
@@ -33,8 +66,10 @@ func Test_DataDog_WrapHandler(t *testing.T) {
 	})
 
 	handler := app.WrapHandler("/", dataDogServeHTTP)
-	assert.Assert(t, handler != nil, handler)
+	assert.NotNil(t, handler)
+	// assert that handler != dataDogServeHTTP
 }
+
 
 func dataDogServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
@@ -48,14 +83,14 @@ func Test_DataDog_WrapLambda(t *testing.T) {
 	})
 
 	handler := app.WrapLambdaHandler(dataDogLambadaHandler)
-	assert.Assert(t, handler != nil, handler)
+	assert.NotNil(t, handler)
 }
 
 func dataDogLambadaHandler(ctx context.Context, request aws.ALBTargetGroupRequest) (aws.ALBTargetGroupResponse, error) {
 	return aws.ALBTargetGroupResponse{StatusCode: 200}, nil
 }
 
-func Test_DataDog_RecordMetric(t *testing.T) {
+func Test_DataDog_RealWorld_RecordMetric(t *testing.T) {
 	ctx := context.Background()
 	app := datadog.NewApplication(ctx, "Glamplify-Unit-Tests", func(conf *datadog.Config) {
 		conf.Enabled = true
@@ -77,5 +112,5 @@ func Test_DataDog_TraceHandler(t *testing.T) {
 
 	app.WrapLambdaHandler(dataDogLambadaHandler)
 	span, _ := app.TraceHandler(ctx, "root")
-	assert.Assert(t, span != nil, span)
+	assert.NotNil(t, span)
 }

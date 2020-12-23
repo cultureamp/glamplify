@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_New_BitSet(t *testing.T) {
 	lhs := newBitSet(testCauldron)
-	assert.Assert(t, lhs != nil, lhs)
+	assert.NotNil(t, lhs, lhs)
 }
 
 func Test_BitSet_And(t *testing.T) {
@@ -19,9 +19,9 @@ func Test_BitSet_And(t *testing.T) {
 
 	// And two empty sets
 	result, err := lhs.And(rhs)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == 0, result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, uint64(0), result.Count())
 
 	// One empty, the other with values
 	empty := newBitSet(testCauldron)
@@ -38,20 +38,20 @@ func Test_BitSet_And(t *testing.T) {
 	}
 
 	result, err = empty.And(rhs)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == 0, result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, uint64(0), result.Count())
 
 	result, err = rhs.And(empty)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == 0, result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, uint64(0), result.Count())
 
 	result, err = lhs.And(rhs)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == lhs.Count(), result.Count())
-	assert.Assert(t, result.Count() == rhs.Count(), result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, lhs.Count(), result.Count())
+	assert.Equal(t, rhs.Count(), result.Count())
 }
 
 func Test_BitSet_AndCount(t *testing.T) {
@@ -60,8 +60,8 @@ func Test_BitSet_AndCount(t *testing.T) {
 
 	// And two empty sets
 	count, err := lhs.AndCount(rhs)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == 0, count)
+	assert.Nil(t, err)
+	assert.Equal(t, uint64(0), count)
 
 	// One empty, the other with values
 	empty := newBitSet(testCauldron)
@@ -78,17 +78,17 @@ func Test_BitSet_AndCount(t *testing.T) {
 	}
 
 	count, err = empty.AndCount(rhs)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == 0, count)
+	assert.Nil(t, err)
+	assert.Equal(t, uint64(0), count)
 
 	count, err = rhs.AndCount(empty)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == 0, count)
+	assert.Nil(t, err)
+	assert.Equal(t, uint64(0), count)
 
 	count, err = lhs.AndCount(rhs)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == lhs.Count(), count)
-	assert.Assert(t, count == rhs.Count(), count)
+	assert.Nil(t, err)
+	assert.Equal(t, lhs.Count(), count)
+	assert.Equal(t, rhs.Count(), count)
 }
 
 func Test_BitSet_Or(t *testing.T) {
@@ -97,9 +97,9 @@ func Test_BitSet_Or(t *testing.T) {
 
 	// Or two empty sets
 	result, err := lhs.Or(rhs)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == 0, result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, uint64(0), result.Count())
 
 	// One empty, the other with values
 	empty := newBitSet(testCauldron)
@@ -116,20 +116,20 @@ func Test_BitSet_Or(t *testing.T) {
 	}
 
 	result, err = empty.Or(rhs)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == rhs.Count(), result.Count())
+	assert.Nil(t, err, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, rhs.Count(), result.Count())
 
 	result, err = rhs.Or(empty)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == rhs.Count(), result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, rhs.Count(), result.Count())
 
 	result, err = lhs.Or(rhs)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == lhs.Count(), result.Count())
-	assert.Assert(t, result.Count() == rhs.Count(), result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, lhs.Count(), result.Count())
+	assert.Equal(t, rhs.Count(), result.Count())
 }
 
 func Test_BitSet_OrCount(t *testing.T) {
@@ -138,8 +138,8 @@ func Test_BitSet_OrCount(t *testing.T) {
 
 	// Or two empty sets
 	count, err := lhs.OrCount(rhs)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == 0, count)
+	assert.Nil(t, err)
+	assert.Equal(t, uint64(0), count)
 
 	// One empty, the other with values
 	empty := newBitSet(testCauldron)
@@ -156,17 +156,17 @@ func Test_BitSet_OrCount(t *testing.T) {
 	}
 
 	count, err = empty.OrCount(rhs)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == rhs.Count(), count)
+	assert.Nil(t, err)
+	assert.Equal(t, rhs.Count(), count)
 
 	count, err = rhs.OrCount(empty)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == rhs.Count(), count)
+	assert.Nil(t, err)
+	assert.Equal(t, rhs.Count(), count)
 
 	count, err = lhs.OrCount(rhs)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == lhs.Count(), count)
-	assert.Assert(t, count == rhs.Count(), count)
+	assert.Nil(t, err)
+	assert.Equal(t, lhs.Count(), count)
+	assert.Equal(t, rhs.Count(), count)
 }
 
 func Test_BitSet_Not(t *testing.T) {
@@ -175,9 +175,9 @@ func Test_BitSet_Not(t *testing.T) {
 
 	// Not empty set
 	result, err := set.Not()
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == cauldronCount, result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, cauldronCount, result.Count())
 
 	// Add some values
 	s1 := rand.NewSource(time.Now().UnixNano())
@@ -192,9 +192,9 @@ func Test_BitSet_Not(t *testing.T) {
 	countBeforeNot := set.Count()
 
 	result, err = set.Not()
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, result != nil, result)
-	assert.Assert(t, result.Count() == (cauldronCount-countBeforeNot), result.Count())
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, cauldronCount-countBeforeNot, result.Count())
 }
 
 func Test_BitSet_NotCount(t *testing.T) {
@@ -203,8 +203,8 @@ func Test_BitSet_NotCount(t *testing.T) {
 
 	// Not empty set
 	count, err := set.NotCount()
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == cauldronCount, count)
+	assert.Nil(t, err)
+	assert.Equal(t, cauldronCount, count)
 
 	// Add some values
 	s1 := rand.NewSource(time.Now().UnixNano())
@@ -219,14 +219,14 @@ func Test_BitSet_NotCount(t *testing.T) {
 	countBeforeNot := set.Count()
 
 	count, err = set.NotCount()
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, count == (cauldronCount-countBeforeNot), count)
+	assert.Nil(t, err)
+	assert.Equal(t, cauldronCount-countBeforeNot, count)
 }
 
 func Test_BitSet_Size(t *testing.T) {
 	set := newBitSet(testCauldron)
 
-	assert.Assert(t, set.Size() == testCauldron.Capacity(), set.Size())
+	assert.Equal(t, testCauldron.Capacity(), set.Size())
 }
 
 func Test_BitSet_ToSlice(t *testing.T) {
@@ -237,7 +237,7 @@ func Test_BitSet_ToSlice(t *testing.T) {
 	}
 
 	slice := set.ToSlice()
-	assert.Assert(t, uint64(len(slice)) == set.Count(), len(slice))
+	assert.Equal(t, set.Count(), uint64(len(slice)))
 }
 
 func Test_BitSet_SetBit_GetBit_UnsetBit(t *testing.T) {
@@ -246,18 +246,18 @@ func Test_BitSet_SetBit_GetBit_UnsetBit(t *testing.T) {
 		bitIdx := uint64(rand.Int63n(TestSetSize))
 
 		err := set.SetBit(bitIdx)
-		assert.Assert(t, err == nil, err)
+		assert.Nil(t, err)
 
 		bit, err := set.GetBit(bitIdx)
-		assert.Assert(t, err == nil, err)
-		assert.Assert(t, bit, bit)
+		assert.Nil(t, err)
+		assert.True(t, bit)
 
 		err = set.UnsetBit(bitIdx)
-		assert.Assert(t, err == nil, err)
+		assert.Nil(t, err)
 
 		bit, err = set.GetBit(bitIdx)
-		assert.Assert(t, err == nil, err)
-		assert.Assert(t, !bit, bit)
+		assert.Nil(t, err)
+		assert.False(t, bit)
 	}
 }
 
@@ -269,7 +269,7 @@ func Test_BitSet_Clear(t *testing.T) {
 	}
 
 	set.Clear()
-	assert.Assert(t, set.Count() == 0, set.Count())
+	assert.Equal(t, uint64(0), set.Count(), set.Count())
 }
 
 func Test_BitSet_Fill(t *testing.T) {
@@ -279,7 +279,7 @@ func Test_BitSet_Fill(t *testing.T) {
 	set.Fill()
 	cap := testCauldron.Capacity()
 	count := set.Count()
-	assert.Assert(t, count == cap, count)
+	assert.Equal(t, count, cap)
 
 	set = newBitSet(testCauldron)
 	for i := 0; i < TestNumberOfBits; i++ {
@@ -291,7 +291,7 @@ func Test_BitSet_Fill(t *testing.T) {
 	set.Fill()
 	cap = testCauldron.Capacity()
 	count = set.Count()
-	assert.Assert(t, count == cap, count)
+	assert.Equal(t, count, cap)
 }
 
 func Benchmark_BitSet_And(b *testing.B) {

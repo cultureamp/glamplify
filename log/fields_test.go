@@ -1,11 +1,11 @@
 package log_test
 
 import (
-	"github.com/cultureamp/glamplify/log"
 	"testing"
 	"time"
 
-	"gotest.tools/assert"
+	"github.com/cultureamp/glamplify/log"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFields_Success(t *testing.T) {
@@ -13,11 +13,11 @@ func TestFields_Success(t *testing.T) {
 		"aString": "hello world",
 		"aInt":    123,
 	}
-	assert.Assert(t, entries != nil, entries)
+	assert.NotNil(t, entries)
 
 	ok, err := entries.ValidateNewRelic()
-	assert.Assert(t, ok, ok)
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
+	assert.True(t, ok)
 }
 
 func TestFields_Merge_Duration(t *testing.T) {
@@ -25,9 +25,9 @@ func TestFields_Merge_Duration(t *testing.T) {
 	durations := log.NewDurationFields(d)
 
 	tt := durations["time_taken"]
-	assert.Assert(t, tt == "P0.456S", tt)
+	assert.Equal(t, "P0.456S", tt)
 	ttms := durations["time_taken_ms"]
-	assert.Assert(t, ttms == int64(456), ttms)
+	assert.Equal(t, int64(456), ttms)
 
 	entries := log.Fields{
 		"aString": "hello world",
@@ -36,9 +36,9 @@ func TestFields_Merge_Duration(t *testing.T) {
 	entries = entries.Merge(durations)
 
 	tt = entries["time_taken"]
-	assert.Assert(t, tt == "P0.456S", tt)
+	assert.Equal(t, "P0.456S", tt)
 	ttms = entries["time_taken_ms"]
-	assert.Assert(t, ttms == int64(456), ttms)
+	assert.Equal(t, int64(456), ttms)
 }
 
 func TestFields_InvalidType_Failed(t *testing.T) {
@@ -48,11 +48,11 @@ func TestFields_InvalidType_Failed(t *testing.T) {
 	entries := log.Fields{
 		"aMap": dict,
 	}
-	assert.Assert(t, entries != nil, entries)
+	assert.NotNil(t, entries)
 
 	ok, err := entries.ValidateNewRelic()
-	assert.Assert(t, !ok, ok)
-	assert.Assert(t, err != nil, err)
+	assert.NotNil(t, err)
+	assert.False(t, ok)
 }
 
 func TestFields_NilValue_Failed(t *testing.T) {
@@ -63,22 +63,22 @@ func TestFields_NilValue_Failed(t *testing.T) {
 		"aMap": dict,
 		"akey": nil,
 	}
-	assert.Assert(t, entries != nil, entries)
+	assert.NotNil(t, entries)
 
 	ok, err := entries.ValidateNewRelic()
-	assert.Assert(t, !ok, ok)
-	assert.Assert(t, err != nil, err)
+	assert.NotNil(t, err)
+	assert.False(t, ok)
 }
 
 func TestFields_StringToLong_Failed(t *testing.T) {
 	entries := log.Fields{
 		"aString": "big_long_string_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890",
 	}
-	assert.Assert(t, entries != nil, entries)
+	assert.NotNil(t, entries)
 
 	ok, err := entries.ValidateNewRelic()
-	assert.Assert(t, !ok, ok)
-	assert.Assert(t, err != nil, err)
+	assert.NotNil(t, err)
+	assert.False(t, ok)
 }
 
 func TestFields_InvalidValues_ToJSON(t *testing.T) {
@@ -92,38 +92,29 @@ func TestFields_InvalidValues_ToJSON(t *testing.T) {
 	}
 
 	str := fields.ToJSON(false)
-	assert.Assert(t, str == "{\"key_string\":\"abc\"}", str)
+	assert.Equal(t, "{\"key_string\":\"abc\"}", str)
 }
 
 func TestFields_ToTags(t *testing.T) {
 	fields := log.Fields{
 		"key_string": "abc",
-		"key_int": 1,
-		"key_float": 3.14,
+		"key_int":    1,
+		"key_float":  3.14,
 		"key_field": log.Fields{
 			"sub_key_string": "xyz",
-			"sub_key_int": 5,
-			"sub_key_float": 6.28,
+			"sub_key_int":    5,
+			"sub_key_float":  6.28,
 		},
 	}
 
 	tags := fields.ToTags(false)
-	assert.Assert(t, len(tags) == 6, tags)
-	assert.Assert(t, tagContains(tags,"key_string:abc"), tags)
-	assert.Assert(t, tagContains(tags,"key_int:1"), tags)
-	assert.Assert(t, tagContains(tags,"key_float:3.14"), tags)
-	assert.Assert(t, tagContains(tags,"sub_key_string:xyz"), tags)
-	assert.Assert(t, tagContains(tags,"sub_key_int:5"), tags)
-	assert.Assert(t, tagContains(tags,"sub_key_float:6.28"), tags)
-}
-
-func tagContains(tags []string, tag string) bool {
-	for _, t := range tags {
-		if t == tag {
-			return true
-		}
-	}
-	return false
+	assert.Equal(t, 6, len(tags))
+	assert.Contains(t, tags, "key_string:abc")
+	assert.Contains(t, tags, "key_int:1")
+	assert.Contains(t, tags, "key_float:3.14")
+	assert.Contains(t, tags, "sub_key_string:xyz")
+	assert.Contains(t, tags, "sub_key_int:5")
+	assert.Contains(t, tags, "sub_key_float:6.28")
 }
 
 func Benchmark_FieldsToJSON(b *testing.B) {

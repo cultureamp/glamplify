@@ -3,13 +3,12 @@ package datadog
 import (
 	"context"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
 	gcontext "github.com/cultureamp/glamplify/context"
 	"github.com/cultureamp/glamplify/log"
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_DataDog_Writer(t *testing.T) {
@@ -34,11 +33,17 @@ func Test_DataDog_Writer(t *testing.T) {
 
 	logger := log.NewFromCtxWithCustomerWriter(ctx, writer)
 
-	json := logger.Info("hello Data Dog")
+	json := logger.Event("data_dog").Fields(log.Fields{
+		"string_key": "a string",
+		"int_key": 123,
+	}).Info("hello from Data Dog")
 	writer.WaitAll()
 
-	assert.Assert(t, json != "", json)
-	assert.Assert(t, strings.Contains(json, "hello"), json)
+	assert.NotEmpty(t, json)
+	assert.Contains(t, json, "\"event\":\"data_dog\"")
+	assert.Contains(t, json, "\"string_key\":\"a string\"")
+	assert.Contains(t, json, "\"int_key\":123")
+	assert.Contains(t, json, "hello from Data Dog")
 }
 
 func Test_DataDog_Writer_IsEnabled(t *testing.T) {
@@ -48,13 +53,13 @@ func Test_DataDog_Writer_IsEnabled(t *testing.T) {
 	})
 
 	ok := writer.IsEnabled(log.DebugSev)
-	assert.Assert(t, !ok, ok)
+	assert.False(t, ok)
 	ok = writer.IsEnabled(log.InfoSev)
-	assert.Assert(t, !ok, ok)
+	assert.False(t, ok)
 	ok = writer.IsEnabled(log.WarnSev)
-	assert.Assert(t, !ok, ok)
+	assert.False(t, ok)
 	ok = writer.IsEnabled(log.ErrorSev)
-	assert.Assert(t, ok, ok)
+	assert.True(t, ok)
 	ok = writer.IsEnabled(log.FatalSev)
-	assert.Assert(t, ok, ok)
+	assert.True(t, ok)
 }
