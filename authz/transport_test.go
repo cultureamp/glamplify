@@ -38,6 +38,10 @@ func Test_Http_Transport_Post_Error(t *testing.T){
 	ctx := context.Background()
 	response, err = client.Post(ctx, "http://error.local", "application/json", bytes.NewBuffer([]byte("{}")))
 	assert.Error(t, err)
-	assert.EqualError(t, err, "Post \"http://error.local\": dial tcp: lookup error.local: no such host")
 	assert.Nil(t, response)
+
+	// This gives difference answers on Windows vs Linux
+	// assert.EqualError(t, err, "Post \"http://error.local\": dial tcp: lookup error.local: no such host")
+	// So just go with this for now...
+	assert.Contains(t, err.Error(), "dial tcp")
 }
