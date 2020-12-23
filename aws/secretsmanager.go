@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/cultureamp/glamplify/cache"
+	"github.com/cultureamp/glamplify/helper"
 	"time"
 )
 
@@ -13,7 +14,7 @@ type SecretsManagerConfig struct {
 	Profile string
 	// todo other aws config?
 	CacheErrorsAsEmpty bool
-	CacheDuration time.Duration
+	CacheDuration      time.Duration
 }
 
 // SecretsManager allows easy access to retrieve secrets
@@ -28,10 +29,9 @@ type SecretsManager struct {
 func NewSecretsManager(configure ...func(*SecretsManagerConfig)) *SecretsManager {
 
 	conf := &SecretsManagerConfig{
-		Profile:            "default",
+		Profile:            helper.GetEnvString(AWSProfileEnv, "default"),
 		CacheErrorsAsEmpty: false,
 		CacheDuration:      1 * time.Minute,
-
 	}
 	for _, config := range configure {
 		config(conf)
