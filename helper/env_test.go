@@ -1,9 +1,10 @@
 package helper
 
 import (
-	"gotest.tools/assert"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_GetEnvString(t *testing.T) {
@@ -11,10 +12,10 @@ func Test_GetEnvString(t *testing.T) {
 	defer os.Unsetenv("TEST_STRING")
 
 	val := GetEnvString("should_not_exist_env_var", "fallback")
-	assert.Assert(t, val == "fallback", val)
+	assert.Equal(t, "fallback", val)
 
 	val = GetEnvString("TEST_STRING", "fallback")
-	assert.Assert(t, val == "string", val)
+	assert.Equal(t, "string", val)
 }
 
 func Test_GetEnvInt(t *testing.T) {
@@ -22,10 +23,10 @@ func Test_GetEnvInt(t *testing.T) {
 	defer os.Unsetenv("TEST_INT")
 
 	val := GetEnvInt("should_not_exist_env_var", 42)
-	assert.Assert(t, val == 42, val)
+	assert.Equal(t, 42, val)
 
 	val = GetEnvInt("TEST_INT", 6)
-	assert.Assert(t, val == 123, val)
+	assert.Equal(t, 123, val)
 }
 
 func Test_GetEnvBool(t *testing.T) {
@@ -33,8 +34,8 @@ func Test_GetEnvBool(t *testing.T) {
 	defer os.Unsetenv("TEST_BOOL")
 
 	val := GetEnvBool("should_not_exist_env_var", false)
-	assert.Assert(t, val == false, val)
+	assert.False(t, val)
 
 	val = GetEnvBool("TEST_BOOL", false)
-	assert.Assert(t, val == true, val)
+	assert.True(t, val)
 }

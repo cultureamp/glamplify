@@ -7,13 +7,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"testing"
 	"time"
 
 	gcontext "github.com/cultureamp/glamplify/context"
 	gerrors "github.com/go-errors/errors"
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -24,17 +23,17 @@ var (
 
 func Test_New(t *testing.T) {
 	logger := New(rsFields)
-	assert.Assert(t, logger != nil, logger)
+	assert.NotNil(t, logger)
 }
 
 func Test_NewWithContext(t *testing.T) {
 	logger := NewFromCtx(ctx)
-	assert.Assert(t, logger != nil, logger)
+	assert.NotNil(t, logger)
 
-	rsFields, ok1 := gcontext.GetRequestScopedFields(ctx)
+	rsFields, ok := gcontext.GetRequestScopedFields(ctx)
 
-	assert.Assert(t, ok1, ok1)
-	assert.Assert(t, rsFields.TraceID == "1-2-3", rsFields)
+	assert.True(t, ok)
+	assert.Equal(t, "1-2-3", rsFields.TraceID)
 }
 
 func Test_NewWithRequest(t *testing.T) {
@@ -42,12 +41,12 @@ func Test_NewWithRequest(t *testing.T) {
 
 	req1 := req.WithContext(ctx)
 	logger := NewFromRequest(req1)
-	assert.Assert(t, logger != nil, logger)
+	assert.NotNil(t, logger)
 
-	rsFields, ok1 := gcontext.GetRequestScopedFields(req1.Context())
+	rsFields, ok := gcontext.GetRequestScopedFields(req1.Context())
 
-	assert.Assert(t, ok1, ok1)
-	assert.Assert(t, rsFields.TraceID == "1-2-3", rsFields)
+	assert.True(t, ok)
+	assert.Equal(t, "1-2-3", rsFields.TraceID)
 }
 
 func Test_Log_IsEnabled(t *testing.T) {
@@ -55,12 +54,12 @@ func Test_Log_IsEnabled(t *testing.T) {
 		config.Level =  WarnSev
 	})
 	logger := NewFromCtxWithCustomerWriter(ctx, writer)
-	assert.Assert(t, logger != nil, logger)
+	assert.NotNil(t, logger)
 
-	assert.Assert(t, !logger.IsEnabled(DebugSev), logger.IsEnabled(DebugSev))
-	assert.Assert(t, !logger.IsEnabled(InfoSev), logger.IsEnabled(InfoSev))
-	assert.Assert(t, logger.IsEnabled(WarnSev), logger.IsEnabled(WarnSev))
-	assert.Assert(t, logger.IsEnabled(ErrorSev), logger.IsEnabled(ErrorSev))
+	assert.False(t, logger.IsEnabled(DebugSev))
+	assert.False(t, logger.IsEnabled(InfoSev))
+	assert.True(t, logger.IsEnabled(WarnSev))
+	assert.True(t, logger.IsEnabled(ErrorSev))
 }
 
 func Test_Log_Global_Scope(t *testing.T) {
@@ -75,11 +74,11 @@ func Test_Log_Global_Scope(t *testing.T) {
 		AppFarmEnv: "app_farm",
 	}).Debug("debug")
 
-	msg := memBuffer.String()
-	assertContainsString(t, msg, "event", "detail_event")
-	assertContainsString(t, msg, "severity", "DEBUG")
-	assertContainsString(t, msg, "app", "app_name")
-	assertContainsString(t, msg, "farm", "app_farm")
+	json := memBuffer.String()
+	assert.Contains(t, json, "\"event\":\"detail_event\"")
+	assert.Contains(t, json, "\"severity\":\"DEBUG\"")
+	assert.Contains(t, json, "\"app\":\"app_name\"")
+	assert.Contains(t, json, "\"farm\":\"app_farm\"")
 }
 
 func Test_Log_Debug(t *testing.T) {
@@ -87,19 +86,16 @@ func Test_Log_Debug(t *testing.T) {
 	logger := New(rsFields)
 	json := logger.Debug("detail_event")
 
-	assertContainsString(t, json, "event", "detail_event")
-	assertContainsString(t, json, "severity", "DEBUG")
-	assertContainsString(t, json, "trace_id", "1-2-3")
-	assertContainsString(t, json, "customer", "hooli")
-	assertContainsString(t, json, "user", "UserAggregateID-123")
-	assertContainsString(t, json, "product", "engagement")
-	assertContainsString(t, json, "app", "murmur")
-	assertContainsString(t, json, "app_version", "87.23.11")
-	assertContainsString(t, json, "aws_region", "us-west-02")
-	assertContainsString(t, json, "aws_account_id", "aws-account-123")
-
-	subString := "testing.go:1123:testing.tRunner"
-	assert.Assert(t, strings.Contains(json,subString ), "Expected '%s' in '%s'", subString, json)
+	assert.Contains(t, json, "\"event\":\"detail_event\"")
+	assert.Contains(t, json, "\"severity\":\"DEBUG\"")
+	assert.Contains(t, json, "\"trace_id\":\"1-2-3\"")
+	assert.Contains(t, json, "\"customer\":\"hooli\"")
+	assert.Contains(t, json, "\"user\":\"UserAggregateID-123\"")
+	assert.Contains(t, json, "\"product\":\"engagement\"")
+	assert.Contains(t, json, "\"app\":\"murmur\"")
+	assert.Contains(t, json, "\"app_version\":\"87.23.11\"")
+	assert.Contains(t, json, "\"aws_region\":\"us-west-02\"")
+	assert.Contains(t, json, "\"aws_account_id\":\"aws-account-123\"")
 }
 
 func Test_Log_DebugWithFields(t *testing.T) {
@@ -113,25 +109,22 @@ func Test_Log_DebugWithFields(t *testing.T) {
 		"string3 space": "world",
 	})
 
-	assertContainsString(t, json, "event", "detail_event")
-	assertContainsString(t, json, "severity", "DEBUG")
-	assertContainsString(t, json, "string", "hello")
-	assertContainsInt(t, json, "int", 123)
-	assertContainsFloat(t, json, "float", 42.48)
-	assertContainsString(t, json, "string2", "hello world")
-	assertContainsString(t, json, "string3_space", "world")
-	assertContainsString(t, json, "trace_id", "1-2-3")
-	assertContainsString(t, json, "customer", "hooli")
-	assertContainsString(t, json, "user", "UserAggregateID-123")
-	assertContainsString(t, json, "product", "engagement")
-	assertContainsString(t, json, "app", "murmur")
-	assertContainsString(t, json, "app_version", "87.23.11")
-	assertContainsString(t, json, "aws_region", "us-west-02")
-	assertContainsString(t, json, "aws_account_id", "aws-account-123")
-	assertScopeContainsSubDoc(t, json, "properties")
+	assert.Contains(t, json, "\"event\":\"detail_event\"")
+	assert.Contains(t, json, "\"severity\":\"DEBUG\"")
+	assert.Contains(t, json, "\"trace_id\":\"1-2-3\"")
+	assert.Contains(t, json, "\"customer\":\"hooli\"")
+	assert.Contains(t, json, "\"user\":\"UserAggregateID-123\"")
+	assert.Contains(t, json, "\"product\":\"engagement\"")
+	assert.Contains(t, json, "\"app\":\"murmur\"")
+	assert.Contains(t, json, "\"app_version\":\"87.23.11\"")
+	assert.Contains(t, json, "\"aws_region\":\"us-west-02\"")
+	assert.Contains(t, json, "\"aws_account_id\":\"aws-account-123\"")
 
-	subString := "testing.go:1123:testing.tRunner"
-	assert.Assert(t, strings.Contains(json,subString ), "Expected '%s' in '%s'", subString, json)
+	assert.Contains(t, json, "\"string\":\"hello\"")
+	assert.Contains(t, json, "\"int\":123")
+	assert.Contains(t, json, "\"float\":42.48")
+	assert.Contains(t, json, "\"string2\":\"hello world\"")
+	assert.Contains(t, json, "\"string3_space\":\"world\"")
 }
 
 func Test_Log_Info(t *testing.T) {
@@ -139,16 +132,16 @@ func Test_Log_Info(t *testing.T) {
 	logger := New(rsFields)
 	json := logger.Info("info_event")
 
-	assertContainsString(t, json, "event", "info_event")
-	assertContainsString(t, json, "severity", "INFO")
-	assertContainsString(t, json, "trace_id", "1-2-3")
-	assertContainsString(t, json, "customer", "hooli")
-	assertContainsString(t, json, "user", "UserAggregateID-123")
-	assertContainsString(t, json, "product", "engagement")
-	assertContainsString(t, json, "app", "murmur")
-	assertContainsString(t, json, "app_version", "87.23.11")
-	assertContainsString(t, json, "aws_region", "us-west-02")
-	assertContainsString(t, json, "aws_account_id", "aws-account-123")
+	assert.Contains(t, json, "\"event\":\"info_event\"")
+	assert.Contains(t, json, "\"severity\":\"INFO\"")
+	assert.Contains(t, json, "\"trace_id\":\"1-2-3\"")
+	assert.Contains(t, json, "\"customer\":\"hooli\"")
+	assert.Contains(t, json, "\"user\":\"UserAggregateID-123\"")
+	assert.Contains(t, json, "\"product\":\"engagement\"")
+	assert.Contains(t, json, "\"app\":\"murmur\"")
+	assert.Contains(t, json, "\"app_version\":\"87.23.11\"")
+	assert.Contains(t, json, "\"aws_region\":\"us-west-02\"")
+	assert.Contains(t, json, "\"aws_account_id\":\"aws-account-123\"")
 }
 
 func Test_Log_InfoWithFields(t *testing.T) {
@@ -162,22 +155,22 @@ func Test_Log_InfoWithFields(t *testing.T) {
 		"string3 space": "world",
 	})
 
-	assertContainsString(t, json, "event", "info_event")
-	assertContainsString(t, json, "severity", "INFO")
-	assertContainsString(t, json, "string", "hello")
-	assertContainsInt(t, json, "int", 123)
-	assertContainsFloat(t, json, "float", 42.48)
-	assertContainsString(t, json, "string2", "hello world")
-	assertContainsString(t, json, "string3_space", "world")
-	assertContainsString(t, json, "trace_id", "1-2-3")
-	assertContainsString(t, json, "customer", "hooli")
-	assertContainsString(t, json, "user", "UserAggregateID-123")
-	assertContainsString(t, json, "product", "engagement")
-	assertContainsString(t, json, "app", "murmur")
-	assertContainsString(t, json, "app_version", "87.23.11")
-	assertContainsString(t, json, "aws_region", "us-west-02")
-	assertContainsString(t, json, "aws_account_id", "aws-account-123")
-	assertScopeContainsSubDoc(t, json, "properties")
+	assert.Contains(t, json, "\"event\":\"info_event\"")
+	assert.Contains(t, json, "\"severity\":\"INFO\"")
+	assert.Contains(t, json, "\"trace_id\":\"1-2-3\"")
+	assert.Contains(t, json, "\"customer\":\"hooli\"")
+	assert.Contains(t, json, "\"user\":\"UserAggregateID-123\"")
+	assert.Contains(t, json, "\"product\":\"engagement\"")
+	assert.Contains(t, json, "\"app\":\"murmur\"")
+	assert.Contains(t, json, "\"app_version\":\"87.23.11\"")
+	assert.Contains(t, json, "\"aws_region\":\"us-west-02\"")
+	assert.Contains(t, json, "\"aws_account_id\":\"aws-account-123\"")
+
+	assert.Contains(t, json, "\"string\":\"hello\"")
+	assert.Contains(t, json, "\"int\":123")
+	assert.Contains(t, json, "\"float\":42.48")
+	assert.Contains(t, json, "\"string2\":\"hello world\"")
+	assert.Contains(t, json, "\"string3_space\":\"world\"")
 }
 
 func Test_Log_Warn(t *testing.T) {
@@ -185,16 +178,16 @@ func Test_Log_Warn(t *testing.T) {
 	logger := New(rsFields)
 	json := logger.Warn("warn_event")
 
-	assertContainsString(t, json, "event", "warn_event")
-	assertContainsString(t, json, "severity", "WARN")
-	assertContainsString(t, json, "trace_id", "1-2-3")
-	assertContainsString(t, json, "customer", "hooli")
-	assertContainsString(t, json, "user", "UserAggregateID-123")
-	assertContainsString(t, json, "product", "engagement")
-	assertContainsString(t, json, "app", "murmur")
-	assertContainsString(t, json, "app_version", "87.23.11")
-	assertContainsString(t, json, "aws_region", "us-west-02")
-	assertContainsString(t, json, "aws_account_id", "aws-account-123")
+	assert.Contains(t, json, "\"event\":\"warn_event\"")
+	assert.Contains(t, json, "\"severity\":\"WARN\"")
+	assert.Contains(t, json, "\"trace_id\":\"1-2-3\"")
+	assert.Contains(t, json, "\"customer\":\"hooli\"")
+	assert.Contains(t, json, "\"user\":\"UserAggregateID-123\"")
+	assert.Contains(t, json, "\"product\":\"engagement\"")
+	assert.Contains(t, json, "\"app\":\"murmur\"")
+	assert.Contains(t, json, "\"app_version\":\"87.23.11\"")
+	assert.Contains(t, json, "\"aws_region\":\"us-west-02\"")
+	assert.Contains(t, json, "\"aws_account_id\":\"aws-account-123\"")
 }
 
 func Test_Log_WarnWithFields(t *testing.T) {
@@ -208,42 +201,42 @@ func Test_Log_WarnWithFields(t *testing.T) {
 		"string3 space": "world",
 	})
 
-	assertContainsString(t, json, "event", "warn_event")
-	assertContainsString(t, json, "severity", "WARN")
-	assertContainsString(t, json, "string", "hello")
-	assertContainsInt(t, json, "int", 123)
-	assertContainsFloat(t, json, "float", 42.48)
-	assertContainsString(t, json, "string2", "hello world")
-	assertContainsString(t, json, "string3_space", "world")
-	assertContainsString(t, json, "trace_id", "1-2-3")
-	assertContainsString(t, json, "customer", "hooli")
-	assertContainsString(t, json, "user", "UserAggregateID-123")
-	assertContainsString(t, json, "product", "engagement")
-	assertContainsString(t, json, "app", "murmur")
-	assertContainsString(t, json, "app_version", "87.23.11")
-	assertContainsString(t, json, "aws_region", "us-west-02")
-	assertContainsString(t, json, "aws_account_id", "aws-account-123")
-	assertScopeContainsSubDoc(t, json, "properties")
+	assert.Contains(t, json, "\"event\":\"warn_event\"")
+	assert.Contains(t, json, "\"severity\":\"WARN\"")
+	assert.Contains(t, json, "\"trace_id\":\"1-2-3\"")
+	assert.Contains(t, json, "\"customer\":\"hooli\"")
+	assert.Contains(t, json, "\"user\":\"UserAggregateID-123\"")
+	assert.Contains(t, json, "\"product\":\"engagement\"")
+	assert.Contains(t, json, "\"app\":\"murmur\"")
+	assert.Contains(t, json, "\"app_version\":\"87.23.11\"")
+	assert.Contains(t, json, "\"aws_region\":\"us-west-02\"")
+	assert.Contains(t, json, "\"aws_account_id\":\"aws-account-123\"")
+
+	assert.Contains(t, json, "\"string\":\"hello\"")
+	assert.Contains(t, json, "\"int\":123")
+	assert.Contains(t, json, "\"float\":42.48")
+	assert.Contains(t, json, "\"string2\":\"hello world\"")
+	assert.Contains(t, json, "\"string3_space\":\"world\"")
 }
 
 func Test_Log_Error(t *testing.T) {
 
 	logger := New(rsFields)
-	msg := logger.Error("error event", errors.New("something went wrong"))
+	json := logger.Error("error event", errors.New("something went wrong"))
 
-	assertContainsString(t, msg, "event", "error_event")
-	assertContainsString(t, msg, "severity", "ERROR")
-	assertContainsString(t, msg, "trace_id", "1-2-3")
-	assertContainsString(t, msg, "customer", "hooli")
-	assertContainsString(t, msg, "user", "UserAggregateID-123")
-	assertContainsString(t, msg, "product", "engagement")
-	assertContainsString(t, msg, "app", "murmur")
-	assertContainsString(t, msg, "app_version", "87.23.11")
-	assertContainsString(t, msg, "aws_region", "us-west-02")
-	assertContainsString(t, msg, "aws_account_id", "aws-account-123")
-	assertScopeContainsSubDoc(t, msg, "exception")
-	assertContainsString(t, msg, "error", "something went wrong")
-	//fmt.Println(msg)
+	assert.Contains(t, json, "\"event\":\"error_event\"")
+	assert.Contains(t, json, "\"severity\":\"ERROR\"")
+	assert.Contains(t, json, "\"trace_id\":\"1-2-3\"")
+	assert.Contains(t, json, "\"customer\":\"hooli\"")
+	assert.Contains(t, json, "\"user\":\"UserAggregateID-123\"")
+	assert.Contains(t, json, "\"product\":\"engagement\"")
+	assert.Contains(t, json, "\"app\":\"murmur\"")
+	assert.Contains(t, json, "\"app_version\":\"87.23.11\"")
+	assert.Contains(t, json, "\"aws_region\":\"us-west-02\"")
+	assert.Contains(t, json, "\"aws_account_id\":\"aws-account-123\"")
+
+	assert.Contains(t, json, "\"exception\"")
+	assert.Contains(t, json, "\"error\":\"something went wrong\"")
 }
 
 func Test_Log_Error_StackTrace(t *testing.T) {
@@ -251,19 +244,19 @@ func Test_Log_Error_StackTrace(t *testing.T) {
 	logger := New(rsFields)
 	json := logger.Error("error event", gerrors.New("with correct stack trace"))
 
-	assertContainsString(t, json, "event", "error_event")
-	assertContainsString(t, json, "severity", "ERROR")
-	assertContainsString(t, json, "trace_id", "1-2-3")
-	assertContainsString(t, json, "customer", "hooli")
-	assertContainsString(t, json, "user", "UserAggregateID-123")
-	assertContainsString(t, json, "product", "engagement")
-	assertContainsString(t, json, "app", "murmur")
-	assertContainsString(t, json, "app_version", "87.23.11")
-	assertContainsString(t, json, "aws_region", "us-west-02")
-	assertContainsString(t, json, "aws_account_id", "aws-account-123")
-	assertScopeContainsSubDoc(t, json, "exception")
-	assertContainsString(t, json, "error", "with correct stack trace")
-	//fmt.Println(json)
+	assert.Contains(t, json, "\"event\":\"error_event\"")
+	assert.Contains(t, json, "\"severity\":\"ERROR\"")
+	assert.Contains(t, json, "\"trace_id\":\"1-2-3\"")
+	assert.Contains(t, json, "\"customer\":\"hooli\"")
+	assert.Contains(t, json, "\"user\":\"UserAggregateID-123\"")
+	assert.Contains(t, json, "\"product\":\"engagement\"")
+	assert.Contains(t, json, "\"app\":\"murmur\"")
+	assert.Contains(t, json, "\"app_version\":\"87.23.11\"")
+	assert.Contains(t, json, "\"aws_region\":\"us-west-02\"")
+	assert.Contains(t, json, "\"aws_account_id\":\"aws-account-123\"")
+
+	assert.Contains(t, json, "\"exception\"")
+	assert.Contains(t, json, "\"error\":\"with correct stack trace\"")
 }
 
 func Test_Log_ErrorWithFields(t *testing.T) {
@@ -277,24 +270,25 @@ func Test_Log_ErrorWithFields(t *testing.T) {
 		"string3 space": "world",
 	})
 
-	assertContainsString(t, json, "event", "error_event")
-	assertContainsString(t, json, "severity", "ERROR")
-	assertContainsString(t, json, "string", "hello")
-	assertContainsInt(t, json, "int", 123)
-	assertContainsFloat(t, json, "float", 42.48)
-	assertContainsString(t, json, "string2", "hello world")
-	assertContainsString(t, json, "string3_space", "world")
-	assertContainsString(t, json, "trace_id", "1-2-3")
-	assertContainsString(t, json, "customer", "hooli")
-	assertContainsString(t, json, "user", "UserAggregateID-123")
-	assertContainsString(t, json, "product", "engagement")
-	assertContainsString(t, json, "app", "murmur")
-	assertContainsString(t, json, "app_version", "87.23.11")
-	assertContainsString(t, json, "aws_region", "us-west-02")
-	assertContainsString(t, json, "aws_account_id", "aws-account-123")
-	assertScopeContainsSubDoc(t, json, "properties")
-	assertScopeContainsSubDoc(t, json, "exception")
-	assertContainsString(t, json, "error", "something went wrong")
+	assert.Contains(t, json, "\"event\":\"error_event\"")
+	assert.Contains(t, json, "\"severity\":\"ERROR\"")
+	assert.Contains(t, json, "\"trace_id\":\"1-2-3\"")
+	assert.Contains(t, json, "\"customer\":\"hooli\"")
+	assert.Contains(t, json, "\"user\":\"UserAggregateID-123\"")
+	assert.Contains(t, json, "\"product\":\"engagement\"")
+	assert.Contains(t, json, "\"app\":\"murmur\"")
+	assert.Contains(t, json, "\"app_version\":\"87.23.11\"")
+	assert.Contains(t, json, "\"aws_region\":\"us-west-02\"")
+	assert.Contains(t, json, "\"aws_account_id\":\"aws-account-123\"")
+
+	assert.Contains(t, json, "\"string\":\"hello\"")
+	assert.Contains(t, json, "\"int\":123")
+	assert.Contains(t, json, "\"float\":42.48")
+	assert.Contains(t, json, "\"string2\":\"hello world\"")
+	assert.Contains(t, json, "\"string3_space\":\"world\"")
+
+	assert.Contains(t, json, "\"exception\"")
+	assert.Contains(t, json, "\"error\":\"something went wrong\"")
 }
 
 func Test_Log_Fatal(t *testing.T) {
@@ -306,19 +300,20 @@ func Test_Log_Fatal(t *testing.T) {
 
 	defer func() {
 		if r := recover(); r != nil {
-			msg := memBuffer.String()
-			assertContainsString(t, msg, "event", "fatal_event")
-			assertContainsString(t, msg, "severity", "FATAL")
-			assertContainsString(t, msg, "trace_id", "1-2-3")
-			assertContainsString(t, msg, "customer", "hooli")
-			assertContainsString(t, msg, "user", "UserAggregateID-123")
-			assertContainsString(t, msg, "product", "engagement")
-			assertContainsString(t, msg, "app", "murmur")
-			assertContainsString(t, msg, "app_version", "87.23.11")
-			assertContainsString(t, msg, "aws_region", "us-west-02")
-			assertContainsString(t, msg, "aws_account_id", "aws-account-123")
-			assertScopeContainsSubDoc(t, msg, "exception")
-			assertContainsString(t, msg, "error", "something fatal happened")
+			json := memBuffer.String()
+			assert.Contains(t, json, "\"event\":\"fatal_event\"")
+			assert.Contains(t, json, "\"severity\":\"FATAL\"")
+			assert.Contains(t, json, "\"trace_id\":\"1-2-3\"")
+			assert.Contains(t, json, "\"customer\":\"hooli\"")
+			assert.Contains(t, json, "\"user\":\"UserAggregateID-123\"")
+			assert.Contains(t, json, "\"product\":\"engagement\"")
+			assert.Contains(t, json, "\"app\":\"murmur\"")
+			assert.Contains(t, json, "\"app_version\":\"87.23.11\"")
+			assert.Contains(t, json, "\"aws_region\":\"us-west-02\"")
+			assert.Contains(t, json, "\"aws_account_id\":\"aws-account-123\"")
+
+			assert.Contains(t, json, "\"exception\"")
+			assert.Contains(t, json, "\"error\":\"something fatal happened\"")
 		}
 	}()
 
@@ -335,26 +330,26 @@ func Test_Log_FatalWithFields(t *testing.T) {
 
 	defer func() {
 		if r := recover(); r != nil {
-			msg := memBuffer.String()
-			assertContainsString(t, msg, "event", "fatal_event")
-			assertContainsString(t, msg, "severity", "FATAL")
-			assertContainsString(t, msg, "string", "hello")
-			assertContainsInt(t, msg, "int", 123)
-			assertContainsFloat(t, msg, "float", 42.48)
-			assertContainsString(t, msg, "string2", "hello world")
-			assertContainsString(t, msg, "string3_space", "world")
-			assertContainsString(t, msg, "trace_id", "1-2-3")
-			assertContainsString(t, msg, "customer", "hooli")
-			assertContainsString(t, msg, "user", "UserAggregateID-123")
-			assertContainsString(t, msg, "product", "engagement")
-			assertContainsString(t, msg, "app", "murmur")
-			assertContainsString(t, msg, "app_version", "87.23.11")
-			assertContainsString(t, msg, "aws_region", "us-west-02")
-			assertContainsString(t, msg, "aws_account_id", "aws-account-123")
-			assertScopeContainsSubDoc(t, msg, "properties")
-			assertScopeContainsSubDoc(t, msg, "exception")
-			assertContainsString(t, msg, "error", "something fatal happened")
+			json := memBuffer.String()
+			assert.Contains(t, json, "\"event\":\"fatal_event\"")
+			assert.Contains(t, json, "\"severity\":\"FATAL\"")
+			assert.Contains(t, json, "\"trace_id\":\"1-2-3\"")
+			assert.Contains(t, json, "\"customer\":\"hooli\"")
+			assert.Contains(t, json, "\"user\":\"UserAggregateID-123\"")
+			assert.Contains(t, json, "\"product\":\"engagement\"")
+			assert.Contains(t, json, "\"app\":\"murmur\"")
+			assert.Contains(t, json, "\"app_version\":\"87.23.11\"")
+			assert.Contains(t, json, "\"aws_region\":\"us-west-02\"")
+			assert.Contains(t, json, "\"aws_account_id\":\"aws-account-123\"")
 
+			assert.Contains(t, json, "\"string\":\"hello\"")
+			assert.Contains(t, json, "\"int\":123")
+			assert.Contains(t, json, "\"float\":42.48")
+			assert.Contains(t, json, "\"string2\":\"hello world\"")
+			assert.Contains(t, json, "\"string3_space\":\"world\"")
+
+			assert.Contains(t, json, "\"exception\"")
+			assert.Contains(t, json, "\"error\":\"something fatal happened\"")
 		}
 	}()
 
@@ -372,16 +367,16 @@ func Test_Log_Audit(t *testing.T) {
 	logger := New(rsFields)
 	json := logger.Audit("audit_event")
 
-	assertContainsString(t, json, "event", "audit_event")
-	assertContainsString(t, json, "severity", "AUDIT")
-	assertContainsString(t, json, "trace_id", "1-2-3")
-	assertContainsString(t, json, "customer", "hooli")
-	assertContainsString(t, json, "user", "UserAggregateID-123")
-	assertContainsString(t, json, "product", "engagement")
-	assertContainsString(t, json, "app", "murmur")
-	assertContainsString(t, json, "app_version", "87.23.11")
-	assertContainsString(t, json, "aws_region", "us-west-02")
-	assertContainsString(t, json, "aws_account_id", "aws-account-123")
+	assert.Contains(t, json, "\"event\":\"audit_event\"")
+	assert.Contains(t, json, "\"severity\":\"AUDIT\"")
+	assert.Contains(t, json, "\"trace_id\":\"1-2-3\"")
+	assert.Contains(t, json, "\"customer\":\"hooli\"")
+	assert.Contains(t, json, "\"user\":\"UserAggregateID-123\"")
+	assert.Contains(t, json, "\"product\":\"engagement\"")
+	assert.Contains(t, json, "\"app\":\"murmur\"")
+	assert.Contains(t, json, "\"app_version\":\"87.23.11\"")
+	assert.Contains(t, json, "\"aws_region\":\"us-west-02\"")
+	assert.Contains(t, json, "\"aws_account_id\":\"aws-account-123\"")
 }
 
 func Test_Log_AuditWithFields(t *testing.T) {
@@ -395,25 +390,25 @@ func Test_Log_AuditWithFields(t *testing.T) {
 		"string3 space": "world",
 	})
 
-	assertContainsString(t, json, "event", "audit_event")
-	assertContainsString(t, json, "severity", "AUDIT")
-	assertContainsString(t, json, "string", "hello")
-	assertContainsInt(t, json, "int", 123)
-	assertContainsFloat(t, json, "float", 42.48)
-	assertContainsString(t, json, "string2", "hello world")
-	assertContainsString(t, json, "string3_space", "world")
-	assertContainsString(t, json, "trace_id", "1-2-3")
-	assertContainsString(t, json, "customer", "hooli")
-	assertContainsString(t, json, "user", "UserAggregateID-123")
-	assertContainsString(t, json, "product", "engagement")
-	assertContainsString(t, json, "app", "murmur")
-	assertContainsString(t, json, "app_version", "87.23.11")
-	assertContainsString(t, json, "aws_region", "us-west-02")
-	assertContainsString(t, json, "aws_account_id", "aws-account-123")
-	assertScopeContainsSubDoc(t, json, "properties")
+	assert.Contains(t, json, "\"event\":\"audit_event\"")
+	assert.Contains(t, json, "\"severity\":\"AUDIT\"")
+	assert.Contains(t, json, "\"trace_id\":\"1-2-3\"")
+	assert.Contains(t, json, "\"customer\":\"hooli\"")
+	assert.Contains(t, json, "\"user\":\"UserAggregateID-123\"")
+	assert.Contains(t, json, "\"product\":\"engagement\"")
+	assert.Contains(t, json, "\"app\":\"murmur\"")
+	assert.Contains(t, json, "\"app_version\":\"87.23.11\"")
+	assert.Contains(t, json, "\"aws_region\":\"us-west-02\"")
+	assert.Contains(t, json, "\"aws_account_id\":\"aws-account-123\"")
+
+	assert.Contains(t, json, "\"string\":\"hello\"")
+	assert.Contains(t, json, "\"int\":123")
+	assert.Contains(t, json, "\"float\":42.48")
+	assert.Contains(t, json, "\"string2\":\"hello world\"")
+	assert.Contains(t, json, "\"string3_space\":\"world\"")
 }
 
-func Test_Log_Namespace(t *testing.T) {
+func Test_Log_Error_WithSubDocument(t *testing.T) {
 
 	t1 := time.Now()
 	logger := New(rsFields)
@@ -421,6 +416,7 @@ func Test_Log_Namespace(t *testing.T) {
 	time.Sleep(123 * time.Millisecond)
 	t2 := time.Now()
 	d := t2.Sub(t1)
+	timeTaken := fmt.Sprintf("P%gS", d.Seconds())
 
 	json := logger.Error("error event", errors.New("something went wrong"), Fields{
 		"string": "hello",
@@ -429,24 +425,30 @@ func Test_Log_Namespace(t *testing.T) {
 		"reports_shared": Fields{
 			"report":    "report1",
 			"user":      "userid",
-			TimeTaken:   fmt.Sprintf("P%gS", d.Seconds()),
+			TimeTaken:   timeTaken,
 			TimeTakenMS: d.Milliseconds(),
 		},
 	})
 
-	assertContainsString(t, json, "report", "report1")
-	assertContainsString(t, json, "user", "userid")
-	assertContainsString(t, json, "trace_id", "1-2-3")
-	assertContainsString(t, json, "customer", "hooli")
-	assertContainsString(t, json, "user", "UserAggregateID-123")
-	assertContainsString(t, json, "product", "engagement")
-	assertContainsString(t, json, "app", "murmur")
-	assertContainsString(t, json, "app_version", "87.23.11")
-	assertContainsString(t, json, "aws_region", "us-west-02")
-	assertContainsString(t, json, "aws_account_id", "aws-account-123")
+	assert.Contains(t, json, "\"event\":\"error_event\"")
+	assert.Contains(t, json, "\"severity\":\"ERROR\"")
+	assert.Contains(t, json, "\"trace_id\":\"1-2-3\"")
+	assert.Contains(t, json, "\"customer\":\"hooli\"")
+	assert.Contains(t, json, "\"user\":\"UserAggregateID-123\"")
+	assert.Contains(t, json, "\"product\":\"engagement\"")
+	assert.Contains(t, json, "\"app\":\"murmur\"")
+	assert.Contains(t, json, "\"app_version\":\"87.23.11\"")
+	assert.Contains(t, json, "\"aws_region\":\"us-west-02\"")
+	assert.Contains(t, json, "\"aws_account_id\":\"aws-account-123\"")
 
-	assertScopeContainsSubDoc(t, json, "reports_shared")
-	assertScopeContainsSubDoc(t, json, "properties")
+	assert.Contains(t, json, "\"string\":\"hello\"")
+	assert.Contains(t, json, "\"int\":123")
+	assert.Contains(t, json, "\"float\":42.48")
+	assert.Contains(t, json, "\"reports_shared\"")
+	assert.Contains(t, json, "\"report\":\"report1\"")
+	assert.Contains(t, json, "\"user\":\"userid\"")
+	assert.Contains(t, json, fmt.Sprintf("\"time_taken\":\"%s\"", timeTaken))
+	assert.Contains(t, json, fmt.Sprintf("\"time_taken_ms\":%d", d.Milliseconds()))
 }
 
 func TestScope(t *testing.T) {
@@ -455,24 +457,24 @@ func TestScope(t *testing.T) {
 	})
 
 	json := logger.Debug("detail_event")
-	assertScopeContainsString(t, json, "event", "detail_event")
-	assertScopeContainsInt(t, json, "request_id", 123)
+	assert.Contains(t, json, "\"event\":\"detail_event\"")
+	assert.Contains(t, json, "\"request_id\":123")
 
 	json = logger.Info("info_event")
-	assertScopeContainsString(t, json, "event", "info_event")
-	assertScopeContainsInt(t, json, "request_id", 123)
+	assert.Contains(t, json, "\"event\":\"info_event\"")
+	assert.Contains(t, json, "\"request_id\":123")
 
 	json = logger.Warn("warn_event")
-	assertScopeContainsString(t, json, "event", "warn_event")
-	assertScopeContainsInt(t, json, "request_id", 123)
+	assert.Contains(t, json, "\"event\":\"warn_event\"")
+	assert.Contains(t, json, "\"request_id\":123")
 
 	json = logger.Error("error_event", errors.New("something went wrong"))
-	assertScopeContainsString(t, json, "event", "error_event")
-	assertScopeContainsInt(t, json, "request_id", 123)
+	assert.Contains(t, json, "\"event\":\"error_event\"")
+	assert.Contains(t, json, "\"request_id\":123")
 
 	json = logger.Audit("audit_event")
-	assertScopeContainsString(t, json, "event", "audit_event")
-	assertScopeContainsInt(t, json, "request_id", 123)
+	assert.Contains(t, json, "\"event\":\"audit_event\"")
+	assert.Contains(t, json, "\"request_id\":123")
 
 	memBuffer := &bytes.Buffer{}
 	writer := NewWriter(func(conf *WriterConfig) {
@@ -484,9 +486,9 @@ func TestScope(t *testing.T) {
 
 	defer func() {
 		if r := recover(); r != nil {
-			msg := memBuffer.String()
-			assertContainsString(t, msg, "event", "fatal_event")
-			assertContainsString(t, msg, "severity", "FATAL")
+			json := memBuffer.String()
+			assert.Contains(t, json, "\"event\":\"fatal_event\"")
+			assert.Contains(t, json, "\"request_id\":123")
 		}
 	}()
 
@@ -502,32 +504,32 @@ func TestScope_Overwrite(t *testing.T) {
 	json := logger.Debug("detail_event", Fields{
 		"requestID": 456,
 	})
-	assertScopeContainsString(t, json, "event", "detail_event")
-	assertScopeContainsInt(t, json, "request_id", 456)
+	assert.Contains(t, json, "\"event\":\"detail_event\"")
+	assert.Contains(t, json, "\"request_id\":456")
 
 	json = logger.Info("info_event", Fields{
 		"requestID": 456,
 	})
-	assertScopeContainsString(t, json, "event", "info_event")
-	assertScopeContainsInt(t, json, "request_id", 456)
+	assert.Contains(t, json, "\"event\":\"info_event\"")
+	assert.Contains(t, json, "\"request_id\":456")
 
 	json = logger.Warn("warn_event", Fields{
 		"requestID": 456,
 	})
-	assertScopeContainsString(t, json, "event", "warn_event")
-	assertScopeContainsInt(t, json, "request_id", 456)
+	assert.Contains(t, json, "\"event\":\"warn_event\"")
+	assert.Contains(t, json, "\"request_id\":456")
 
 	json = logger.Error("error_event", errors.New("error"), Fields{
 		"requestID": 456,
 	})
-	assertScopeContainsString(t, json, "event", "error_event")
-	assertScopeContainsInt(t, json, "request_id", 456)
+	assert.Contains(t, json, "\"event\":\"error_event\"")
+	assert.Contains(t, json, "\"request_id\":456")
 
 	json = logger.Audit("audit_event", Fields{
 		"requestID": 456,
 	})
-	assertScopeContainsString(t, json, "event", "audit_event")
-	assertScopeContainsInt(t, json, "request_id", 456)
+	assert.Contains(t, json, "\"event\":\"audit_event\"")
+	assert.Contains(t, json, "\"request_id\":456")
 
 	memBuffer := &bytes.Buffer{}
 	writer := NewWriter(func(conf *WriterConfig) {
@@ -539,10 +541,9 @@ func TestScope_Overwrite(t *testing.T) {
 
 	defer func() {
 		if r := recover(); r != nil {
-			msg := memBuffer.String()
-			assertScopeContainsString(t, msg, "event", "fatal_event")
-			assertScopeContainsString(t, msg, "severity", "FATAL")
-			assertScopeContainsInt(t, msg, "request_id", 456)
+			json := memBuffer.String()
+			assert.Contains(t, json, "\"event\":\"fatal_event\"")
+			assert.Contains(t, json, "\"request_id\":456")
 		}
 	}()
 
@@ -550,6 +551,25 @@ func TestScope_Overwrite(t *testing.T) {
 	logger.Fatal("fatal_event", errors.New("fatal"), Fields{
 		"request_id": 456,
 	})
+}
+
+
+func Test_Durations(t *testing.T) {
+
+	logger := New(rsFields)
+
+	d := time.Millisecond * 456
+	json := logger.Debug("detail_event", Fields{
+		"string":        "hello",
+		"int":           123,
+		"float":         42.48,
+		"string2":       "hello world",
+		"string3 space": "world",
+	}.Merge(NewDurationFields(d)))
+
+	assert.Contains(t, json, "\"event\":\"detail_event\"")
+	assert.Contains(t, json, "\"time_taken\":\"P0.456S\"")
+	assert.Contains(t, json, "\"time_taken_ms\":456")
 }
 
 func Test_RealWorld(t *testing.T) {
@@ -790,7 +810,7 @@ func Test_RealWorld_Combined(t *testing.T) {
 func Test_RealWorld_Scope(t *testing.T) {
 
 	logger := New(rsFields, Fields{"scopeID": 123})
-	assert.Assert(t, logger != nil)
+	assert.NotNil(t, logger)
 
 	logger.Debug("detail_event", Fields{
 		"string":        "hello",
@@ -846,24 +866,6 @@ func Test_RealWorld_Scope(t *testing.T) {
 	})
 }
 
-func Test_Durations(t *testing.T) {
-
-	logger := New(rsFields)
-
-	d := time.Millisecond * 456
-	json := logger.Debug("detail_event", Fields{
-		"string":        "hello",
-		"int":           123,
-		"float":         42.48,
-		"string2":       "hello world",
-		"string3 space": "world",
-	}.Merge(NewDurationFields(d)))
-
-	assertContainsString(t, json, "event", "detail_event")
-	assertContainsString(t, json, "time_taken", "P0.456S")
-	assertContainsInt(t, json, "time_taken_ms", 456)
-}
-
 func BenchmarkLogging(b *testing.B) {
 	writer := NewWriter(func(conf *WriterConfig) {
 		conf.Output = ioutil.Discard
@@ -881,39 +883,4 @@ func BenchmarkLogging(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		logger.Info("test details", fields)
 	}
-}
-
-func assertContainsString(t *testing.T, log string, key string, val string) {
-	// Check that the keys and values are in the log line
-	find := fmt.Sprintf("\"%s\":\"%s\"", key, val)
-	assert.Assert(t, strings.Contains(log, find), "Expected '%s' in '%s'", find, log)
-}
-
-func assertContainsInt(t *testing.T, log string, key string, val int) {
-	// Check that the keys and values are in the log line
-	find := fmt.Sprintf("\"%s\":%v", key, val)
-	assert.Assert(t, strings.Contains(log, find), "Expected '%s' in '%s'", find, log)
-}
-
-func assertContainsFloat(t *testing.T, log string, key string, val float32) {
-	// Check that the keys and values are in the log line
-	find := fmt.Sprintf("\"%s\":%v", key, val)
-	assert.Assert(t, strings.Contains(log, find), "Expected '%s' in '%s'", find, log)
-}
-
-func assertScopeContainsString(t *testing.T, log string, key string, val string) {
-	// Check that the keys and values are in the log line
-	find := fmt.Sprintf("\"%s\":\"%s\"", key, val)
-	assert.Assert(t, strings.Contains(log, find), "Expected '%s' in '%s'", find, log)
-}
-
-func assertScopeContainsInt(t *testing.T, log string, key string, val int) {
-	// Check that the keys and values are in the log line
-	find := fmt.Sprintf("\"%s\":%v", key, val)
-	assert.Assert(t, strings.Contains(log, find), "Expected '%s' in '%s'", find, log)
-}
-
-func assertScopeContainsSubDoc(t *testing.T, log string, key string) {
-	find := fmt.Sprintf("\"%s\":{", key)
-	assert.Assert(t, strings.Contains(log, find), "Expected '%s' in '%s'", find, log)
 }

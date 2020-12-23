@@ -5,8 +5,8 @@ go 1.15
 require (
 	github.com/DataDog/datadog-go v4.2.0+incompatible // indirect
 	github.com/DataDog/datadog-lambda-go v0.9.0
-	github.com/aws/aws-lambda-go v1.20.0
-	github.com/aws/aws-sdk-go v1.36.13
+	github.com/aws/aws-lambda-go v1.21.0
+	github.com/aws/aws-sdk-go v1.36.14
 	github.com/aws/aws-xray-sdk-go v1.1.0
 	github.com/bobesa/go-domain-util v0.0.0-20190911083921-4033b5f7dd89
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
@@ -27,5 +27,4 @@ require (
 	golang.org/x/text v0.3.4 // indirect
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
 	gopkg.in/DataDog/dd-trace-go.v1 v1.28.0
-	gotest.tools v2.2.0+incompatible
 )

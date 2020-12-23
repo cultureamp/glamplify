@@ -1,19 +1,20 @@
 package aws
 
 import (
-	"gotest.tools/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_GetParam_MissingKey(t *testing.T) {
 
 	ps := NewParameterStore("default")
-	assert.Assert(t, ps != nil, ps)
+	assert.NotNil(t, ps)
 
 	// Missing Key
 	val, err := ps.Get("/this/should/not/exist/secret_key")
-	assert.Assert(t, val == "", val)
-	assert.Assert(t, err != nil, val)
+	assert.Empty(t, val)
+	assert.NotNil(t, err)
 
 	// aerr, ok := err.(awserr.Error)
 }

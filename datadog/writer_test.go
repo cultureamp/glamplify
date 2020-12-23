@@ -9,7 +9,7 @@ import (
 
 	gcontext "github.com/cultureamp/glamplify/context"
 	"github.com/cultureamp/glamplify/log"
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_DataDog_Writer(t *testing.T) {
@@ -37,8 +37,8 @@ func Test_DataDog_Writer(t *testing.T) {
 	json := logger.Info("hello Data Dog")
 	writer.WaitAll()
 
-	assert.Assert(t, json != "", json)
-	assert.Assert(t, strings.Contains(json, "hello"), json)
+	assert.NotEmpty(t, json)
+	assert.True(t, strings.Contains(json, "hello"))
 }
 
 func Test_DataDog_Writer_IsEnabled(t *testing.T) {
@@ -48,13 +48,13 @@ func Test_DataDog_Writer_IsEnabled(t *testing.T) {
 	})
 
 	ok := writer.IsEnabled(log.DebugSev)
-	assert.Assert(t, !ok, ok)
+	assert.False(t, ok)
 	ok = writer.IsEnabled(log.InfoSev)
-	assert.Assert(t, !ok, ok)
+	assert.False(t, ok)
 	ok = writer.IsEnabled(log.WarnSev)
-	assert.Assert(t, !ok, ok)
+	assert.False(t, ok)
 	ok = writer.IsEnabled(log.ErrorSev)
-	assert.Assert(t, ok, ok)
+	assert.True(t, ok)
 	ok = writer.IsEnabled(log.FatalSev)
-	assert.Assert(t, ok, ok)
+	assert.True(t, ok)
 }

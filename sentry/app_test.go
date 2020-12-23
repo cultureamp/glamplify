@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/cultureamp/glamplify/sentry"
 	sentrygo "github.com/getsentry/sentry-go"
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
+	"net/http/httptest"
 )
 
 func TestSentry_Error_Success(t *testing.T) {
@@ -22,10 +22,10 @@ func TestSentry_Error_Success(t *testing.T) {
 		conf.AppVersion = "1.0.0"
 		conf.DSN = "https://177fbd4b35304a80aeaef835f938de69@o19604.ingest.sentry.io/5447011"
 	})
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 
 	id := sentry.Error(errors.New("glamplify test NPE"))
-	assert.Assert(t, id != nil, id)
+	assert.NotNil(t, id)
 
 	sentry.Shutdown()
 }
@@ -39,7 +39,7 @@ func TestSentry_Context_Success(t *testing.T) {
 		conf.AppVersion = "1.0.0"
 		conf.DSN = "https://177fbd4b35304a80aeaef835f938de69@o19604.ingest.sentry.io/5447011"
 	})
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 
 	_, handler := sentry.WrapHTTPHandler("/", rootRequest)
 	h := http.HandlerFunc(handler)
@@ -67,7 +67,7 @@ func TestSentry_Sync_Transport(t *testing.T) {
 		conf.DSN = "https://177fbd4b35304a80aeaef835f938de69@o19604.ingest.sentry.io/5447011"
 		conf.Transport = &sentrygo.HTTPSyncTransport{Timeout: 1500 * time.Millisecond}
 	})
-	assert.Assert(t, err == nil, err)
+	assert.Nil(t, err)
 
 	_, handler := sentry.WrapHTTPHandler("/", rootRequest)
 	h := http.HandlerFunc(handler)
@@ -90,13 +90,12 @@ func rootRequest(w http.ResponseWriter, r *http.Request) {
 	t, _ := ctx.Value("t").(*testing.T)
 
 	sentry, err := sentry.FromContext(ctx)
-	assert.Assert(t, err == nil, err)
-	assert.Assert(t, sentry != nil, sentry)
+	assert.Nil(t, err)
+	assert.NotNil(t, sentry)
 
 	id := sentry.Message("glamplify http handler test message")
-	assert.Assert(t, *id != "", id)
+	assert.NotEmpty(t, id)
 }
-
 
 func Test_Sentry_WrapHandler(t *testing.T) {
 	ctx := context.Background()
@@ -108,8 +107,8 @@ func Test_Sentry_WrapHandler(t *testing.T) {
 	})
 
 	pattern, handler := sentry.WrapHTTPHandler("/", rootRequest)
-	assert.Assert(t, handler != nil, handler)
-	assert.Assert(t, pattern == "/", pattern)
+	assert.NotNil(t, handler)
+	assert.Equal(t, "/", pattern)
 }
 
 

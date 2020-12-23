@@ -1,8 +1,9 @@
 package log
 
 import (
-	"gotest.tools/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_ShouldLogLevel(t *testing.T) {
@@ -10,11 +11,11 @@ func Test_ShouldLogLevel(t *testing.T) {
 	leveller := NewLevelMap()
 
 	ok := leveller.ShouldLogLevel(DebugLevel, DebugLevel)
-	assert.Assert(t, ok, ok)
+	assert.True(t, ok)
 	ok = leveller.ShouldLogLevel(InfoLevel, DebugLevel)
-	assert.Assert(t, !ok, ok)
+	assert.False(t, ok)
 	ok = leveller.ShouldLogLevel(DebugLevel, InfoLevel)
-	assert.Assert(t, ok, ok)
+	assert.True(t, ok)
 }
 
 func Test_ShouldLogSeverity(t *testing.T) {
@@ -22,11 +23,11 @@ func Test_ShouldLogSeverity(t *testing.T) {
 	leveller := NewLevelMap()
 
 	ok := leveller.ShouldLogSeverity(DebugSev, DebugSev)
-	assert.Assert(t, ok, ok)
+	assert.True(t, ok)
 	ok = leveller.ShouldLogSeverity(InfoSev, DebugSev)
-	assert.Assert(t, !ok, ok)
+	assert.False(t, ok)
 	ok = leveller.ShouldLogSeverity(DebugSev, InfoSev)
-	assert.Assert(t, ok, ok)
+	assert.True(t, ok)
 }
 
 func Test_StringToLevel(t *testing.T) {
@@ -34,16 +35,17 @@ func Test_StringToLevel(t *testing.T) {
 	leveller := NewLevelMap()
 
 	level := leveller.StringToLevel(DebugSev)
-	assert.Assert(t, level == DebugLevel)
+	assert.Equal(t, DebugLevel, level)
 	level = leveller.StringToLevel(InfoSev)
-	assert.Assert(t, level == InfoLevel)
+	assert.Equal(t, InfoLevel, level)
 	level = leveller.StringToLevel(WarnSev)
-	assert.Assert(t, level == WarnLevel)
+	assert.Equal(t, WarnLevel, level)
 	level = leveller.StringToLevel(ErrorSev)
-	assert.Assert(t, level == ErrorLevel)
+	assert.Equal(t, ErrorLevel, level)
 	level = leveller.StringToLevel(FatalSev)
-	assert.Assert(t, level == FatalLevel)
+	assert.Equal(t, FatalLevel, level)
+	level = leveller.StringToLevel(AuditSev)
+	assert.Equal(t, AuditLevel, level)
 	level = leveller.StringToLevel("bad")
-	assert.Assert(t, level == DebugLevel)
-
+	assert.Equal(t, DebugLevel, level)
 }

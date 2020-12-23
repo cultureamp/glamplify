@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_New_Tracer(t *testing.T) {
@@ -16,7 +16,7 @@ func Test_New_Tracer(t *testing.T) {
 		config.Environment = "local"
 		config.AWSService = "ECS"
 	})
-	assert.Assert(t, xray != nil, xray)
+	assert.NotNil(t, xray)
 }
 
 func Test_Trace_ID(t *testing.T) {
@@ -30,5 +30,5 @@ func Test_Trace_ID(t *testing.T) {
 	})
 
 	traceID := xray.GetTraceID(ctx)
-	assert.Assert(t, traceID == "", traceID)
+	assert.Empty(t, traceID)
 }

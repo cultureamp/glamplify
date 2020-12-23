@@ -20,7 +20,7 @@ func Test_LinkedListStack(t *testing.T) {
 
 	id, err := s.pop()
 	assert.Nil(t, err)
-	assert.Equal(t, 1, id)
+	assert.Equal(t, uint64(1), id)
 	assert.True(t, s.isEmpty())
 
 	_, err = s.pop()
