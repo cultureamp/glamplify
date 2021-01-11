@@ -1,4 +1,4 @@
-package main
+package errors
 
 import (
 	"errors"
@@ -18,7 +18,11 @@ func Test_ErrorResponse_New(t *testing.T) {
 	s := er.ToJSON()
 	assert.NotEmpty(t, s)
 	//fmt.Println(s)
-	assert.JSONEq(t, "{\"errors\":[{\"code\":\"500\",\"title\":\"test\",\"detail\":\"C:/src/go/src/github.com/cultureamp/glamplify/errors/errors_test.go:13:github.com/cultureamp/glamplify/errors.Test_ErrorResponse_New\"}]}", s)
+
+	// build has different paths, so check it has these "snippets" which shouldn't change
+	assert.Contains(t, s, "{\"errors\":[{\"code\":\"500\",", s)
+	assert.Contains(t, s, "\"title\":\"test\"", s)
+	assert.Contains(t, s, "errors.Test_ErrorResponse_New\"}]}", s)
 }
 
 func Test_ErrorResponse_Append(t *testing.T) {
@@ -33,7 +37,13 @@ func Test_ErrorResponse_Append(t *testing.T) {
 	s := er.ToJSON()
 	assert.NotEmpty(t, s)
 	//fmt.Println(s)
-	assert.JSONEq(t, "{\"errors\":[{\"code\":\"500\",\"title\":\"first error\",\"detail\":\"C:/src/go/src/github.com/cultureamp/glamplify/errors/errors_test.go:25:github.com/cultureamp/glamplify/errors.Test_ErrorResponse_Append\"},{\"code\":\"404\",\"title\":\"second error\",\"detail\":\"C:/src/go/src/github.com/cultureamp/glamplify/errors/errors_test.go:30:github.com/cultureamp/glamplify/errors.Test_ErrorResponse_Append\"}]}", s)
+
+	// build has different paths, so check it has these "snippets" which shouldn't change
+	assert.Contains(t, s, "\"code\":\"500\",", s)
+	assert.Contains(t, s, "\"code\":\"404\",", s)
+	assert.Contains(t, s, "\"title\":\"first error\"", s)
+	assert.Contains(t, s, "\"title\":\"second error\"", s)
+	assert.Contains(t, s, "errors.Test_ErrorResponse_Append\"}]}", s)
 }
 
 func Test_ErrorResponse_Standard_Error(t *testing.T) {
@@ -45,5 +55,8 @@ func Test_ErrorResponse_Standard_Error(t *testing.T) {
 	s := er.ToJSON()
 	assert.NotEmpty(t, s)
 	//fmt.Println(s)
-	assert.JSONEq(t, "{\"errors\":[{\"code\":\"500\",\"title\":\"standard error\",\"detail\":\"C:/Program Files/go/src/testing/testing.go:1123:testing.tRunner\"}]}", s)
+
+	// build has different paths, so check it has these "snippets" which shouldn't change
+	assert.Contains(t, s, "{\"errors\":[{\"code\":\"500\",", s)
+	assert.Contains(t, s, "\"title\":\"standard error\"", s)
 }
