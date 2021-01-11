@@ -74,11 +74,13 @@ func rootRequestHandler(w http.ResponseWriter, r *http.Request) {
 		logger.Event("glamplify_request_handler").Error(err)
 
 		// write out error in jsonapi.org format
-		errorResponse := gerrors.NewErrorResponse("500", err)
-		w.WriteHeader(500)
+		errorResponse := gerrors.NewErrorResponse("403", err)
+		w.WriteHeader(403)
 		w.Write([]byte(errorResponse.ToJSON()))
 		return
 	}
+
+	// TODO - do something here
 
 	// Fields can contain any type of variables
 	logger.Event("glamplify_request_handler").Fields(log.Fields{
