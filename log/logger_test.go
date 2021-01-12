@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/cultureamp/glamplify/env"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -70,8 +71,8 @@ func Test_Log_Global_Scope(t *testing.T) {
 	logger := NewWitCustomWriter(rsFields, writer)
 
 	logger.Event( "detail_event").Fields(Fields{
-		AppNameEnv: "app_name",
-		AppFarmEnv: "app_farm",
+		env.AppNameEnv: "app_name",
+		env.AppFarmEnv: "app_farm",
 	}).Debug("debug")
 
 	json := memBuffer.String()

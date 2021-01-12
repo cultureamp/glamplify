@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/cultureamp/glamplify/env"
 	"os"
 	"runtime"
 	"runtime/debug"
@@ -123,13 +124,13 @@ func (df SystemValues) getCurrentStack(skip int) string {
 
 func (df SystemValues) getEnvFields(fields Fields, properties Fields) Fields {
 
-	fields = df.addEnvFieldIfMissing(Product, ProductEnv, fields, properties)
-	fields = df.addEnvFieldIfMissing(App, AppNameEnv, fields, properties)
-	fields = df.addEnvFieldIfMissing(Farm, AppFarmEnv, fields, properties)
-	fields = df.addEnvFieldIfMissing(Farm, AppFarmLegacyEnv, fields, properties) // spec changed, delete this after a while: 14/09/2020 Mike
-	fields = df.addEnvFieldIfMissing(AppVer, AppVerEnv, fields, properties)
-	fields = df.addEnvFieldIfMissing(AwsRegion, AwsRegionEnv, fields, properties)
-	fields = df.addEnvFieldIfMissing(AwsAccountID, AwsAccountIDEnv, fields, properties)
+	fields = df.addEnvFieldIfMissing(Product, env.ProductEnv, fields, properties)
+	fields = df.addEnvFieldIfMissing(App, env.AppNameEnv, fields, properties)
+	fields = df.addEnvFieldIfMissing(Farm, env.AppFarmEnv, fields, properties)
+	fields = df.addEnvFieldIfMissing(Farm, env.AppFarmLegacyEnv, fields, properties) // spec changed, delete this after a while: 14/09/2020 Mike
+	fields = df.addEnvFieldIfMissing(AppVer, env.AppVerEnv, fields, properties)
+	fields = df.addEnvFieldIfMissing(AwsRegion, env.AwsRegionEnv, fields, properties)
+	fields = df.addEnvFieldIfMissing(AwsAccountID, env.AwsAccountIDEnv, fields, properties)
 
 	return fields
 }

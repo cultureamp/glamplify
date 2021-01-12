@@ -2,7 +2,7 @@ package authz
 
 import (
 	"context"
-	"github.com/cultureamp/glamplify/helper"
+	"github.com/cultureamp/glamplify/env"
 	"io"
 	"net"
 	"net/http"
@@ -31,13 +31,13 @@ type HTTPTransport struct {
 func NewHTTPTransport(configure ...func(*HTTPConfig)) Transport {
 	// https://medium.com/@nate510/don-t-use-go-s-default-http-client-4804cb19f779
 
-	c := helper.GetEnvInt(ClientTimeoutEnv, 10000) // 10 secs
+	c := env.GetInt(env.AuthzClientTimeoutEnv, 10000) // 10 secs
 	clientTimeout := time.Duration(c) * time.Millisecond
 
-	d := helper.GetEnvInt(DialerTimeoutEnv, 5000) // 5 secs
+	d := env.GetInt(env.AuthzDialerTimeoutEnv, 5000) // 5 secs
 	dialerTimeout := time.Duration(d) * time.Millisecond
 
-	t := helper.GetEnvInt(TLSTimeoutEnv, 5000) // 5 secs
+	t := env.GetInt(env.AuthzTLSTimeoutEnv, 5000) // 5 secs
 	tlsTimeout := time.Duration(t) * time.Millisecond
 
 	conf := &HTTPConfig{

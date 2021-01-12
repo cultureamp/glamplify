@@ -3,13 +3,13 @@ package datadog
 import (
 	"bytes"
 	"fmt"
+	"github.com/cultureamp/glamplify/env"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"sync"
 	"time"
 
-	"github.com/cultureamp/glamplify/helper"
 	"github.com/cultureamp/glamplify/log"
 )
 
@@ -60,11 +60,11 @@ type DDFieldWriter struct {
 // NewDataDogWriter creates a new FieldWriter. The optional configure func lets you set values on the underlying  writer.
 func NewDataDogWriter(configure ...func(*DDFieldWriter)) DDWriter { // https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
 	writer := &DDFieldWriter{
-		APIKey:    os.Getenv(DDApiKey),
-		Endpoint:  helper.GetEnvString(DDLogEndpoint, "https://http-intake.logs.datadoghq.com/v1/input"),
-		Timeout:   time.Second * time.Duration(helper.GetEnvInt(DDTimeout, 5)),
-		OmitEmpty: helper.GetEnvBool(log.OmitEmpty, false),
-		Level:     helper.GetEnvString(log.Level, log.DebugSev),
+		APIKey:    os.Getenv(env.DatadogApiKey),
+		Endpoint:  env.GetString(env.DatadogLogEndpoint, "https://http-intake.logs.datadoghq.com/v1/input"),
+		Timeout:   time.Second * time.Duration(env.GetInt(env.DatadogTimeout, 5)),
+		OmitEmpty: env.GetBool(env.LogOmitEmpty, false),
+		Level:     env.GetString(env.LogLevel, log.DebugSev),
 		waitGroup: &sync.WaitGroup{},
 		leveller:  log.NewLevelMap(),
 	}
