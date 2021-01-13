@@ -10,6 +10,7 @@ import (
 	"github.com/cultureamp/glamplify/aws"
 	gcontext "github.com/cultureamp/glamplify/context"
 	"github.com/cultureamp/glamplify/datadog"
+	gerrors "github.com/cultureamp/glamplify/errors"
 	"github.com/cultureamp/glamplify/jwt"
 	"github.com/cultureamp/glamplify/log"
 	"github.com/cultureamp/glamplify/sentry"
@@ -61,11 +62,25 @@ func rootRequestHandler(w http.ResponseWriter, r *http.Request) {
 	decoder, err := jwt.NewDecoder() // assumes AUTH_PUBLIC_KEY set, check other New methods for overloads
 	if err != nil {
 		logger.Event("glamplify_request_handler").Error(err)
+
+		// write out error in jsonapi.org format
+		errorResponse := gerrors.NewErrorResponse("500", err)
+		w.WriteHeader(500)
+		w.Write([]byte(errorResponse.ToJSON()))
+		return
 	}
 	payload, err := jwt.PayloadFromRequest(r, decoder)
 	if err != nil {
 		logger.Event("glamplify_request_handler").Error(err)
+
+		// write out error in jsonapi.org format
+		errorResponse := gerrors.NewErrorResponse("403", err)
+		w.WriteHeader(403)
+		w.Write([]byte(errorResponse.ToJSON()))
+		return
 	}
+
+	// TODO - do something here
 
 	// Fields can contain any type of variables
 	logger.Event("glamplify_request_handler").Fields(log.Fields{
