@@ -7,6 +7,15 @@ import (
 	"github.com/google/uuid"
 )
 
+// EventCtxKey type
+type EventCtxKey int
+
+const (
+	// RequestFieldsCtx EventCtxKey = iota
+	RequestFieldsCtx EventCtxKey = iota
+)
+
+
 // AddRequestFields adds a RequestScopedFields to the context
 func AddRequestFields(ctx context.Context, rsFields RequestScopedFields) context.Context {
 	return context.WithValue(ctx, RequestFieldsCtx, rsFields)

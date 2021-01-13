@@ -2,12 +2,12 @@ package authz
 
 import (
 	"bytes"
+	"github.com/cultureamp/glamplify/env"
 	"github.com/go-errors/errors"
 	"io/ioutil"
 	"net/http"
 	"time"
 
-	"github.com/cultureamp/glamplify/helper"
 	"github.com/patrickmn/go-cache"
 	cachecontrol "github.com/pquerna/cachecontrol/cacheobject"
 	"golang.org/x/net/context"
@@ -30,10 +30,10 @@ type Client struct {
 // NewClient creates a new authz Client
 func NewClient(authzAPIEndpoint string, http Transport, configure ...func(*Config)) *Client {
 
-	c := helper.GetEnvInt(CacheDurationEnv, 60)
+	c := env.GetInt(env.AuthzCacheDurationEnv, 60)
 	cacheDuration := time.Duration(c) * time.Second
 
-	t := helper.GetEnvInt(ClientTimeoutEnv, 10000) // 1- secs
+	t := env.GetInt(env.AuthzClientTimeoutEnv, 10000) // 1- secs
 	timeOutDuration := time.Duration(t) * time.Millisecond
 
 	conf := Config{

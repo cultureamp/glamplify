@@ -2,12 +2,12 @@ package datadog
 
 import (
 	"context"
+	"github.com/cultureamp/glamplify/env"
 	"net/http"
 	"os"
 
 	ddlambda "github.com/DataDog/datadog-lambda-go"
 	gcontext "github.com/cultureamp/glamplify/context"
-	"github.com/cultureamp/glamplify/helper"
 	"github.com/cultureamp/glamplify/log"
 	ddhttp "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
 	ddtracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
@@ -56,19 +56,19 @@ type Application struct {
 func NewApplication(ctx context.Context, name string, configure ...func(*Config)) *Application {
 	// https://docs.datadoghq.com/tracing/setup/go/
 	// https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/?tab=kubernetes
-	// We highly recommend using DDEnv, DDService, and DDVersion to set env, service, and version for your services.
+	// We highly recommend using DatadogEnv, DatadogService, and DatadogVersion to set env, service, and version for your services.
 
 	conf := Config{
 		Enabled:            false,
 		Name:               name,
 		Logging:            false,
-		APIKey:             os.Getenv(DDApiKey),
-		AppName:            helper.GetEnvString(DDService, os.Getenv(log.AppNameEnv)),
-		AppEnv:             helper.GetEnvString(DDEnv, os.Getenv(log.AppFarmEnv)),
-		AppVersion:         helper.GetEnvString(DDVersion, os.Getenv(log.AppVerEnv)),
-		AgentHost:          helper.GetEnvString(DDAgentHost, "localhost"),
-		AgentStatsDPort:    helper.GetEnvString(DDDogStatsdPort, "8125"),
-		MetricSite:         helper.GetEnvString(DDSite, "datadoghq.com"),
+		APIKey:             os.Getenv(env.DatadogApiKey),
+		AppName:            env.GetString(env.DatadogService, os.Getenv(env.AppNameEnv)),
+		AppEnv:             env.GetString(env.DatadogEnv, os.Getenv(env.AppFarmEnv)),
+		AppVersion:         env.GetString(env.DatadogVersion, os.Getenv(env.AppVerEnv)),
+		AgentHost:          env.GetString(env.DatadogAgentHost, "localhost"),
+		AgentStatsDPort:    env.GetString(env.DatadogStatsdPort, "8125"),
+		MetricSite:         env.GetString(env.DatadogSite, "datadoghq.com"),
 		WithAnalytics:      false,
 		WithRuntimeMetrics: false,
 		logger:             nil,

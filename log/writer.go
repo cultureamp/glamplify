@@ -2,12 +2,12 @@ package log
 
 import (
 	"fmt"
+	"github.com/cultureamp/glamplify/env"
 	"io"
 	"os"
 	"strings"
 	"sync"
 
-	"github.com/cultureamp/glamplify/helper"
 	"github.com/gookit/color"
 )
 
@@ -44,9 +44,9 @@ func NewWriter(configure ...func(*WriterConfig)) *FieldWriter { // https://dave.
 	writer := &FieldWriter{}
 	conf := WriterConfig{
 		Output:     os.Stdout,
-		OmitEmpty:  helper.GetEnvBool(OmitEmpty, false),
-		UseColours: helper.GetEnvBool(UseColours, false),
-		Level:      helper.GetEnvString(Level, DebugSev),
+		OmitEmpty:  env.GetBool(env.LogOmitEmpty, false),
+		UseColours: env.GetBool(env.LogUseColours, false),
+		Level:      env.GetString(env.LogLevel, DebugSev),
 	}
 	for _, config := range configure {
 		config(&conf)

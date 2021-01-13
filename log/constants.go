@@ -81,27 +81,4 @@ const (
 	FatalSev = "FATAL"
 	// AuditSev = "AUDIT"
 	AuditSev = "AUDIT"
-
-	// ENVIRONMENT VARIABLES
-
-	// Level            = "LOG_LEVEL"
-	Level = "LOG_LEVEL"
-	// OmitEmpty        = "LOG_OMITEMPTY"
-	OmitEmpty = "LOG_OMITEMPTY"
-	// UseColours       = "LOG_COLOURS"
-	UseColours = "LOG_COLOURS"
-	// ProductEnv       = "PRODUCT"
-	ProductEnv = "PRODUCT"
-	// AppNameEnv       = "APP"
-	AppNameEnv = "APP"
-	// AppFarmLegacyEnv = "APP_ENV"
-	AppFarmLegacyEnv = "APP_ENV"
-	// AppFarmEnv       = "FARM"
-	AppFarmEnv = "FARM"
-	// AppVerEnv        = "APP_VERSION"
-	AppVerEnv = "APP_VERSION"
-	// AwsRegionEnv     = "AWS_REGION"
-	AwsRegionEnv = "AWS_REGION"
-	// AwsAccountIDEnv  = "AWS_ACCOUNT_ID"
-	AwsAccountIDEnv = "AWS_ACCOUNT_ID"
 )

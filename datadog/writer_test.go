@@ -2,6 +2,7 @@ package datadog
 
 import (
 	"context"
+	"github.com/cultureamp/glamplify/env"
 	"os"
 	"testing"
 	"time"
@@ -13,7 +14,7 @@ import (
 
 func Test_DataDog_Writer(t *testing.T) {
 
-	if key := os.Getenv(DDApiKey); key == "" {
+	if key := os.Getenv(env.DatadogApiKey); key == "" {
 		t.Skip("no data dog api key set")
 	}
 

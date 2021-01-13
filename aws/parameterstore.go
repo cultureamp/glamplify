@@ -1,11 +1,12 @@
 package aws
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/cultureamp/glamplify/cache"
-	"github.com/cultureamp/glamplify/helper"
-	"time"
+	"github.com/cultureamp/glamplify/env"
 )
 
 // ParameterStoreConfig configures how the parameter store should work
@@ -28,7 +29,7 @@ type ParameterStore struct {
 func NewParameterStore(configure ...func(*ParameterStoreConfig)) *ParameterStore {
 
 	conf := &ParameterStoreConfig{
-		Profile:            helper.GetEnvString(AWSProfileEnv, "default"),
+		Profile:            env.GetString(env.AwsProfileEnv, "default"),
 		CacheErrorsAsEmpty: false,
 		CacheDuration:      1 * time.Minute,
 	}

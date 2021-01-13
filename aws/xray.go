@@ -2,12 +2,18 @@ package aws
 
 import (
 	"context"
+	"github.com/cultureamp/glamplify/env"
 	"net/http"
 
 	"github.com/aws/aws-xray-sdk-go/awsplugins/ec2"
 	"github.com/aws/aws-xray-sdk-go/awsplugins/ecs"
 	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/aws/aws-xray-sdk-go/xraylog"
+)
+
+const (
+	// XrayEnv = "XRAY_LOGGING"
+	XrayEnv = "XRAY_LOGGING"
 )
 
 // TracerConfig for setting initial values for Tracer
@@ -28,8 +34,10 @@ type Tracer struct {
 func NewTracer(ctx context.Context, configure ...func(*TracerConfig)) *Tracer {
 
 	conf := TracerConfig{
-		Environment: "development",
+		Environment:   "development",
+		EnableLogging: env.GetBool(env.AwsXrayEnv, false),
 	}
+
 	for _, config := range configure {
 		config(&conf)
 	}

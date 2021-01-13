@@ -2,21 +2,13 @@ package sentry
 
 import (
 	"context"
+	"github.com/cultureamp/glamplify/env"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/cultureamp/glamplify/helper"
-	"github.com/cultureamp/glamplify/log"
 	"github.com/getsentry/sentry-go"
 	sentryhttp "github.com/getsentry/sentry-go/http"
-)
-
-const (
-	// SentryDsn = "SENTRY_DSN"
-	SentryDsn = "SENTRY_DSN"
-	// SentryFlushTimeoutInMsEnv = "SENTRY_FLUSH_TIMEOUT_IN_MS"
-	SentryFlushTimeoutInMsEnv = "SENTRY_FLUSH_TIMEOUT_IN_MS"
 )
 
 // Config represents Sentry configuration values
@@ -41,18 +33,18 @@ type Application struct {
 func NewApplication(ctx context.Context, name string, configure ...func(*Config)) (*Application, error) {
 
 	if len(name) == 0 {
-		name = helper.GetEnvString(log.AppNameEnv, "default")
+		name = env.GetString(env.AppNameEnv, "default")
 	}
 
 	conf := Config{
 		Enabled:          false,
 		Logging:          false,
-		DSN:              os.Getenv(SentryDsn),
-		FlushTimeoutInMs: helper.GetEnvInt(SentryFlushTimeoutInMsEnv, 500),
+		DSN:              os.Getenv(env.SentryDsnEnv),
+		FlushTimeoutInMs: env.GetInt(env.SentryFlushTimeoutInMsEnv, 500),
 		Transport:        sentry.NewHTTPTransport(),
 		AppName:          name,
-		AppVersion:       helper.GetEnvString(log.AppVerEnv, "1.0.0"),
-		ReleaseStage:     helper.GetEnvString(log.AppFarmEnv, "production"),
+		AppVersion:       env.GetString(env.AppVerEnv, "1.0.0"),
+		ReleaseStage:     env.GetString(env.AppFarmEnv, "production"),
 	}
 
 	host, err := os.Hostname()

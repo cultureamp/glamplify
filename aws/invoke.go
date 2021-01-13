@@ -11,6 +11,9 @@ import (
 	lc "github.com/aws/aws-lambda-go/lambdacontext"
 )
 
+const (
+	functionInvokeRPC = "Function.Invoke"
+)
 
 // Input represents an AWS RPC call
 type Input = struct {

@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"github.com/cultureamp/glamplify/helper"
+	"github.com/cultureamp/glamplify/env"
 	cachego "github.com/patrickmn/go-cache"
 	"time"
 )
@@ -20,7 +20,7 @@ type Cache struct {
 // New creates a new Cache
 func New(configure ...func(*Config)) *Cache {
 
-	c := helper.GetEnvInt(CacheDurationEnv, 60)
+	c := env.GetInt(env.CacheDurationEnv, 60)
 	cacheDuration := time.Duration(c) * time.Second
 
 	conf := Config{
