@@ -58,7 +58,6 @@ func NewFromRequestWithCustomWriter(r *http.Request, writer Writer, fields ...Fi
 }
 
 func newLogger(rsFields gcontext.RequestScopedFields, writer Writer, fields ...Fields) *Logger {
-
 	df := newSystemValues()
 
 	merged := Fields{}
@@ -169,7 +168,6 @@ func (logger Logger) Audit(event string, fields ...Fields) string {
 
 // Event method uses expressive syntax format: logger.Event("event_name").Fields(fields...).Info("message")
 func (logger Logger) Event(event string) *Segment {
-
 	return &Segment{
 		logger: logger,
 		event: event,
@@ -193,5 +191,3 @@ func (logger Logger) write(rsFields gcontext.RequestScopedFields, event string, 
 
 	return logger.writer.WriteFields(severity, system, properties)
 }
-
-

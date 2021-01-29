@@ -27,8 +27,8 @@ const (
 	CacheDurationEnv = "CACHE_DURATION_IN_SEC"
 
 	// *** Datadog Environment Variables ***
-	// DatadogApiKey        = "DD_API_KEY"
-	DatadogApiKey = "DD_API_KEY"
+	// DatadogAPIKey        = "DD_API_KEY"
+	DatadogAPIKey = "DD_API_KEY"
 	// DatadogLogEndpoint   = "DD_LOG_ENDPOINT"
 	DatadogLogEndpoint = "DD_LOG_ENDPOINT"
 	// DatadogEnv           = "DD_ENV"

@@ -1,9 +1,10 @@
 package jwt
 
 import (
-	"errors"
 	"net/http"
 	"strings"
+
+	"github.com/go-errors/errors"
 )
 
 // Payload represents the jwt payload

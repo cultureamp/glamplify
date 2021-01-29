@@ -24,7 +24,6 @@ type ErrorDetail struct {
 
 // NewErrorResponse creates a new ErrorResponse
 func NewErrorResponse(code string, err error) *ErrorResponse {
-
 	errors := &ErrorResponse{}
 	errors = errors.AppendError(code, err)
 	return errors
@@ -64,7 +63,6 @@ func (e ErrorResponse) getLocation(err error) string {
 }
 
 func (e ErrorResponse) getLocationFromErrorStack(err *gerrors.Error) string {
-
 	callers := err.Callers()
 	frames := runtime.CallersFrames(callers)
 

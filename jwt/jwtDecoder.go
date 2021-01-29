@@ -2,12 +2,13 @@ package jwt
 
 import (
 	"crypto/rsa"
-	"errors"
 	"fmt"
-	jwtgo "github.com/dgrijalva/jwt-go"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	jwtgo "github.com/dgrijalva/jwt-go"
+	"github.com/go-errors/errors"
 )
 
 // Decoder represents how to decode a JWT
@@ -15,23 +16,21 @@ type Decoder struct {
 	verifyKey *rsa.PublicKey
 }
 
+
 // NewDecoder creates a new Decoder
 func NewDecoder() (Decoder, error) {
-
 	pubKey := os.Getenv("AUTH_PUBLIC_KEY")
 	return NewDecoderFromBytes([]byte(pubKey))
 }
 
 // NewDecoderFromPath creates a new Decoder with the public key in 'pubKeyPath'
 func NewDecoderFromPath(pubKeyPath string) (Decoder, error) {
-
 	verifyBytes, _ := ioutil.ReadFile(filepath.Clean(pubKeyPath))
 	return NewDecoderFromBytes(verifyBytes)
 }
 
 // NewDecoderFromBytes creates a new Decoder given the public key as a []byte
 func NewDecoderFromBytes(verifyBytes []byte) (Decoder, error) {
-
 	verifyKey, err := jwtgo.ParseRSAPublicKeyFromPEM(verifyBytes)
 	return Decoder{
 		verifyKey: verifyKey,
@@ -72,7 +71,6 @@ func (jwt Decoder) Decode(tokenString string) (Payload, error) {
 }
 
 func (jwt Decoder) extractKey(claims jwtgo.MapClaims, key string) (string, error) {
-
 	val, ok := claims[key].(string)
 	if !ok {
 		return "", fmt.Errorf("missing %s in jwt token", key)

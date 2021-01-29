@@ -71,7 +71,6 @@ func (set *bitSet) And(rhsSet ReadOnlySet) (Set, error) {
 
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
-
 		lhsBlock, lhsOk := set.getBlock(i)
 		rhsBlock, rhsOk := rhs.getBlock(i)
 
@@ -100,7 +99,6 @@ func (set bitSet) Or(rhsSet ReadOnlySet) (Set, error) {
 
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
-
 		lhsBlock, lhsOk := set.getBlock(i)
 		rhsBlock, rhsOk := rhs.getBlock(i)
 
@@ -130,7 +128,6 @@ func (set bitSet) Not() (Set, error) {
 
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
-
 		var notBlock *bitBlock
 		block, ok := set.getBlock(i)
 		if !ok {
@@ -160,7 +157,6 @@ func (set bitSet) AndCount(rhsSet ReadOnlySet) (uint64, error) {
 
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
-
 		lhsBlock, lhsOk := set.getBlock(i)
 		rhsBlock, rhsOk := rhs.getBlock(i)
 
@@ -188,7 +184,6 @@ func (set bitSet) OrCount(rhsSet ReadOnlySet) (uint64, error) {
 
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
-
 		lhsBlock, lhsOk := set.getBlock(i)
 		rhsBlock, rhsOk := rhs.getBlock(i)
 
@@ -215,8 +210,8 @@ func (set bitSet) NotCount() (uint64, error) {
 
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
-
 		var notBlock *bitBlock
+
 		block, ok := set.getBlock(i)
 		if !ok {
 			// create new block and fill it with 1s
@@ -243,10 +238,8 @@ func (set bitSet) Count() uint64 {
 	defer set.lock.RUnlock()
 
 	var count uint64 = 0
-
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
-
 		block, ok := set.getBlock(i)
 		if ok {
 			count += block.countAll()
@@ -293,7 +286,6 @@ func (set bitSet) GetBit(index uint64) (bool, error) {
 
 	blockID := int(index / BitsPerBlock)
 	idx := int(index % BitsPerBlock)
-
 	block, ok := set.getBlock(blockID)
 	if !ok {
 		// we don't have that block, so assume all 0s (eg. false the bit is not set)
@@ -309,7 +301,6 @@ func (set *bitSet) SetBit(index uint64) error {
 
 	blockID := int(index / BitsPerBlock)
 	idx := int(index % BitsPerBlock)
-
 	block, ok := set.getBlock(blockID)
 	if !ok {
 		// create the block
@@ -326,7 +317,6 @@ func (set *bitSet) UnsetBit(index uint64) error {
 
 	blockID := int(index / BitsPerBlock)
 	idx := int(index % BitsPerBlock)
-
 	block, ok := set.getBlock(blockID)
 	if !ok {
 		// no need to do anything, it already is assumed to be all 0's
@@ -342,7 +332,6 @@ func (set *bitSet) Clear() {
 
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
-
 		block, ok := set.getBlock(i)
 		if !ok {
 			// no block here, nothing to do
@@ -359,7 +348,6 @@ func (set *bitSet) Fill() {
 
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
-
 		block, ok := set.getBlock(i)
 		if !ok {
 			// create the block
@@ -380,10 +368,9 @@ func (set *bitSet) Fill() {
 }
 
 func (set bitSet) getBlockCount() int {
-	cap := set.cauldron.Capacity()
-
-	blocks := int(cap / BitsPerBlock)
-	if cap%BitsPerBlock > 0 {
+	capacity := set.cauldron.Capacity()
+	blocks := int(capacity / BitsPerBlock)
+	if capacity%BitsPerBlock > 0 {
 		blocks++
 	}
 

@@ -62,7 +62,7 @@ func NewApplication(ctx context.Context, name string, configure ...func(*Config)
 		Enabled:            false,
 		Name:               name,
 		Logging:            false,
-		APIKey:             os.Getenv(env.DatadogApiKey),
+		APIKey:             os.Getenv(env.DatadogAPIKey),
 		AppName:            env.GetString(env.DatadogService, os.Getenv(env.AppNameEnv)),
 		AppEnv:             env.GetString(env.DatadogEnv, os.Getenv(env.AppFarmEnv)),
 		AppVersion:         env.GetString(env.DatadogVersion, os.Getenv(env.AppVerEnv)),

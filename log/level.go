@@ -22,7 +22,6 @@ const (
 
 // NewLevelMap creates a Leveller map
 func NewLevelMap() *Leveller {
-
 	table := map[string]int{
 		DebugSev: DebugLevel,
 		InfoSev:  InfoLevel,
@@ -31,7 +30,6 @@ func NewLevelMap() *Leveller {
 		FatalSev: FatalLevel,
 		AuditSev: AuditLevel,
 	}
-
 	return &Leveller{
 		stol: table,
 	}

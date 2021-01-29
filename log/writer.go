@@ -40,7 +40,6 @@ type Writer interface {
 // Useful for CLI apps that want to direct logging to a file or stderr
 // eg. SetOutput
 func NewWriter(configure ...func(*WriterConfig)) *FieldWriter { // https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
-
 	writer := &FieldWriter{}
 	conf := WriterConfig{
 		Output:     os.Stdout,
@@ -89,7 +88,6 @@ func (writer FieldWriter) IsEnabled(sev string) bool {
 
 func (writer *FieldWriter) write(sev string, json string) {
 	// This can return an error, but we just swallow it here as what can we or a client really do? Try and log it? :)
-
 	json = writer.addNewLineIfMissing(json)
 
 	writer.mutex.Lock()
@@ -100,7 +98,6 @@ func (writer *FieldWriter) write(sev string, json string) {
 		// Also we purposely print with double NewLines (1 in the string and an extra one when printing)
 		// to make it easy to separate different log lines...
 		color.SetOutput(writer.output)
-
 		level := writer.levelMap.StringToLevel(sev)
 		switch level {
 		case DebugLevel:

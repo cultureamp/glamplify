@@ -59,15 +59,15 @@ func (bb *bitBlock) notAll() *bitBlock {
 	return block
 }
 
-func (bb bitBlock) not(len int) (*bitBlock, error) {
-	if len > BitsPerBlock {
-		return nil, errors.New("length out of range for Not(len int)")
+func (bb bitBlock) not(length int) (*bitBlock, error) {
+	if length > BitsPerBlock {
+		return nil, errors.New("length out of range for Not(length int)")
 	}
 
 	var result [LongsPerBlock]uint64
 
-	numLongs := len / BitsPerLong
-	lastBits := len % BitsPerLong
+	numLongs := length / BitsPerLong
+	lastBits := length % BitsPerLong
 
 	for i := 0; i < numLongs; i++ {
 		result[i] = ^bb.bits[i]
@@ -112,15 +112,15 @@ func (bb bitBlock) countAll() uint64 {
 	return count
 }
 
-func (bb bitBlock) count(len int) (uint64, error) {
-	if len > BitsPerBlock {
-		return ZeroBitPattern, errors.New("length out of range for count(len int)")
+func (bb bitBlock) count(length int) (uint64, error) {
+	if length > BitsPerBlock {
+		return ZeroBitPattern, errors.New("length out of range for count(length int)")
 	}
 
 	var count uint64 = 0
 
-	numLongs := len / BitsPerLong
-	lastBits := len % BitsPerLong
+	numLongs := length / BitsPerLong
+	lastBits := length % BitsPerLong
 
 	for i := 0; i < numLongs; i++ {
 		count += bb.numberOfSetBits(bb.bits[i])
@@ -180,17 +180,17 @@ func (bb *bitBlock) unsetBit(index int) error {
 	return nil
 }
 
-func (bb *bitBlock) fillAll() error {
-	return bb.fill(BitsPerBlock)
+func (bb *bitBlock) fillAll()  {
+	bb.fill(BitsPerBlock)
 }
 
-func (bb *bitBlock) fill(len int) error {
-	if len > BitsPerBlock {
-		return errors.New("length out of range for Fill(len int)")
+func (bb *bitBlock) fill(length int)  {
+	if length > BitsPerBlock {
+		length = BitsPerBlock
 	}
 
-	numLongs := len / BitsPerLong
-	lastBits := len % BitsPerLong
+	numLongs := length / BitsPerLong
+	lastBits := length % BitsPerLong
 
 	for i := 0; i < numLongs; i++ {
 		bb.bits[i] = AllOnesBitPattern
@@ -206,21 +206,19 @@ func (bb *bitBlock) fill(len int) error {
 	for i := lastLong; i < LongsPerBlock; i++ {
 		bb.bits[i] = ZeroBitPattern
 	}
-
-	return nil
 }
 
-func (bb *bitBlock) clearAll() error {
-	return bb.clear(BitsPerBlock)
+func (bb *bitBlock) clearAll()  {
+	bb.clear(BitsPerBlock)
 }
 
-func (bb *bitBlock) clear(len int) error {
-	if len > BitsPerBlock {
-		return errors.New("length out of range for Fill(len int)")
+func (bb *bitBlock) clear(length int)  {
+	if length > BitsPerBlock {
+		length = BitsPerBlock
 	}
 
-	numLongs := len / BitsPerLong
-	lastBits := len % BitsPerLong
+	numLongs := length / BitsPerLong
+	lastBits := length % BitsPerLong
 
 	for i := 0; i < numLongs; i++ {
 		bb.bits[i] = ZeroBitPattern
@@ -231,8 +229,6 @@ func (bb *bitBlock) clear(len int) error {
 		mask := bb.getMask(lastBits)
 		bb.bits[lastLong] &= ^mask
 	}
-
-	return nil
 }
 
 func (bb bitBlock) getMask(bitIndex int) uint64 {

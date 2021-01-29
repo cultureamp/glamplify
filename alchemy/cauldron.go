@@ -81,12 +81,12 @@ func (cauldron bitCauldron) Aspects() ([]Aspect, error) {
 	cauldron.lock.RLock()
 	defer cauldron.lock.RUnlock()
 
-	len := len(cauldron.childAspects)
-	if len == 0 {
+	length := len(cauldron.childAspects)
+	if length == 0 {
 		return []Aspect{}, errors.New("no aspects")
 	}
 
-	var aspects = make([]Aspect, 0, len)
+	var aspects = make([]Aspect, 0, length)
 	for _, aspect := range cauldron.childAspects {
 		aspects = append(aspects, aspect)
 	}
@@ -145,7 +145,6 @@ func (cauldron bitCauldron) ItemFor(index uint64) (Item, error) {
 }
 
 func (cauldron *bitCauldron) Upsert(item Item) (uint64, error) {
-
 	cauldron.lock.Lock()
 	defer cauldron.lock.Unlock()
 
@@ -180,7 +179,6 @@ func (cauldron *bitCauldron) Upsert(item Item) (uint64, error) {
 }
 
 func (cauldron *bitCauldron) TryRemove(item Item) (bool, error) {
-
 	index, err := cauldron.IndexFor(item)
 	if err != nil {
 		// it does not exists, so no-op nothing to do
@@ -203,7 +201,10 @@ func (cauldron *bitCauldron) TryRemove(item Item) (bool, error) {
 	for _, aspect := range aspects{
 		facets, _ := aspect.Facets()
 		for _, facet := range facets {
-			facet.UnsetBitForIndex(index)
+			facetErr := facet.UnsetBitForIndex(index)
+			if facetErr != nil && err == nil {
+				err = facetErr
+			}
 		}
 	}
 

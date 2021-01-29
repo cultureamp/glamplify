@@ -25,7 +25,6 @@ func newPolicyEvalRequestParser() *PolicyResponseParser {
 
 // ParsePolicyEvalRequest parses a body response to a PolicyResponse
 func (p PolicyResponseParser) ParsePolicyEvalRequest(body string) (*PolicyResponse, error) {
-
 	record := PolicyResponse{}
 	err := json.Unmarshal([]byte(body), &record)
 	return &record, err

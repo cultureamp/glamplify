@@ -27,7 +27,6 @@ type Settings struct {
 }
 
 func NewSettings() *Settings {
-
 	settings := &Settings{}
 
 	settings.App = GetString(AppNameEnv, "authz-api")
@@ -39,7 +38,7 @@ func NewSettings() *Settings {
 	settings.AwsRegion = GetString(AwsRegionEnv, "us-west-2")
 	settings.AwsAccountID = os.Getenv(AwsAccountIDEnv)
 	settings.XrayLogging = GetBool(AwsXrayEnv, true)
-	settings.DDApiKey = os.Getenv(DatadogApiKey)
+	settings.DDApiKey = os.Getenv(DatadogAPIKey)
 	settings.SentryDSN = os.Getenv(SentryDsnEnv)
 	settings.SentryFlushMs = GetInt(SentryFlushTimeoutInMsEnv, 50)
 

@@ -2,8 +2,9 @@ package sentry
 
 import (
 	"context"
-	"errors"
 	"net/http"
+
+	"github.com/go-errors/errors"
 )
 
 type key int
@@ -21,7 +22,6 @@ func FromRequest(w http.ResponseWriter, r *http.Request) (*Application, error) {
 
 // FromContext gets the current Application from the given context
 func FromContext(ctx context.Context) (*Application, error) {
-
 	notify, ok := ctx.Value(sentryContextKey).(*Application)
 	if ok && notify != nil {
 		return notify, nil
@@ -29,4 +29,3 @@ func FromContext(ctx context.Context) (*Application, error) {
 
 	return nil, errors.New("no sentry application in context")
 }
-

@@ -1,0 +1,49 @@
+# options for analysis running
+run:
+  # include test files or not, default is true
+  tests: false
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - deadcode
+    - depguard
+    - dogsled
+    - dupl
+    - errcheck
+    - errorlint
+    - exportloopref
+#    - exhaustive
+#    - exhaustivestruct
+    - funlen
+    - gochecknoinits
+    - gocognit
+    - goconst
+    - gocyclo
+#    - goerr113
+#    - goimports
+    - golint
+    - goprintffuncname
+    - gosimple
+    - govet
+    - ineffassign
+    - interfacer
+#    - lll
+    - makezero
+    - misspell
+    - nestif
+    - noctx
+    - prealloc
+    - predeclared
+    - scopelint
+    - sqlclosecheck
+    - stylecheck
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+    - whitespace

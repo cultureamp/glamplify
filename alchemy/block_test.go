@@ -86,26 +86,21 @@ func Test_BitBlock_Set_Unset_Bit(t *testing.T) {
 func Test_BitBlock_Fill_Clear(t *testing.T) {
 	bb := newBitBlock()
 
-	err := bb.fillAll()
-	assert.Nil(t, err, err)
-
+	bb.fillAll()
 	for i := 0; i < BitsPerBlock; i++ {
 		bit, err := bb.getBit(i)
 		assert.Nil(t, err)
 		assert.True(t, bit)
 	}
 
-	err = bb.clearAll()
-	assert.Nil(t, err, err)
-
+	bb.clearAll()
 	for i := 0; i < BitsPerBlock; i++ {
 		bit, err := bb.getBit(i)
 		assert.Nil(t, err)
 		assert.False(t, bit)
 	}
 
-	err = bb.fill(63)
-	assert.Nil(t, err)
+	bb.fill(63)
 	bit, err := bb.getBit(62)
 	assert.Nil(t, err)
 	assert.True(t, bit)
@@ -113,7 +108,7 @@ func Test_BitBlock_Fill_Clear(t *testing.T) {
 	assert.Nil(t, err)
 	assert.False(t, bit)
 
-	err = bb.fill(65)
+	bb.fill(65)
 	assert.Nil(t, err)
 	bit, err = bb.getBit(64)
 	assert.Nil(t, err)
@@ -122,7 +117,7 @@ func Test_BitBlock_Fill_Clear(t *testing.T) {
 	assert.Nil(t, err)
 	assert.False(t, bit)
 
-	err = bb.fill(1021)
+	bb.fill(1021)
 	assert.Nil(t, err)
 	bit, err = bb.getBit(1020)
 	assert.Nil(t, err)
@@ -137,7 +132,7 @@ func Test_BitBlock_Fill_Clear(t *testing.T) {
 	assert.Nil(t, err)
 	assert.False(t, bit)
 
-	err = bb.clear(35)
+	bb.clear(35)
 	assert.Nil(t, err)
 	bit, err = bb.getBit(34)
 	assert.Nil(t, err)
@@ -150,10 +145,14 @@ func Test_BitBlock_Fill_Clear(t *testing.T) {
 	assert.True(t, bit)
 
 	// out of range
-	err = bb.fill(1025)
-	assert.NotNil(t, err)
-	err = bb.clear(1025)
-	assert.NotNil(t, err)
+	bb.fill(1025)
+	bit, err = bb.getBit(1023)
+	assert.Nil(t, err)
+	assert.True(t, bit)
+	bb.clear(1025)
+	bit, err = bb.getBit(1023)
+	assert.Nil(t, err)
+	assert.False(t, bit)
 }
 
 func Test_BitBlock_And_AndCount(t *testing.T) {

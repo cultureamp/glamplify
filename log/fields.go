@@ -3,11 +3,12 @@ package log
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/cultureamp/glamplify/helper"
 	systemLog "log"
 	"reflect"
 	"runtime/debug"
 	"time"
+
+	"github.com/cultureamp/glamplify/helper"
 )
 
 // Fields type, used to pass to Debug, Print and Error.
@@ -43,7 +44,6 @@ func (fields Fields) ToSnakeCase() Fields {
 	snaked := Fields{}
 
 	for k, v := range fields {
-
 		switch f := v.(type) {
 		case Fields:
 			v = f.ToSnakeCase()
@@ -73,7 +73,6 @@ func (fields Fields) ToJSON(omitempty bool) string {
 func (fields Fields) ToTags(omitempty bool) []string {
 	var tags []string
 	for k, v := range fields {
-
 		switch f := v.(type) {
 		case Fields:
 			t := f.ToTags(omitempty)
@@ -134,9 +133,7 @@ func (fields Fields) omitEmpty(omitEmpty bool) Fields {
 // ValidateNewRelic checks that Entries are valid according to NewRelic requirements before processing
 // https://docs.newrelic.com/docs/insights/insights-data-sources/custom-data/insights-custom-data-requirements-limits
 func (fields Fields) ValidateNewRelic() (bool, error) {
-
 	for k, v := range fields {
-
 		switch s := v.(type) {
 		case nil:
 			return false, fmt.Errorf("key '%v' cannot have 'nil' value", k)

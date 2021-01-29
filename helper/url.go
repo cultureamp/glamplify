@@ -9,7 +9,6 @@ import (
 
 // Domain gets the top level domain from url
 func Domain(url string) string {
-
 	// doesn't work with port so we have to do this...
 	host, _ := hostFromURL(url)
 	return d.Domain(host)

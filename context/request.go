@@ -32,7 +32,6 @@ func AddRequestScopedFieldsRequest(r *http.Request, requestScopeFields RequestSc
 // If missing, then it checks http.Request Headers for TraceID, RequestID, and CorrelationID.
 // Then this method also tries to decode the JWT payload and adds CustomerAggregateID and UserAggregateID if successful.
 func WrapRequest(r *http.Request) (*http.Request, error) {
-
 	// reads AUTH_PUBLIC_KEY environment var - use PayloadFromRequest() if you want a custom decoder
 	// then use WrapRequestWithDecoder
 	jwt, err := jwt.NewDecoder()
