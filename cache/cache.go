@@ -19,7 +19,6 @@ type Cache struct {
 
 // New creates a new Cache
 func New(configure ...func(*Config)) *Cache {
-
 	c := env.GetInt(env.CacheDurationEnv, 60)
 	cacheDuration := time.Duration(c) * time.Second
 
@@ -48,4 +47,3 @@ func (c Cache) Get(key string) (interface{}, bool) {
 func (c *Cache) Set(key string, val interface{}, duration time.Duration) {
 	c.cache.Set(key, val, duration)
 }
-

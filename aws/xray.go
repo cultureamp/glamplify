@@ -32,7 +32,6 @@ type Tracer struct {
 
 // NewTracer creates a new Tracer
 func NewTracer(ctx context.Context, configure ...func(*TracerConfig)) *Tracer {
-
 	conf := TracerConfig{
 		Environment:   "development",
 		EnableLogging: env.GetBool(env.AwsXrayEnv, false),

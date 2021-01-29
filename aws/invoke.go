@@ -2,13 +2,13 @@ package aws
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/rpc"
 	"time"
 
 	"github.com/aws/aws-lambda-go/lambda/messages"
 	lc "github.com/aws/aws-lambda-go/lambdacontext"
+	"github.com/go-errors/errors"
 )
 
 const (

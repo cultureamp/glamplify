@@ -2,9 +2,8 @@ package datadog
 
 import (
 	"bytes"
-	"fmt"
+	"context"
 	"github.com/cultureamp/glamplify/env"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"sync"
@@ -14,11 +13,10 @@ import (
 )
 
 const (
-	dataDogApiKeyHeader = "DD-API-KEY"
-	contentTypeHeader = "Content-Type"
-	applicationJsonType = "application/json"
+	dataDogAPIKeyHeader = "DD-API-KEY"
+	contentTypeHeader   = "Content-Type"
+	applicationJSONType = "application/json"
 )
-
 
 // DDWriter interface represents a log writer for data dog
 type DDWriter interface {
@@ -54,13 +52,12 @@ type DDFieldWriter struct {
 	waitGroup *sync.WaitGroup
 	// converts to and from string <-> int
 	leveller *log.Leveller
-
 }
 
 // NewDataDogWriter creates a new FieldWriter. The optional configure func lets you set values on the underlying  writer.
 func NewDataDogWriter(configure ...func(*DDFieldWriter)) DDWriter { // https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
 	writer := &DDFieldWriter{
-		APIKey:    os.Getenv(env.DatadogApiKey),
+		APIKey:    os.Getenv(env.DatadogAPIKey),
 		Endpoint:  env.GetString(env.DatadogLogEndpoint, "https://http-intake.logs.datadoghq.com/v1/input"),
 		Timeout:   time.Second * time.Duration(env.GetInt(env.DatadogTimeout, 5)),
 		OmitEmpty: env.GetBool(env.LogOmitEmpty, false),
@@ -78,7 +75,6 @@ func NewDataDogWriter(configure ...func(*DDFieldWriter)) DDWriter { // https://d
 
 //WriteFields - writes fields to the Data Dog log endpoint
 func (writer *DDFieldWriter) WriteFields(sev string, system log.Fields, fields ...log.Fields) string {
-
 	merged := log.Fields{}
 	properties := merged.Merge(fields...)
 	if len(properties) > 0 {
@@ -103,33 +99,27 @@ func (writer *DDFieldWriter) WaitAll() {
 	writer.waitGroup.Wait()
 }
 
-func post(writer *DDFieldWriter, jsonStr string) error {
+func post(writer *DDFieldWriter, jsonStr string) {
 	defer writer.waitGroup.Done()
 
 	jsonBytes := []byte(jsonStr)
 
-	req, err := http.NewRequest("POST", writer.Endpoint, bytes.NewBuffer(jsonBytes))
+	// golint-noctx requires ctx for http requests
+	ctx := context.Background()
+	req, err := http.NewRequestWithContext(ctx, "POST", writer.Endpoint, bytes.NewBuffer(jsonBytes))
 	if err != nil {
-		return err
+		panic(err)
 	}
 
-	req.Header.Set(contentTypeHeader, applicationJsonType)
-	req.Header.Set(dataDogApiKeyHeader, writer.APIKey)
+	req.Header.Set(contentTypeHeader, applicationJSONType)
+	req.Header.Set(dataDogAPIKeyHeader, writer.APIKey)
 
 	var client = &http.Client{
 		Timeout: writer.Timeout,
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		panic(err)
 	}
 	defer resp.Body.Close()
-
-	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
-		return nil
-	}
-
-	body, _ := ioutil.ReadAll(resp.Body)
-	str := string(body)
-	return fmt.Errorf("bad server response: %d. body: %v", resp.StatusCode, str)
 }

@@ -29,7 +29,6 @@ type Client struct {
 
 // NewClient creates a new authz Client
 func NewClient(authzAPIEndpoint string, http Transport, configure ...func(*Config)) *Client {
-
 	c := env.GetInt(env.AuthzCacheDurationEnv, 60)
 	cacheDuration := time.Duration(c) * time.Second
 
@@ -55,7 +54,6 @@ func NewClient(authzAPIEndpoint string, http Transport, configure ...func(*Confi
 
 // EvaluateBooleanPolicy calls authz-api asking it to evaluate the policy, and then returns the result
 func (client Client) EvaluateBooleanPolicy(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (*EvaluationResponse, error) {
-
 	if item, found := client.cache.Get(policy); found {
 		result, ok := item.(*EvaluationResponse)
 		if ok {
@@ -63,12 +61,12 @@ func (client Client) EvaluateBooleanPolicy(ctx context.Context, policy string, i
 		}
 	}
 
-	response, result, err := client.evaluateBooleanPolicy(ctx, policy, identity, input)
+	response, result, err := client.evaluateBooleanPolicy(policy, identity, input)
 	if err != nil {
 		return nil, err // if there is a compile error, etc. assume the kill switch is OFF
 	}
 
-	controlDirective, err := client.parseResponseCacheControl(ctx, response)
+	controlDirective, err := client.parseResponseCacheControl(response)
 	if err == nil && controlDirective.MaxAge > 0 {
 		cacheExpiry := time.Duration(controlDirective.MaxAge) * time.Second
 		client.cache.Set(policy, result, cacheExpiry)
@@ -77,7 +75,7 @@ func (client Client) EvaluateBooleanPolicy(ctx context.Context, policy string, i
 	return result, nil
 }
 
-func (client Client) parseResponseCacheControl(ctx context.Context, response *http.Response) (*cachecontrol.ResponseCacheDirectives, error) {
+func (client Client) parseResponseCacheControl(response *http.Response) (*cachecontrol.ResponseCacheDirectives, error) {
 	if response == nil || response.Header == nil {
 		return nil, nil
 	}
@@ -90,7 +88,7 @@ func (client Client) parseResponseCacheControl(ctx context.Context, response *ht
 	return controlDirective, nil
 }
 
-func (client Client) evaluateBooleanPolicy(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (*http.Response, *EvaluationResponse, error) {
+func (client Client) evaluateBooleanPolicy(policy string, identity IdentityRequest, input InputRequest) (*http.Response, *EvaluationResponse, error) {
 	postBody, err := client.createRequestPostBody(policy, identity, input)
 	if err != nil {
 		return nil, nil, err
@@ -130,7 +128,6 @@ func (client Client) createRequestPostBody(policy string, identity IdentityReque
 }
 
 func (client Client) readResponse(response *http.Response) (*PolicyResponse, error) {
-
 	if response == nil {
 		return nil, errors.New("response is nil")
 	}

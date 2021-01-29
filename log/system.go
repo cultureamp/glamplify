@@ -48,7 +48,6 @@ func (df SystemValues) getSystemValues(rsFields gcontext.RequestScopedFields, pr
 		Severity: severity,
 		Loc:      df.getLocation(4),
 	}
-
 	fields = df.getMandatoryFields(rsFields, fields, properties)
 	fields = df.getEnvFields(fields, properties)
 
@@ -96,7 +95,6 @@ func (df SystemValues) getErrorStackTrace(err error) string {
 }
 
 func (df SystemValues) getStackTracer(ews stackTracer) string {
-
 	frames := ews.StackTrace()
 
 	buf := bytes.Buffer{}
@@ -123,7 +121,6 @@ func (df SystemValues) getCurrentStack(skip int) string {
 }
 
 func (df SystemValues) getEnvFields(fields Fields, properties Fields) Fields {
-
 	fields = df.addEnvFieldIfMissing(Product, env.ProductEnv, fields, properties)
 	fields = df.addEnvFieldIfMissing(App, env.AppNameEnv, fields, properties)
 	fields = df.addEnvFieldIfMissing(Farm, env.AppFarmEnv, fields, properties)
@@ -136,7 +133,6 @@ func (df SystemValues) getEnvFields(fields Fields, properties Fields) Fields {
 }
 
 func (df SystemValues) getMandatoryFields(rsFields gcontext.RequestScopedFields, fields Fields, properties Fields) Fields {
-
 	fields = df.addMandatoryFieldIfMissing(TraceID, rsFields.TraceID, fields, properties)
 	fields = df.addMandatoryFieldIfMissing(RequestID, rsFields.RequestID, fields, properties)
 	fields = df.addMandatoryFieldIfMissing(CorrelationID, rsFields.CorrelationID, fields, properties)
@@ -147,7 +143,6 @@ func (df SystemValues) getMandatoryFields(rsFields gcontext.RequestScopedFields,
 }
 
 func (df SystemValues) addEnvFieldIfMissing(fieldName string, osVar string, fields Fields, properties Fields) Fields {
-
 	// If it contains it already, all good!
 	if _, ok := fields[fieldName]; ok {
 		return fields
@@ -167,7 +162,6 @@ func (df SystemValues) addEnvFieldIfMissing(fieldName string, osVar string, fiel
 }
 
 func (df SystemValues) addMandatoryFieldIfMissing(fieldName string, fieldValue string, fields Fields, properties Fields) Fields {
-
 	// If it contains it already, all good!
 	if _, ok := fields[fieldName]; ok {
 		return fields
@@ -206,7 +200,6 @@ var host string
 var hostOnce sync.Once
 
 func (df SystemValues) hostName() string {
-
 	var err error
 	hostOnce.Do(func() {
 		host, err = os.Hostname()

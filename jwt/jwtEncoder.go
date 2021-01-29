@@ -24,21 +24,18 @@ type claims struct {
 
 // NewEncoder creates a new Encoder
 func NewEncoder() (Encoder, error) {
-
 	priKey := os.Getenv("AUTH_PRIVATE_KEY")
 	return NewEncoderFromBytes([]byte(priKey))
 }
 
 // NewEncoderFromPath creates a new Encoder given the private key at 'pemKeyPath'
 func NewEncoderFromPath(pemKeyPath string) (Encoder, error) {
-
 	pemBytes, _ := ioutil.ReadFile(filepath.Clean(pemKeyPath))
 	return NewEncoderFromBytes(pemBytes)
 }
 
 // NewEncoderFromBytes creates a new Encoder given the private key as a []byte
 func NewEncoderFromBytes(pemBytes []byte) (Encoder, error) {
-
 	pemKey, err := jwtgo.ParseRSAPrivateKeyFromPEM(pemBytes)
 	return Encoder{
 		pemKey: pemKey,
@@ -57,7 +54,6 @@ func (encoder Encoder) Encode(payload Payload) (string, error) {
 
 // EncodeWithExpiry encodes a Payload with an expiry
 func (encoder Encoder) EncodeWithExpiry(payload Payload, duration time.Duration) (string, error) {
-
 	claims := encoder.claims(payload, duration)
 	token := jwtgo.NewWithClaims(jwtgo.SigningMethodRS256, claims)
 	return token.SignedString(encoder.pemKey)

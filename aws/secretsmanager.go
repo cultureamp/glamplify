@@ -1,12 +1,13 @@
 package aws
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/cultureamp/glamplify/cache"
 	"github.com/cultureamp/glamplify/env"
-	"time"
 )
 
 // SecretsManagerConfig configures how the secrets manager should work
@@ -27,7 +28,6 @@ type SecretsManager struct {
 
 // NewSecretsManager creates a new SecretsManager
 func NewSecretsManager(configure ...func(*SecretsManagerConfig)) *SecretsManager {
-
 	conf := &SecretsManagerConfig{
 		Profile:            env.GetString(env.AwsProfileEnv, "default"),
 		CacheErrorsAsEmpty: false,
@@ -55,7 +55,6 @@ func NewSecretsManager(configure ...func(*SecretsManagerConfig)) *SecretsManager
 
 // Get a secret by 'key'
 func (sm SecretsManager) Get(key string) (string, error) {
-
 	if x, found := sm.cache.Get(key); found {
 		if val, ok := x.(string); ok {
 			return val, nil

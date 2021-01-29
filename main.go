@@ -47,7 +47,7 @@ func main() {
 	h := xrayTracer.SegmentHandler("MyApp", sentryApp.Middleware(datadogApp.WrapHandler("MyApp", rootRequestHandler)))
 
 	rr := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/", nil)
+	req, _ := http.NewRequestWithContext(ctx, "GET", "/", nil)
 	h.ServeHTTP(rr, req)
 
 	datadogApp.Shutdown()
@@ -66,7 +66,10 @@ func rootRequestHandler(w http.ResponseWriter, r *http.Request) {
 		// write out error in jsonapi.org format
 		errorResponse := gerrors.NewErrorResponse("500", err)
 		w.WriteHeader(500)
-		w.Write([]byte(errorResponse.ToJSON()))
+		_, err := w.Write([]byte(errorResponse.ToJSON()))
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
 	payload, err := jwt.PayloadFromRequest(r, decoder)
@@ -76,7 +79,10 @@ func rootRequestHandler(w http.ResponseWriter, r *http.Request) {
 		// write out error in jsonapi.org format
 		errorResponse := gerrors.NewErrorResponse("403", err)
 		w.WriteHeader(403)
-		w.Write([]byte(errorResponse.ToJSON()))
+		_, err := w.Write([]byte(errorResponse.ToJSON()))
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
 
@@ -93,7 +99,6 @@ func rootRequestHandler(w http.ResponseWriter, r *http.Request) {
 
 // GetLoggingCtx adds in missing TraceID, RequestID and CorrelationID if required at the start of a request
 func GetLoggingCtx(ctx context.Context, r *http.Request) context.Context {
-
 	// If XRAY is enabled, get the trace_id
 	traceID := getTraceID(ctx, r)
 
@@ -114,7 +119,6 @@ func GetLoggingCtx(ctx context.Context, r *http.Request) context.Context {
 
 
 func getTraceID(ctx context.Context,  r *http.Request) string {
-
 	if awsxray.RequestWasTraced(ctx) {
 		return awsxray.TraceID(ctx)
 	}
@@ -128,7 +132,6 @@ func getTraceID(ctx context.Context,  r *http.Request) string {
 }
 
 func getRequestID( r *http.Request) string {
-
 	// Did the client pass us a request_id?
 	requestID := r.Header.Get(gcontext.RequestIDHeader)
 	if requestID == "" {

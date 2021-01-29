@@ -80,12 +80,12 @@ func (aspect bitAspect) Facets() ([]Facet, error) {
 	aspect.lock.RLock()
 	defer aspect.lock.RUnlock()
 
-	len := len(aspect.childFacets)
-	if len == 0 {
+	length := len(aspect.childFacets)
+	if length == 0 {
 		return []Facet{}, errors.New("no facets for aspect")
 	}
 
-	var facets = make([]Facet, 0, len)
+	var facets = make([]Facet, 0, length)
 	for _, facet := range aspect.childFacets {
 		facets = append(facets, facet)
 	}

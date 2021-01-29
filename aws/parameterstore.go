@@ -27,7 +27,6 @@ type ParameterStore struct {
 
 // NewParameterStore creates a new ParameterStore
 func NewParameterStore(configure ...func(*ParameterStoreConfig)) *ParameterStore {
-
 	conf := &ParameterStoreConfig{
 		Profile:            env.GetString(env.AwsProfileEnv, "default"),
 		CacheErrorsAsEmpty: false,
@@ -41,10 +40,8 @@ func NewParameterStore(configure ...func(*ParameterStoreConfig)) *ParameterStore
 		SharedConfigState: session.SharedConfigEnable,
 		Profile:           conf.Profile, // eg. "default", or "dev-admin" etc
 	}))
-
 	ssm := ssm.New(sess)
 	c := cache.New()
-
 	return &ParameterStore{
 		conf:    conf,
 		session: sess,
@@ -55,7 +52,6 @@ func NewParameterStore(configure ...func(*ParameterStoreConfig)) *ParameterStore
 
 // Get a secret from the parameter store for 'key'
 func (ps ParameterStore) Get(key string) (string, error) {
-
 	if x, found := ps.cache.Get(key); found {
 		if val, ok := x.(string); ok {
 			return val, nil

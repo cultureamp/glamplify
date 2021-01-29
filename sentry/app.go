@@ -31,7 +31,6 @@ type Application struct {
 
 // NewApplication creates a new sentry Application
 func NewApplication(ctx context.Context, name string, configure ...func(*Config)) (*Application, error) {
-
 	if len(name) == 0 {
 		name = env.GetString(env.AppNameEnv, "default")
 	}
