@@ -1,0 +1,30 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: glamplify
+  description: 
+  links:
+    - title: Website
+      url: https://github.com/cultureamp/glamplify
+  # - title: Confluence
+  #   url: confluence.com/project-page
+  # - title: Monitoring Dashboard
+  #   url: datadog.com/this-service
+  # - title: Logs
+  #   url: splunk.com/service?filters
+  tags: # required and based on - https://cultureamp.atlassian.net/wiki/spaces/CPlatform/pages/1720156463/Authentication+-+One+Platform+Technical+Canvas
+    - tier-1
+  annotations:
+    github.com/project-slug: cultureamp/glamplify
+    github.com/team-slug: cultureamp/sre 
+    backstage.io/techdocs-ref: url:https://github.com/cultureamp/blob/master/glamplify
+    buildkite.com/project-slug: culture-amp/glamplify
+    # pagerduty.com/integration-key: optional
+spec:
+  type: default
+  owner: sre
+  # system: 
+  # subcomponentOf: 
+  # consumesApis: 
+  # providesApis: 
+  lifecycle: production
