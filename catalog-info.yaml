@@ -27,3 +27,4 @@ spec:
   type: library # openapi | website | service | library
   owner: core-services # Backstage Teamname should be the same as the Github Team Name (these teams are synced between github and backstage)
   lifecycle: production # experimental | development | production | deprecated | contained
+  dependencyOf: component:web-gateway
