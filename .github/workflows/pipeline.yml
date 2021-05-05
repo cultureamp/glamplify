@@ -1,9 +1,6 @@
 name: pipeline
-on:
-  pull_request:
-  push:
-    branches-ignore:
-      - master
+on: push
+
 env:
   goLangVersion: '1.15.7'
 
