@@ -40,7 +40,7 @@ jobs:
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           go get -u github.com/securego/gosec/v2/cmd/gosec@v2.8.0
-          gosec -fmt json -out gosec-results.json -conf ${{ env.GITHUB_WORKSPACE }}/gosec-config.json -stdout ./...
+          gosec -fmt json -out gosec-results.json -conf gosec-config.json -stdout ./...
   
       - uses: actions/upload-artifact@v2
         if: always()
@@ -134,7 +134,7 @@ jobs:
             --org=cultureamp \
             --show-vulnerable-paths=some \
             --json --json-file-output=snyk-results.json \
-            --policy-path=${{ env.GITHUB_WORKSPACE }}/.snyk
+            --policy-path=.snyk
   
       - uses: actions/upload-artifact@v2
         if: always()
