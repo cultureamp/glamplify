@@ -34,6 +34,8 @@ jobs:
           go-version: ${{ env.goLangVersion }}
 
       - name: Run Gosec Security Scanner
+        env:
+          GO111MODULE: on
         # https://securego.io/docs/rules/rule-intro.html
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
