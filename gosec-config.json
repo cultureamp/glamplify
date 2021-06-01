@@ -1,0 +1,9 @@
+{
+    "global": {
+        "nosec": "enabled",
+        "audit": "disabled"
+    },
+    "G101":{
+        "mode": "strict"
+    }
+}

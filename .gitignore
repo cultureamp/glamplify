@@ -12,4 +12,6 @@ glamplify
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-
+# Githb Actions Artefacts - results for security scanners
+**/gosec-results.json
+**/snyk-results.json
