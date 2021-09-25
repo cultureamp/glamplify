@@ -25,6 +25,7 @@ linters:
 #    - goimports
     - golint
     - goprintffuncname
+    - gosec
     - gosimple
     - govet
     - ineffassign
@@ -47,3 +48,18 @@ linters:
     - unused
     - varcheck
     - whitespace
+
+
+linters-settings:
+
+  gosec:
+    # all rules enabled
+    # see also: https://securego.io/docs/rules/rule-intro.html
+    config:
+      global:
+        # allow #nosec override comments
+        nosec: enabled
+        # disable potentially noisy stricter audit mode
+        audit: disabled
+      G101: # "Look for hard-coded credentials"
+        mode: strict
