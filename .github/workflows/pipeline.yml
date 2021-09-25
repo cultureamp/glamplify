@@ -106,44 +106,44 @@ jobs:
               sha: context.sha
             })
 
-  sca: # project must be built to run Snyk
-    needs: [go-build]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - uses: snyk/actions/setup@master
+  # sca: # project must be built to run Snyk
+  #   needs: [go-build]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@master
+  #     - uses: snyk/actions/setup@master
 
-      - name: Checkout code
-        uses: actions/checkout@v2
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
 
-      - name: Install Go
-        uses: actions/setup-go@v2
-        with:
-          stable: 'true'
-          go-version: ${{ env.goLangVersion }}
+  #     - name: Install Go
+  #       uses: actions/setup-go@v2
+  #       with:
+  #         stable: 'true'
+  #         go-version: ${{ env.goLangVersion }}
 
-      - name: Run Snyk SCA
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        # https://support.snyk.io/hc/en-us/articles/360003812578-CLI-reference
-        run: |
-          snyk auth "$SNYK_TOKEN"
-          snyk test \
-            --severity-threshold=medium \
-            --fail-on=upgradable \
-            --org=cultureamp \
-            --show-vulnerable-paths=some \
-            --json --json-file-output=snyk-results.json \
-            --policy-path=.snyk
+  #     - name: Run Snyk SCA
+  #       env:
+  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  #       # https://support.snyk.io/hc/en-us/articles/360003812578-CLI-reference
+  #       run: |
+  #         snyk auth "$SNYK_TOKEN"
+  #         snyk test \
+  #           --severity-threshold=medium \
+  #           --fail-on=upgradable \
+  #           --org=cultureamp \
+  #           --show-vulnerable-paths=some \
+  #           --json --json-file-output=snyk-results.json \
+  #           --policy-path=.snyk
   
-      - uses: actions/upload-artifact@v2
-        if: always()
-        with:
-          name: snyk-results
-          path: snyk-results.json
+  #     - uses: actions/upload-artifact@v2
+  #       if: always()
+  #       with:
+  #         name: snyk-results
+  #         path: snyk-results.json
 
   tag-master:
-    needs: [sca]
+    needs: [go-build]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
