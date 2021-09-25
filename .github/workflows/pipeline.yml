@@ -27,43 +27,31 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Install GO
-        uses: actions/setup-go@v2
-        with:
-          stable: 'true'
-          go-version: ${{ env.GO_VERSION }}
-      - name: GOTest
-        run: |
-          go test ./...
 
-  go-cover:
-    needs: [go-test]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Install GO
+      - name: Install Go
         uses: actions/setup-go@v2
         with:
           stable: 'true'
           go-version: ${{ env.GO_VERSION }}
-      - name: GOCover
+
+      - name: Test
         run: |
           go test ./... -covermode=count -coverprofile=count.out
           go tool cover -func=count.out
 
   go-build:
-    needs: [go-cover,go-lint,go-sec]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Install GO
+
+      - name: Install Go
         uses: actions/setup-go@v2
         with:
           stable: 'true'
           go-version: ${{ env.GO_VERSION }}
-      - name: GOBuild
+
+      - name: Build
         run: |
           GOARCH=amd64 GOOS=linux go build -ldflags="-s -w" -o main
 
@@ -80,8 +68,7 @@ jobs:
               sha: context.sha
             })
 
-  # sca: # project must be built to run Snyk
-  #   needs: [go-build]
+  # sca:
   #   runs-on: ubuntu-latest
   #   steps:
   #     - uses: actions/checkout@master
@@ -117,7 +104,7 @@ jobs:
   #         path: snyk-results.json
 
   tag-master:
-    needs: [go-build]
+    needs: [go-lint,go-test,go-build]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
