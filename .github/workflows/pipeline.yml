@@ -10,16 +10,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Install GO
+
+      - name: Install Go
         uses: actions/setup-go@v2
         with:
           stable: 'true'
           go-version: ${{ env.GO_VERSION }}
-      - name: GOLangCI-Lint
-        # https://golangci-lint.run/usage/configuration/  https://golangci-lint.run/usage/linters/
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.36.0
-          golangci-lint run --verbose
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.42.1
 
   go-sec:
     runs-on: ubuntu-latest
