@@ -2,7 +2,7 @@ name: pipeline
 on: push
 
 env:
-  goLangVersion: '1.15.7'
+  GO_VERSION: '1.17.1'
 
 jobs:
   go-lint:
@@ -14,7 +14,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           stable: 'true'
-          go-version: ${{ env.goLangVersion }}
+          go-version: ${{ env.GO_VERSION }}
       - name: GOLangCI-Lint
         # https://golangci-lint.run/usage/configuration/  https://golangci-lint.run/usage/linters/
         run: |
@@ -31,7 +31,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           stable: 'true'
-          go-version: ${{ env.goLangVersion }}
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Run Gosec Security Scanner
         env:
@@ -41,7 +41,7 @@ jobs:
           export PATH=$PATH:$(go env GOPATH)/bin
           go get -u github.com/securego/gosec/v2/cmd/gosec@v2.8.0
           gosec -fmt json -out gosec-results.json -conf gosec-config.json -stdout ./...
-  
+
       - uses: actions/upload-artifact@v2
         if: always()
         with:
@@ -57,7 +57,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           stable: 'true'
-          go-version: ${{ env.goLangVersion }}
+          go-version: ${{ env.GO_VERSION }}
       - name: GOTest
         run: |
           go test ./...
@@ -72,7 +72,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           stable: 'true'
-          go-version: ${{ env.goLangVersion }}
+          go-version: ${{ env.GO_VERSION }}
       - name: GOCover
         run: |
           go test ./... -covermode=count -coverprofile=count.out
@@ -88,7 +88,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           stable: 'true'
-          go-version: ${{ env.goLangVersion }}
+          go-version: ${{ env.GO_VERSION }}
       - name: GOBuild
         run: |
           GOARCH=amd64 GOOS=linux go build -ldflags="-s -w" -o main
@@ -120,7 +120,7 @@ jobs:
   #       uses: actions/setup-go@v2
   #       with:
   #         stable: 'true'
-  #         go-version: ${{ env.goLangVersion }}
+  #         go-version: ${{ env.GO_VERSION }}
 
   #     - name: Run Snyk SCA
   #       env:
@@ -135,7 +135,7 @@ jobs:
   #           --show-vulnerable-paths=some \
   #           --json --json-file-output=snyk-results.json \
   #           --policy-path=.snyk
-  
+
   #     - uses: actions/upload-artifact@v2
   #       if: always()
   #       with:
