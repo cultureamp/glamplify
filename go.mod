@@ -25,3 +25,8 @@ require (
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
 	gopkg.in/DataDog/dd-trace-go.v1 v1.30.0
 )
+
+exclude (
+	github.com/kataras/iris/v12 v12.1.8
+	github.com/labstack/echo/v4 v4.1.11
+)
