@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	jwtgo "github.com/dgrijalva/jwt-go"
+	jwtgo "github.com/golang-jwt/jwt/v4"
 	"github.com/go-errors/errors"
 )
 

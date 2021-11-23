@@ -2,7 +2,7 @@ package jwt
 
 import (
 	"crypto/rsa"
-	jwtgo "github.com/dgrijalva/jwt-go"
+	jwtgo "github.com/golang-jwt/jwt/v4"
 	"io/ioutil"
 	"os"
 	"path/filepath"
