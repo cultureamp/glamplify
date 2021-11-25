@@ -2,6 +2,8 @@ module github.com/cultureamp/glamplify
 
 go 1.15
 
+replace github.com/aws/aws-xray-sdk-go v1.6.0 => github.com/aws/aws-xray-sdk-go v1.6.1-0.20211110224843-1f272e4024a5
+
 require (
 	github.com/DataDog/datadog-go v4.8.3+incompatible // indirect
 	github.com/DataDog/datadog-lambda-go v1.3.0
