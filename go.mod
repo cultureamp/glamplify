@@ -2,8 +2,6 @@ module github.com/cultureamp/glamplify
 
 go 1.15
 
-replace github.com/aws/aws-xray-sdk-go v1.6.0 => github.com/aws/aws-xray-sdk-go v1.6.1-0.20211110224843-1f272e4024a5
-
 require (
 	github.com/DataDog/datadog-go v4.8.3+incompatible // indirect
 	github.com/DataDog/datadog-lambda-go v1.3.0
@@ -37,7 +35,11 @@ require (
 	gopkg.in/DataDog/dd-trace-go.v1 v1.34.0
 )
 
+// These are for CVEs in these frameworks (which we don't use) and are bought in by Sentry
 exclude (
 	github.com/kataras/iris/v12 v12.1.8
 	github.com/labstack/echo/v4 v4.1.11
 )
+
+// This is for a CVE and can be removed once DataDog/datadog-lambda-go has it's aws/aws-xray-sdk-go dep updated
+replace github.com/aws/aws-xray-sdk-go v1.6.0 => github.com/aws/aws-xray-sdk-go v1.6.1-0.20211110224843-1f272e4024a5
