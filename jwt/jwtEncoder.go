@@ -2,11 +2,12 @@ package jwt
 
 import (
 	"crypto/rsa"
-	jwtgo "github.com/dgrijalva/jwt-go"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
+
+	jwtgo "github.com/golang-jwt/jwt/v4"
 )
 
 // Encoder represents a jwt encoder
@@ -19,7 +20,7 @@ type claims struct {
 	AccountID       string `json:"accountId"`
 	EffectiveUserID string `json:"effectiveUserId"`
 	RealUserID      string `json:"realUserId"`
-	jwtgo.StandardClaims
+	jwtgo.RegisteredClaims
 }
 
 // NewEncoder creates a new Encoder
@@ -65,11 +66,11 @@ func (encoder Encoder) claims(payload Payload, duration time.Duration) claims {
 		AccountID:       payload.Customer,
 		EffectiveUserID: payload.EffectiveUser,
 		RealUserID:      payload.RealUser,
-		StandardClaims: jwtgo.StandardClaims{
-			IssuedAt: now.Unix(),
+		RegisteredClaims: jwtgo.RegisteredClaims{
+			IssuedAt: jwtgo.NewNumericDate(now),
 			// Were a little loose on the expiry for now, to avoid possible
 			// problems with clock skew, slow requests, background jobs (?) etc.
-			ExpiresAt: now.Add(duration).Unix(),
+			ExpiresAt: jwtgo.NewNumericDate(now.Add(duration)),
 		},
 	}
 }

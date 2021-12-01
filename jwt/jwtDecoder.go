@@ -7,15 +7,14 @@ import (
 	"os"
 	"path/filepath"
 
-	jwtgo "github.com/dgrijalva/jwt-go"
 	"github.com/go-errors/errors"
+	jwtgo "github.com/golang-jwt/jwt/v4"
 )
 
 // Decoder represents how to decode a JWT
 type Decoder struct {
 	verifyKey *rsa.PublicKey
 }
-
 
 // NewDecoder creates a new Decoder
 func NewDecoder() (Decoder, error) {
