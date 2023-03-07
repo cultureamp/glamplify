@@ -26,9 +26,7 @@ require (
 	github.com/sony/gobreaker v0.5.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/tinylib/msgp v1.1.6 // indirect
-	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9
-	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/net v0.7.0
 	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
 	google.golang.org/genproto v0.0.0-20211118181313-81c1377c94b1 // indirect
 	google.golang.org/grpc v1.42.0 // indirect
