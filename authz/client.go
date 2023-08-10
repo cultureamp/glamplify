@@ -53,7 +53,7 @@ func NewClient(authzAPIEndpoint string, http Transport, configure ...func(*Confi
 }
 
 // EvaluateBooleanPolicy calls authz-api asking it to evaluate the policy, and then returns the result
-func (client Client) EvaluateBooleanPolicy(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (*EvaluationResponse, error) {
+func (client Client) EvaluateBooleanPolicy(_ context.Context, policy string, identity IdentityRequest, input InputRequest) (*EvaluationResponse, error) {
 	if item, found := client.cache.Get(policy); found {
 		result, ok := item.(*EvaluationResponse)
 		if ok {
@@ -65,6 +65,7 @@ func (client Client) EvaluateBooleanPolicy(ctx context.Context, policy string, i
 	if err != nil {
 		return nil, err // if there is a compile error, etc. assume the kill switch is OFF
 	}
+	defer response.Body.Close()
 
 	controlDirective, err := client.parseResponseCacheControl(response)
 	if err == nil && controlDirective.MaxAge > 0 {

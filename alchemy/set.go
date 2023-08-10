@@ -153,7 +153,7 @@ func (set bitSet) AndCount(rhsSet ReadOnlySet) (uint64, error) {
 	set.lock.RLock()
 	defer set.lock.RUnlock()
 
-	var count uint64 = 0
+	var count uint64
 
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
@@ -180,7 +180,7 @@ func (set bitSet) OrCount(rhsSet ReadOnlySet) (uint64, error) {
 	set.lock.RLock()
 	defer set.lock.RUnlock()
 
-	var count uint64 = 0
+	var count uint64
 
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
@@ -237,7 +237,7 @@ func (set bitSet) Count() uint64 {
 	set.lock.RLock()
 	defer set.lock.RUnlock()
 
-	var count uint64 = 0
+	var count uint64
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
 		block, ok := set.getBlock(i)
@@ -333,9 +333,7 @@ func (set *bitSet) Clear() {
 	blocks := set.getBlockCount()
 	for i := 0; i < blocks; i++ {
 		block, ok := set.getBlock(i)
-		if !ok {
-			// no block here, nothing to do
-		} else {
+		if ok {
 			// Note: should we just remove all the blocks (as block=nil assumes all 0's)
 			block.clearAll()
 		}

@@ -45,7 +45,7 @@ func WrapRequest(r *http.Request) (*http.Request, error) {
 // If missing, then it checks http.Request Headers for TraceID, RequestID, and CorrelationID.
 // Then this method also tries to decode the JWT payload and adds CustomerAggregateID and UserAggregateID if successful.
 func WrapRequestWithDecoder(r *http.Request, jwtDecoder jwt.DecodeJwtToken) (*http.Request, error) {
-	rsFields, ok := GetRequestScopedFieldsFromRequest(r)
+	_, ok := GetRequestScopedFieldsFromRequest(r)
 	if ok {
 		return r, nil
 	}
@@ -58,6 +58,7 @@ func WrapRequestWithDecoder(r *http.Request, jwtDecoder jwt.DecodeJwtToken) (*ht
 
 	payload, err := jwt.PayloadFromRequest(r, jwtDecoder)
 
+	var rsFields RequestScopedFields
 	if err == nil {
 		rsFields = NewRequestScopeFields(traceID, requestID, correlationID, payload.Customer, payload.EffectiveUser)
 	} else {

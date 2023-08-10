@@ -15,7 +15,7 @@ const (
 )
 
 // FromRequest retrieves the current Application associated with the request, error is set appropriately
-func FromRequest(w http.ResponseWriter, r *http.Request) (*Application, error) {
+func FromRequest(_ http.ResponseWriter, r *http.Request) (*Application, error) {
 	ctx := r.Context()
 	return FromContext(ctx)
 }
