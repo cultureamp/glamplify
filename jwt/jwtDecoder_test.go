@@ -51,8 +51,8 @@ func Test_JWT_MultiKey_Decode_Extra_2(t *testing.T) {
 	payload, err := jwt.Decode(token)
 	assert.Nil(t, err)
 	assert.Equal(t, "1a", payload.Customer)
-	assert.Equal(t, "2b", payload.RealUser)
-	assert.Equal(t, "3c", payload.EffectiveUser)
+	assert.Equal(t, "3c", payload.RealUser)
+	assert.Equal(t, "2b", payload.EffectiveUser)
 }
 
 func Test_JWT_MultiKey_Decode_Missing_Extra_3(t *testing.T) {
@@ -70,7 +70,7 @@ func Test_JWT_MultiKey_Decode_Missing_Extra_3_Encoded_With_Default(t *testing.T)
 	token := "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImV4dHJhXzMifQ.eyJyZWFsVXNlcklkIjoiYXNkZjEyMzQiLCJlZmZlY3RpdmVVc2VySWQiOiJhc2RmMTIzNCIsImFjY291bnRJZCI6ImRlZjQ1NiIsImlhdCI6MTY5MTY0NzU5NiwiZXhwIjoxNjkxNzMzOTk2fQ.DDl2aHY0fPYfrBbvTTsnXz1kU-4fqDLsFEs2nPhhKI4Kyg2Na7gQ4Fr4fJHHfmRm4wcsd8R3FPKO3oi5hp9uGyS9t-57MxIVbju76tdx5XZPZUkIcGuTCsu4EAsXGOkjhhfAqwLCWdA-qeP-KSSkQ-wCK6ApRji_glJogtPZKFiZ7ti0VnqbgK9Cjlr-aHFxrjOPFfHiraDnYpg5Jknq1iLkNtqQE5rIvH_J17tMi4XBVwqP8BJZgcD1CeYmyNzpCcV3H7RW3yCNfziILEGd8Xb0-Efh-_ghf98lkhMLUxJi4ToK0VzPcyVrCAvQJ37IaUro_z8-plrbJOfspUrpVrQE-Y73QSQ2dE5rvfp3PK9UNkrgvngmongEXbI44rUH9BU7Sh3O_C_cIxnY0nYEL1hNsDelzP1dAcbHbbU6OkiwZIKThJJzYlSfzoNLUG6-0Q8wQJ7sP-c1Gsi0UcvvGXgR6SYqmoyQBVx7uy4Wzc8X9wVvkJBvs2fy4C8ONqMDTs5-gqHkLfVE99ZUXYsaY9HaFOwgGFROmGAT_v9Og_uh5S0hbEZ4XcD26X8r3b9aFO3Pg9HgYk3a2sZew-MOHCt-elRzHkFCTS4KpiFmbF7lB-SIIBMAA2FUivh7lP6YezEzYc12mAPG4XUgCNCON48zwlfsPKEwojhM9_En--M"
 	payload, err := jwt.Decode(token)
 	assert.Nil(t, err)
-	assert.Equal(t, "1a", payload.Customer)
-	assert.Equal(t, "2b", payload.RealUser)
-	assert.Equal(t, "3c", payload.EffectiveUser)
+	assert.Equal(t, "def456", payload.Customer)
+	assert.Equal(t, "asdf1234", payload.RealUser)
+	assert.Equal(t, "asdf1234", payload.EffectiveUser)
 }
