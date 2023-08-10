@@ -9,9 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install GO
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           stable: 'true'
           go-version: ${{ env.goLangVersion }}
@@ -25,10 +25,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           stable: 'true'
           go-version: ${{ env.goLangVersion }}
@@ -52,9 +52,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install GO
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           stable: 'true'
           go-version: ${{ env.goLangVersion }}
@@ -67,9 +67,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install GO
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           stable: 'true'
           go-version: ${{ env.goLangVersion }}
@@ -83,9 +83,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install GO
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           stable: 'true'
           go-version: ${{ env.goLangVersion }}
@@ -114,10 +114,10 @@ jobs:
       - uses: snyk/actions/setup@master
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           stable: 'true'
           go-version: ${{ env.goLangVersion }}
@@ -147,7 +147,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Create version tag for master
         uses: anothrNick/github-tag-action@1.26.0
         env: # https://github.com/anothrNick/github-tag-action
