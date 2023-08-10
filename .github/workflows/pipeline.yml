@@ -11,9 +11,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install GO
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
-          stable: 'true'
           go-version: ${{ env.goLangVersion }}
       - name: GOLangCI-Lint
         uses: golangci/golangci-lint-action@v3
@@ -37,7 +36,8 @@ jobs:
 
       - name: Run Gosec Security Scanner
         uses: securego/gosec@master
-          gosec -fmt json -out gosec-results.json -conf gosec-config.json -stdout ./...
+        with:
+          args: -fmt json -out gosec-results.json -conf gosec-config.json -stdout ./...
   
       - uses: actions/upload-artifact@v2
         if: always()
