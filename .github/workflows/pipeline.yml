@@ -39,7 +39,7 @@ jobs:
         with:
           args: -fmt json -out gosec-results.json -conf gosec-config.json -stdout ./...
   
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: always()
         with:
           name: gosec-results
@@ -133,7 +133,7 @@ jobs:
             --json --json-file-output=snyk-results.json \
             --policy-path=.snyk
   
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: always()
         with:
           name: snyk-results
