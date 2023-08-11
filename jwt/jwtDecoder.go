@@ -36,6 +36,9 @@ func NewDecoderFromBytes(verifyBytes []byte) (Decoder, error) {
 // NewDecoderFromBytes creates a new Decoder given the public key as a []byte
 func NewMultiKeyDecoderFromBytes(verifyBytes []byte, additionalVerifyBytes map[string][]byte) (Decoder, error) {
 	verifyKey, err := jwtgo.ParseRSAPublicKeyFromPEM(verifyBytes)
+	if err != nil {
+		return Decoder{}, err
+	}
 	additionalKeys := make(map[string]*rsa.PublicKey)
 	for key, bytes := range additionalVerifyBytes {
 		additionalKey, err := jwtgo.ParseRSAPublicKeyFromPEM(bytes)
@@ -47,7 +50,7 @@ func NewMultiKeyDecoderFromBytes(verifyBytes []byte, additionalVerifyBytes map[s
 	return Decoder{
 		defaultVerifyKey: verifyKey,
 		additionalKeys:   additionalKeys,
-	}, err
+	}, nil
 }
 
 // Decode a jwt token and return the Payload
