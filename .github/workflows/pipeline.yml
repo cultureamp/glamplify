@@ -2,7 +2,7 @@ name: pipeline
 on: push
 
 env:
-  goLangVersion: '1.18.0'
+  goLangVersion: '1.20.0'
 
 jobs:
   go-lint:
@@ -104,7 +104,6 @@ jobs:
             })
 
   tag-master:
-    needs: [sca]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
