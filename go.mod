@@ -1,11 +1,11 @@
 module github.com/cultureamp/glamplify
 
-go 1.18
+go 1.20
 
 require (
 	github.com/DataDog/datadog-lambda-go v1.9.0
 	github.com/aws/aws-lambda-go v1.41.0
-	github.com/aws/aws-sdk-go v1.44.320
+	github.com/aws/aws-sdk-go v1.44.321
 	github.com/aws/aws-xray-sdk-go v1.8.1
 	github.com/bobesa/go-domain-util v0.0.0-20190911083921-4033b5f7dd89
 	github.com/dustin/go-humanize v1.0.1
@@ -28,7 +28,7 @@ require (
 	github.com/DataDog/datadog-agent/pkg/remoteconfig/state v0.48.0-devel.0.20230725154044-2549ba9058df // indirect
 	github.com/DataDog/datadog-go/v5 v5.3.0 // indirect
 	github.com/DataDog/go-libddwaf v1.5.0 // indirect
-	github.com/DataDog/go-tuf v1.0.1-0.5.2 // indirect
+	github.com/DataDog/go-tuf v1.0.2-0.5.2 // indirect
 	github.com/DataDog/sketches-go v1.4.2 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
@@ -77,12 +77,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	inet.af/netaddr v0.0.0-20230525184311-b8eac61e914a // indirect
 )
-
-// These are for CVEs in these frameworks (which we don't use) and are bought in by Sentry
-exclude (
-	github.com/kataras/iris/v12 v12.1.8
-	github.com/labstack/echo/v4 v4.1.11
-)
-
-// This is for a CVE and can be removed once DataDog/datadog-lambda-go has it's aws/aws-xray-sdk-go dep updated
-replace github.com/aws/aws-xray-sdk-go v1.6.0 => github.com/aws/aws-xray-sdk-go v1.6.1-0.20211110224843-1f272e4024a5
