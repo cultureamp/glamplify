@@ -109,7 +109,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Create version tag for master
-        uses: anothrNick/github-tag-action@1.26.0
+        uses: anothrNick/github-tag-action@1.67.0
         env: # https://github.com/anothrNick/github-tag-action
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
