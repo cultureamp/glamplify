@@ -5,11 +5,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/cultureamp/glamplify/env"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/cultureamp/glamplify/env"
 
 	gcontext "github.com/cultureamp/glamplify/context"
 	gerrors "github.com/go-errors/errors"
@@ -20,7 +21,6 @@ var (
 	ctx      context.Context
 	rsFields gcontext.RequestScopedFields
 )
-
 
 func Test_New(t *testing.T) {
 	logger := New(rsFields)
@@ -52,7 +52,7 @@ func Test_NewWithRequest(t *testing.T) {
 
 func Test_Log_IsEnabled(t *testing.T) {
 	writer := NewWriter(func(config *WriterConfig) {
-		config.Level =  WarnSev
+		config.Level = WarnSev
 	})
 	logger := NewFromCtxWithCustomerWriter(ctx, writer)
 	assert.NotNil(t, logger)
@@ -70,7 +70,7 @@ func Test_Log_Global_Scope(t *testing.T) {
 	})
 	logger := NewWitCustomWriter(rsFields, writer)
 
-	logger.Event( "detail_event").Fields(Fields{
+	logger.Event("detail_event").Fields(Fields{
 		env.AppNameEnv: "app_name",
 		env.AppFarmEnv: "app_farm",
 	}).Debug("debug")
@@ -554,7 +554,6 @@ func TestScope_Overwrite(t *testing.T) {
 	})
 }
 
-
 func Test_Durations(t *testing.T) {
 
 	logger := New(rsFields)
@@ -869,7 +868,7 @@ func Test_RealWorld_Scope(t *testing.T) {
 
 func BenchmarkLogging(b *testing.B) {
 	writer := NewWriter(func(conf *WriterConfig) {
-		conf.Output = ioutil.Discard
+		conf.Output = io.Discard
 	})
 	logger := newLogger(rsFields, writer)
 

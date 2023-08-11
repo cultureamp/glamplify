@@ -2,7 +2,6 @@ package jwt
 
 import (
 	"crypto/rsa"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
@@ -31,7 +30,7 @@ func NewEncoder() (Encoder, error) {
 
 // NewEncoderFromPath creates a new Encoder given the private key at 'pemKeyPath'
 func NewEncoderFromPath(pemKeyPath string) (Encoder, error) {
-	pemBytes, _ := ioutil.ReadFile(filepath.Clean(pemKeyPath))
+	pemBytes, _ := os.ReadFile(filepath.Clean(pemKeyPath))
 	return NewEncoderFromBytes(pemBytes)
 }
 

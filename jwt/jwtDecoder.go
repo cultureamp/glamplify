@@ -3,7 +3,6 @@ package jwt
 import (
 	"crypto/rsa"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -25,7 +24,7 @@ func NewDecoder() (Decoder, error) {
 
 // NewDecoderFromPath creates a new Decoder with the public key in 'pubKeyPath'
 func NewDecoderFromPath(pubKeyPath string) (Decoder, error) {
-	verifyBytes, _ := ioutil.ReadFile(filepath.Clean(pubKeyPath))
+	verifyBytes, _ := os.ReadFile(filepath.Clean(pubKeyPath))
 	return NewDecoderFromBytes(verifyBytes)
 }
 

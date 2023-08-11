@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -9,9 +9,9 @@ import (
 )
 
 func setup_decoder(t *testing.T) Decoder {
-	defaultKeyBytes, _ := ioutil.ReadFile(filepath.Clean("jwt.rs256.key.development.pub"))
-	extra_1, _ := ioutil.ReadFile(filepath.Clean("jwt.rs256.key.development.extra_1.pub"))
-	extra_2, _ := ioutil.ReadFile(filepath.Clean("jwt.rs256.key.development.extra_2.pub"))
+	defaultKeyBytes, _ := os.ReadFile(filepath.Clean("jwt.rs256.key.development.pub"))
+	extra_1, _ := os.ReadFile(filepath.Clean("jwt.rs256.key.development.extra_1.pub"))
+	extra_2, _ := os.ReadFile(filepath.Clean("jwt.rs256.key.development.extra_2.pub"))
 	additionalKeys := map[string][]byte{
 		"extra_1": extra_1,
 		"extra_2": extra_2,
