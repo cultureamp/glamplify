@@ -31,7 +31,6 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v3
         with:
-          stable: 'true'
           go-version: ${{ env.goLangVersion }}
 
       - name: Run Gosec Security Scanner
@@ -53,7 +52,6 @@ jobs:
       - name: Install GO
         uses: actions/setup-go@v3
         with:
-          stable: 'true'
           go-version: ${{ env.goLangVersion }}
       - name: GOTest
         run: |
@@ -68,7 +66,6 @@ jobs:
       - name: Install GO
         uses: actions/setup-go@v3
         with:
-          stable: 'true'
           go-version: ${{ env.goLangVersion }}
       - name: GOCover
         run: |
@@ -84,7 +81,6 @@ jobs:
       - name: Install GO
         uses: actions/setup-go@v3
         with:
-          stable: 'true'
           go-version: ${{ env.goLangVersion }}
       - name: GOBuild
         run: |
