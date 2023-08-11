@@ -86,7 +86,7 @@ func (bb bitBlock) not(length int) (*bitBlock, error) {
 }
 
 func (bb bitBlock) andCount(rhs *bitBlock) uint64 {
-	var count uint64 = 0
+	var count uint64
 
 	for i := 0; i < LongsPerBlock; i++ {
 		result := bb.bits[i] & rhs.bits[i]
@@ -97,7 +97,7 @@ func (bb bitBlock) andCount(rhs *bitBlock) uint64 {
 }
 
 func (bb bitBlock) orCount(rhs *bitBlock) uint64 {
-	var count uint64 = 0
+	var count uint64
 
 	for i := 0; i < LongsPerBlock; i++ {
 		result := bb.bits[i] | rhs.bits[i]
@@ -117,7 +117,7 @@ func (bb bitBlock) count(length int) (uint64, error) {
 		return ZeroBitPattern, errors.New("length out of range for count(length int)")
 	}
 
-	var count uint64 = 0
+	var count uint64
 
 	numLongs := length / BitsPerLong
 	lastBits := length % BitsPerLong

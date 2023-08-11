@@ -7,8 +7,6 @@ linters:
   disable-all: true
   enable:
     - bodyclose
-    - deadcode
-    - depguard
     - dogsled
     - dupl
     - errcheck
@@ -23,27 +21,22 @@ linters:
     - gocyclo
 #    - goerr113
 #    - goimports
-    - golint
     - goprintffuncname
     - gosimple
     - govet
     - ineffassign
-    - interfacer
-#    - lll
     - makezero
     - misspell
     - nestif
     - noctx
     - prealloc
     - predeclared
-    - scopelint
+    - revive
     - sqlclosecheck
     - stylecheck
     - staticcheck
-    - structcheck
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - whitespace

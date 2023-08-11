@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
@@ -21,7 +20,7 @@ func Test_OPAClient_New(t *testing.T) {
 
 func Test_OPAClient_Throw_Error(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHTTPClient{throwError: true},  func(config *Config) {
+	client := NewClient("dummy", mockHTTPClient{throwError: true}, func(config *Config) {
 		config.Timeout = 100 * time.Millisecond
 	})
 
@@ -55,7 +54,7 @@ func Test_OPAClient_Return_Empty(t *testing.T) {
 
 func Test_OPAClient_Return_Bad_JSON(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHTTPClient{returnBadJSON: true},  func(config *Config) {
+	client := NewClient("dummy", mockHTTPClient{returnBadJSON: true}, func(config *Config) {
 		config.Timeout = 100 * time.Millisecond
 	})
 
@@ -66,7 +65,7 @@ func Test_OPAClient_Return_Bad_JSON(t *testing.T) {
 
 func Test_OPAClient_Return_Not_Allowed(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHTTPClient{returnNotAllowed: true},  func(config *Config) {
+	client := NewClient("dummy", mockHTTPClient{returnNotAllowed: true}, func(config *Config) {
 		config.Timeout = 100 * time.Millisecond
 	})
 
@@ -78,7 +77,7 @@ func Test_OPAClient_Return_Not_Allowed(t *testing.T) {
 
 func Test_OPAClient_Return_Allowed(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient("dummy", mockHTTPClient{},  func(config *Config) {
+	client := NewClient("dummy", mockHTTPClient{}, func(config *Config) {
 		config.Timeout = 100 * time.Millisecond
 	})
 
@@ -118,7 +117,7 @@ func (client mockHTTPClient) Post(ctx context.Context, url string, contentType s
 
 	if client.returnBadJSON {
 		response := &http.Response{
-			Body:       ioutil.NopCloser(strings.NewReader("{hello world}")), // r type is io.ReadCloser,
+			Body:       io.NopCloser(strings.NewReader("{hello world}")), // r type is io.ReadCloser,
 			StatusCode: http.StatusOK,
 			Status:     http.StatusText(http.StatusOK),
 		}
@@ -134,7 +133,7 @@ func (client mockHTTPClient) Post(ctx context.Context, url string, contentType s
   		}]}`
 
 		response := &http.Response{
-			Body:       ioutil.NopCloser(strings.NewReader(postBody)), // r type is io.ReadCloser,
+			Body:       io.NopCloser(strings.NewReader(postBody)), // r type is io.ReadCloser,
 			StatusCode: http.StatusOK,
 			Status:     http.StatusText(http.StatusOK),
 			Header:     http.Header{"Cache-Control": []string{"no-cache"}},
@@ -150,7 +149,7 @@ func (client mockHTTPClient) Post(ctx context.Context, url string, contentType s
   		}]}`
 
 	response := &http.Response{
-		Body:       ioutil.NopCloser(strings.NewReader(postBody)), // r type is io.ReadCloser,
+		Body:       io.NopCloser(strings.NewReader(postBody)), // r type is io.ReadCloser,
 		StatusCode: http.StatusOK,
 		Status:     http.StatusText(http.StatusOK),
 		Header:     http.Header{"Cache-Control": []string{"max-age=60"}},

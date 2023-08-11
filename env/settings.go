@@ -38,7 +38,7 @@ func NewSettings() *Settings {
 	settings.AwsRegion = GetString(AwsRegionEnv, "us-west-2")
 	settings.AwsAccountID = os.Getenv(AwsAccountIDEnv)
 	settings.XrayLogging = GetBool(AwsXrayEnv, true)
-	settings.DDApiKey = os.Getenv(DatadogAPIKey)
+	settings.DDApiKey = os.Getenv(DatadogAPIEnvVar)
 	settings.SentryDSN = os.Getenv(SentryDsnEnv)
 	settings.SentryFlushMs = GetInt(SentryFlushTimeoutInMsEnv, 50)
 

@@ -67,12 +67,12 @@ func Test_Settings_Env_IsAws_IsLocal(t *testing.T) {
 func Test_Settings_JSON(t *testing.T) {
 	defer os.Unsetenv(AppFarmEnv)
 	defer os.Unsetenv(AppEnv)
-	defer os.Unsetenv(DatadogAPIKey)
+	defer os.Unsetenv(DatadogAPIEnvVar)
 	defer os.Unsetenv(SentryDsnEnv)
 
 	os.Setenv(AppFarmEnv, "farm")
 	os.Setenv(AppEnv, "development")
-	os.Setenv(DatadogAPIKey, "1234567890")
+	os.Setenv(DatadogAPIEnvVar, "1234567890")
 	os.Setenv(SentryDsnEnv, "1234567890")
 
 	settings := NewSettings()
@@ -83,12 +83,12 @@ func Test_Settings_JSON(t *testing.T) {
 func Test_Settings_Redacted_JSON(t *testing.T) {
 	defer os.Unsetenv(AppFarmEnv)
 	defer os.Unsetenv(AppEnv)
-	defer os.Unsetenv(DatadogAPIKey)
+	defer os.Unsetenv(DatadogAPIEnvVar)
 	defer os.Unsetenv(SentryDsnEnv)
 
 	os.Setenv(AppFarmEnv, "farm")
 	os.Setenv(AppEnv, "development")
-	os.Setenv(DatadogAPIKey, "1234567890")
+	os.Setenv(DatadogAPIEnvVar, "1234567890")
 	os.Setenv(SentryDsnEnv, "1234567890")
 
 	settings := NewSettings()
@@ -99,12 +99,12 @@ func Test_Settings_Redacted_JSON(t *testing.T) {
 func Test_Settings_Redacted_String(t *testing.T) {
 	defer os.Unsetenv(AppFarmEnv)
 	defer os.Unsetenv(AppEnv)
-	defer os.Unsetenv(DatadogAPIKey)
+	defer os.Unsetenv(DatadogAPIEnvVar)
 	defer os.Unsetenv(SentryDsnEnv)
 
 	os.Setenv(AppFarmEnv, "farm")
 	os.Setenv(AppEnv, "development")
-	os.Setenv(DatadogAPIKey, "1234567890")
+	os.Setenv(DatadogAPIEnvVar, "1234567890")
 	os.Setenv(SentryDsnEnv, "1234567890")
 
 	settings := NewSettings()

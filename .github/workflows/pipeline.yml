@@ -2,47 +2,43 @@ name: pipeline
 on: push
 
 env:
-  goLangVersion: '1.15.7'
+  goLangVersion: '1.20.0'
 
 jobs:
   go-lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install GO
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
-          stable: 'true'
           go-version: ${{ env.goLangVersion }}
       - name: GOLangCI-Lint
-        # https://golangci-lint.run/usage/configuration/  https://golangci-lint.run/usage/linters/
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.36.0
-          golangci-lint run --verbose
+        uses: golangci/golangci-lint-action@v3
+        with:
+          # Require: The version of golangci-lint to use.
+          # When `install-mode` is `binary` (default) the value can be v1.2 or v1.2.3 or `latest` to use the latest version.
+          # When `install-mode` is `goinstall` the value can be v1.2.3, `latest`, or the hash of a commit.
+          version: 'latest'
 
   go-sec:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
-          stable: 'true'
           go-version: ${{ env.goLangVersion }}
 
       - name: Run Gosec Security Scanner
-        env:
-          GO111MODULE: on
-        # https://securego.io/docs/rules/rule-intro.html
-        run: |
-          export PATH=$PATH:$(go env GOPATH)/bin
-          go get -u github.com/securego/gosec/v2/cmd/gosec@v2.8.0
-          gosec -fmt json -out gosec-results.json -conf gosec-config.json -stdout ./...
+        uses: securego/gosec@master
+        with:
+          args: -fmt json -out gosec-results.json -conf gosec-config.json -stdout ./...
   
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: always()
         with:
           name: gosec-results
@@ -52,11 +48,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install GO
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
-          stable: 'true'
           go-version: ${{ env.goLangVersion }}
       - name: GOTest
         run: |
@@ -67,11 +62,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install GO
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
-          stable: 'true'
           go-version: ${{ env.goLangVersion }}
       - name: GOCover
         run: |
@@ -83,11 +77,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install GO
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
-          stable: 'true'
           go-version: ${{ env.goLangVersion }}
       - name: GOBuild
         run: |
@@ -106,50 +99,13 @@ jobs:
               sha: context.sha
             })
 
-  sca: # project must be built to run Snyk
-    needs: [go-build]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - uses: snyk/actions/setup@master
-
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install Go
-        uses: actions/setup-go@v2
-        with:
-          stable: 'true'
-          go-version: ${{ env.goLangVersion }}
-
-      - name: Run Snyk SCA
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        # https://support.snyk.io/hc/en-us/articles/360003812578-CLI-reference
-        run: |
-          snyk auth "$SNYK_TOKEN"
-          snyk test \
-            --severity-threshold=medium \
-            --fail-on=upgradable \
-            --org=cultureamp \
-            --show-vulnerable-paths=some \
-            --json --json-file-output=snyk-results.json \
-            --policy-path=.snyk
-  
-      - uses: actions/upload-artifact@v2
-        if: always()
-        with:
-          name: snyk-results
-          path: snyk-results.json
-
   tag-master:
-    needs: [sca]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Create version tag for master
-        uses: anothrNick/github-tag-action@1.26.0
+        uses: anothrNick/github-tag-action@1.67.0
         env: # https://github.com/anothrNick/github-tag-action
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true

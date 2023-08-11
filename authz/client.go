@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"github.com/cultureamp/glamplify/env"
 	"github.com/go-errors/errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -36,8 +36,8 @@ func NewClient(authzAPIEndpoint string, http Transport, configure ...func(*Confi
 	timeOutDuration := time.Duration(t) * time.Millisecond
 
 	conf := Config{
-		Timeout: timeOutDuration,
-		CacheDuration:  cacheDuration,
+		Timeout:       timeOutDuration,
+		CacheDuration: cacheDuration,
 	}
 
 	for _, config := range configure {
@@ -53,7 +53,7 @@ func NewClient(authzAPIEndpoint string, http Transport, configure ...func(*Confi
 }
 
 // EvaluateBooleanPolicy calls authz-api asking it to evaluate the policy, and then returns the result
-func (client Client) EvaluateBooleanPolicy(ctx context.Context, policy string, identity IdentityRequest, input InputRequest) (*EvaluationResponse, error) {
+func (client Client) EvaluateBooleanPolicy(_ context.Context, policy string, identity IdentityRequest, input InputRequest) (*EvaluationResponse, error) {
 	if item, found := client.cache.Get(policy); found {
 		result, ok := item.(*EvaluationResponse)
 		if ok {
@@ -65,6 +65,7 @@ func (client Client) EvaluateBooleanPolicy(ctx context.Context, policy string, i
 	if err != nil {
 		return nil, err // if there is a compile error, etc. assume the kill switch is OFF
 	}
+	defer response.Body.Close()
 
 	controlDirective, err := client.parseResponseCacheControl(response)
 	if err == nil && controlDirective.MaxAge > 0 {
@@ -132,7 +133,7 @@ func (client Client) readResponse(response *http.Response) (*PolicyResponse, err
 		return nil, errors.New("response is nil")
 	}
 
-	bodyBytes, err := ioutil.ReadAll(response.Body)
+	bodyBytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
